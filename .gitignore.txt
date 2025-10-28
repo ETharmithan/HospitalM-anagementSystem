@@ -1,0 +1,76 @@
+# =========================
+# Visual Studio / Rider / IDE
+# =========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# Build Folders
+# =========================
+bin/
+obj/
+Debug/
+Release/
+
+# =========================
+# .NET / ASP.NET / Entity Framework
+# =========================
+*.dll
+*.exe
+*.pdb
+*.cache
+*.db
+*.log
+*.zip
+*.nupkg
+*.snupkg
+*.nuspec
+*.publish.xml
+*.vsix
+
+# =========================
+# Rider / JetBrains
+# =========================
+.idea/
+*.iml
+*.iws
+
+# =========================
+# Visual Studio Code
+# =========================
+.vscode/
+
+# =========================
+# Runtime / Package Folders
+# =========================
+runtimes/
+ref/
+refint/
+*.runtimeconfig.json
+*.deps.json
+*.lock.json
+
+# =========================
+# User-specific / local files
+# =========================
+*.local
+*.localdb
+*.sqlite
+*.sql
+*.bak
+*.dbmdl
+*.userprefs
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Mac / Linux hidden files
+# =========================
+.DS_Store
+Thumbs.db
