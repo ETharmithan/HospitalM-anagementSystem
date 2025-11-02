@@ -1,5 +1,7 @@
 
-using HospitalManagementSystem.Presentation.Data;
+using HospitalManagementSystem.Infrastructure.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 
 namespace HospitalManagementSystem.Presentation
@@ -38,6 +40,17 @@ namespace HospitalManagementSystem.Presentation
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+    //builder.Services.AddSwaggerGen(options =>
+    //{
+    //    options.DocInclusionPredicate((docName, apiDesc) =>
+    //    {
+    //        var cad = apiDesc.ActionDescriptor as ControllerActionDescriptor;
+    //        if (cad == null) return false;
+
+    //        // Include only controllers marked with [ApiController]
+    //        return cad.ControllerTypeInfo.GetCustomAttributes(typeof(ApiControllerAttribute), true).Any();
+    //    });
+    //});
 
 
 
@@ -66,7 +79,7 @@ namespace HospitalManagementSystem.Presentation
             app.UseAuthorization();
 
 
-            app.UseAuthorization();
+        
 
 
             app.MapControllers();
