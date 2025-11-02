@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HospitalManagementSystem.Presentation.Controllers
 {
     public class AccountController : BaseApiController
     {
-        public IActionResult Index()
+        [HttpGet]
+        public ActionResult<string> Login()   // 
         {
-            return Ok();
+            return "Login Successful";
         }
     }
 }
