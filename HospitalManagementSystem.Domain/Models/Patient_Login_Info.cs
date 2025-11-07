@@ -12,10 +12,16 @@ namespace HospitalManagementSystem.Domain.Models
     {
         [Key]
         [ForeignKey(nameof(Patient))]
-        public Guid PatientId { get; set; }
-        public Patient Patient { get; set; } = null!;
+        public Guid PatientId { get; set; } 
+
+        public required string Email { get; set; }
+        public string? ImageUrl { get; set; }
         public required string Username { get; set; }
         public required byte[] PasswordHash { get; set; }
         public required byte[] PasswordSalt { get; set; }
+
+
+        public Patient Patient { get; set; } = null!;
+
     }
 }
