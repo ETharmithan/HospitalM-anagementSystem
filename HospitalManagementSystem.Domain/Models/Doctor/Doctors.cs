@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HospitalManagementSystem.Domain.Models
+namespace HospitalManagementSystem.Domain.Models.Doctor
 {
     public class Doctors
     {

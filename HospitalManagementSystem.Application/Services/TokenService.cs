@@ -21,9 +21,6 @@ namespace HospitalManagementSystem.Application.Services
 
             var tokenKey = configuration["TokenKey"] ?? throw new Exception("Token key not found in configuration");
 
-            
-
-
 
             if (tokenKey.Length < 64) throw new Exception("Token key must be at least 64 characters long");
 
