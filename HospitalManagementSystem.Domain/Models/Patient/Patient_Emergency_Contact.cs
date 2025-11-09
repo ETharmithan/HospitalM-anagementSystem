@@ -11,6 +11,8 @@ namespace HospitalManagementSystem.Domain.Models.Patient
     public class Patient_Emergency_Contact
     {
         [Key]
+        public Guid Id { get; set; }
+        
         [ForeignKey(nameof(Patient))]
         public Guid PatientId { get; set; }
         public Patient Patient { get; set; } = null!;
