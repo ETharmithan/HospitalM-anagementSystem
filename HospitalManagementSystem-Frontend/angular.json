@@ -5,7 +5,24 @@
   "projects": {
     "HospitalManagementSystem-Frontend": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "skipTests": true,
+          "path": "src"
+        },
+        "@schematics/angular:service": {
+          "skipTests": true,
+          "path": "src/core/services"
+        },
+        "@schematics/angular:guard": {
+          "skipTests": true,
+          "path": "src/core/guards"
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": true,
+          "path": "src/core/interceptors"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
