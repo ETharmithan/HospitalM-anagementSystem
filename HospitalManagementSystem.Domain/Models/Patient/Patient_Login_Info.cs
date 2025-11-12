@@ -6,16 +6,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HospitalManagementSystem.Domain.Models
+namespace HospitalManagementSystem.Domain.Models.Patient
 {
-    public class Patient_Identification_Details
+    public class Patient_Login_Info
     {
         [Key]
         [ForeignKey(nameof(Patient))]
         public Guid PatientId { get; set; }
+
+        public required string Email { get; set; }
+        public string ImageUrl { get; set; }
+        public required string Username { get; set; }
+        public required byte[] PasswordHash { get; set; }
+        public required byte[] PasswordSalt { get; set; }
+
+
+
         public Patient Patient { get; set; } = null!;
-        public string NIC { get; set; } = null!;
-        public string PassportNumber { get; set; } = string.Empty;
-        public string DriversLicenseNumber { get; set; } = string.Empty;
+
     }
 }
