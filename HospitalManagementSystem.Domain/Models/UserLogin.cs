@@ -8,8 +8,6 @@ namespace HospitalManagementSystem.Domain.Models
 {
     public class UserLogin
     {
-        [Key]
-       
         public Guid UserId { get; set; }
         public required string Email { get; set; }
         public string? ImageUrl { get; set; }
@@ -18,6 +16,6 @@ namespace HospitalManagementSystem.Domain.Models
         public required byte[] PasswordSalt { get; set; }
 
 
-        public Patient? Patient { get; set; }
+
     }
 }

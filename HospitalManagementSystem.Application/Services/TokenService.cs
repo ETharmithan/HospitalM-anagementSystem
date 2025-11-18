@@ -15,7 +15,7 @@ namespace HospitalManagementSystem.Application.Services
 {
     public class TokenService(IConfiguration configuration) : ITokenService
     {
-        public string CreateToken(Patient_Login_Info patient)
+        public string CreateToken(UserLogin patient)
         {
             //if (patient == null) throw new ArgumentNullException(nameof(patient));
 
@@ -30,7 +30,7 @@ namespace HospitalManagementSystem.Application.Services
         {
             // new Claim(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Email, patient.Email),
-            new(ClaimTypes.NameIdentifier, patient.PatientId.ToString())
+            //new(ClaimTypes.NameIdentifier, patient.PatientId.ToString())
 
         };
 
