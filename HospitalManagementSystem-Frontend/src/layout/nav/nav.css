@@ -1,0 +1,11 @@
+/* small helper for animated underline */
+.nav-link {
+  @apply relative inline-block text-slate-700 dark:text-slate-200 font-medium transition;
+}
+.nav-link::after {
+  content: '';
+  @apply absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-indigo-500 to-blue-500 transition-all;
+}
+.nav-link:hover::after {
+  @apply w-full;
+}
