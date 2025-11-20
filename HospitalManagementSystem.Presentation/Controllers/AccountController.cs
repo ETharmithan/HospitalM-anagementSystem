@@ -27,7 +27,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (await UserExists(registerUserDto.Email)) return BadRequest("Email is already taken");
+            //if (await UserExists(registerUserDto.Email)) return BadRequest("Email is already taken");
             using var hmac = new HMACSHA512();
             var user = new User
             {

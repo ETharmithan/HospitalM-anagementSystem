@@ -18,7 +18,7 @@ namespace HospitalManagementSystem.Presentation
             var builder = WebApplication.CreateBuilder(args);
             // change
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("HospitalDB")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("HMSConnection"), sql => sql.MigrationsAssembly("HospitalManagementSystem.Infrastructure")));
 
             builder.Services.AddCors();
 

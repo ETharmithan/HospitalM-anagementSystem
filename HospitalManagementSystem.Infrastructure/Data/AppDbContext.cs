@@ -10,6 +10,10 @@ namespace HospitalManagementSystem.Infrastructure.Data
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
+        //public AppDbContext()
+        //{
+            
+        //}
         public DbSet<User> Users { get; set; }
     }
 }
