@@ -4,10 +4,14 @@ export type User = {
   email: string;
   token: string;
   imageUrl?: string;
+  role: string;
 };
 
 
-
+export type LoginCreds = {
+  email: string;
+  password: string;
+}
 export type RegisterCreds = {
   email: string;
   displayName: string;
