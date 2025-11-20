@@ -14,8 +14,8 @@ namespace HospitalManagementSystem.Domain.Models.Patient
         [ForeignKey(nameof(Patient))]
         public Guid PatientId { get; set; }
         public Patient Patient { get; set; } = null!;
-        public string NIC { get; set; } = null!;
-        public string PassportNumber { get; set; } = string.Empty;
-        public string DriversLicenseNumber { get; set; } = string.Empty;
+        public string? NIC { get; set; } = null!;
+        public string? PassportNumber { get; set; } = string.Empty;
+        public string? DriversLicenseNumber { get; set; } = string.Empty;
     }
 }
