@@ -1,3 +1,7 @@
-<app-nav></app-nav>
+@if(role() ==="Patient"){
+    <app-dashboard></app-dashboard>
+}@else{
+    <app-nav></app-nav>
+}
 
-<app-patient-register></app-patient-register>
+
