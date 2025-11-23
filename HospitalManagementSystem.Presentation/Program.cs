@@ -1,13 +1,17 @@
 
-using System.Text;
 using HospitalManagementSystem.Application.IServices;
+using HospitalManagementSystem.Application.IServices.Doctor;
 using HospitalManagementSystem.Application.Services;
+using HospitalManagementSystem.Application.Services.Doctor;
+using HospitalManagementSystem.Domain.IRepository;
 using HospitalManagementSystem.Infrastructure.Data;
+using HospitalManagementSystem.Infrastructure.Repository.Doctor;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace HospitalManagementSystem.Presentation
 {
@@ -23,6 +27,19 @@ namespace HospitalManagementSystem.Presentation
             builder.Services.AddCors();
 
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+            builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+            builder.Services.AddScoped<IDoctorService, DoctorService>();
+            builder.Services.AddScoped<IDoctorAppointmentRepository, DoctorAppointmentRepository>();
+            builder.Services.AddScoped<IDoctorAppointmentService, DoctorAppointmentService>();
+
+
+
+
+
+
+
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => // Configure the JWT bearer authentication options. This will specify how the JWT token should be validated and used for authentication.
