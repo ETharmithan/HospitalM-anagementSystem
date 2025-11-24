@@ -10,41 +10,11 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Infrastructure.Repositories
 {
-    public class UserRepository(AppDbContext dbContext) : IUserRepository
+    public class UserRepository(AppDbContext dbContext) : GenericRepository<User>(dbContext), IUserRepository
     {
         public async Task<User> GetByEmailAsync(string email)
         {
-            return await dbContext.Users.SingleOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
-        }
-
-        public async Task<User> GetByIdAsync(Guid userId)
-        {
-            return await dbContext.Users.FindAsync(userId);
-        }
-
-        public async Task AddAsync(User user)
-        {
-            await dbContext.Users.AddAsync(user);
-        }
-
-        public async Task UpdateAsync(User user)
-        {
-            dbContext.Users.Update(user);
-            await Task.CompletedTask;
-        }
-
-        public async Task DeleteAsync(Guid userId)
-        {
-            var user = await GetByIdAsync(userId);
-            if (user != null)
-            {
-                dbContext.Users.Remove(user);
-            }
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await dbContext.SaveChangesAsync();
+            return await _dbSet.FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
         }
     }
 }

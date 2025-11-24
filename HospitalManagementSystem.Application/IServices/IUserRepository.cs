@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Application.IServices
 {
-    public interface IUserRepository
+    public interface IUserRepository : IGenericRepository<User>
     {
         Task<User> GetByEmailAsync(string email);
-        Task<User> GetByIdAsync(Guid userId);
-        Task AddAsync(User user);
-        Task UpdateAsync(User user);
-        Task DeleteAsync(Guid userId);
-        Task SaveChangesAsync();
     }
 }
