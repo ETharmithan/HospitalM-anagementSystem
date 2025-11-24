@@ -1,4 +1,6 @@
+using HospitalManagementSystem.Application.DTOs;
 using HospitalManagementSystem.Application.IServices;
+using HospitalManagementSystem.Domain.Models;
 using HospitalManagementSystem.Domain.Models.Patient;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +15,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class PatientController(IPatientRepository patientRepository) : ControllerBase
+    public class PatientController(IPatientRepository patientRepository, IImageUploadService imageUploadService, HospitalManagementSystem.Infrastructure.Data.AppDbContext dbContext) : ControllerBase
     {
         /// <summary>
         /// Get all patients
@@ -94,25 +96,102 @@ namespace HospitalManagementSystem.Presentation.Controllers
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<Patient>> CreatePatient([FromBody] Patient patient)
+        public async Task<ActionResult<Patient>> CreatePatient([FromBody] CreatePatientDTO patientDto)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+                if (patientDto == null)
+                    return BadRequest(new { message = "Patient data is required" });
 
-                if (string.IsNullOrWhiteSpace(patient.FirstName) || string.IsNullOrWhiteSpace(patient.LastName))
+                if (string.IsNullOrWhiteSpace(patientDto.FirstName) || string.IsNullOrWhiteSpace(patientDto.LastName))
                     return BadRequest(new { message = "First name and last name are required" });
 
-                patient.PatientId = Guid.NewGuid();
-                await patientRepository.AddAsync(patient);
-                await patientRepository.SaveChangesAsync();
+                // Parse date of birth
+                if (!DateTime.TryParse(patientDto.DateOfBirth, out var dateOfBirth))
+                    return BadRequest(new { message = "Invalid date of birth format" });
 
-                return CreatedAtAction(nameof(GetPatientById), new { id = patient.PatientId }, patient);
+                // Create patient object
+                var patientId = Guid.NewGuid();
+                var userId = Guid.NewGuid();
+                
+                // Create a user for this patient
+                var user = new User
+                {
+                    UserId = userId,
+                    Username = patientDto.EmailAddress ?? $"patient_{patientId}",
+                    Email = patientDto.EmailAddress ?? "",
+                    PasswordHash = new byte[0],
+                    PasswordSalt = new byte[0],
+                    Role = "Patient"
+                };
+                
+                var patient = new Patient
+                {
+                    PatientId = patientId,
+                    UserId = userId,
+                    FirstName = patientDto.FirstName,
+                    LastName = patientDto.LastName,
+                    DateOfBirth = dateOfBirth,
+                    Gender = patientDto.Gender,
+                    ImageUrl = patientDto.ImageUrl
+                };
+
+                // Create nested objects
+                var contactInfo = new Patient_Contact_Information
+                {
+                    PatientId = patientId,
+                    PhoneNumber = patientDto.PhoneNumber ?? "",
+                    EmailAddress = patientDto.EmailAddress ?? "",
+                    AddressLine1 = patientDto.AddressLine1 ?? "",
+                    AddressLine2 = patientDto.AddressLine2 ?? "",
+                    City = patientDto.City ?? "",
+                    State = patientDto.Province ?? "",
+                    PostalCode = patientDto.PostalCode ?? "",
+                    Country = patientDto.Country ?? "",
+                    Nationality = patientDto.Nationality ?? ""
+                };
+
+                var identificationDetails = new Patient_Identification_Details
+                {
+                    PatientId = patientId,
+                    NIC = patientDto.NIC ?? ""
+                };
+
+                patient.ContactInfo = contactInfo;
+                patient.IdentificationDetails = identificationDetails;
+
+                // Add user and patient with nested objects to context
+                dbContext.Users.Add(user);
+                dbContext.Patients.Add(patient);
+                dbContext.Set<Patient_Contact_Information>().Add(contactInfo);
+                dbContext.Set<Patient_Identification_Details>().Add(identificationDetails);
+                
+                await dbContext.SaveChangesAsync();
+
+                // Return a simplified response to avoid circular references
+                var response = new
+                {
+                    patientId = patient.PatientId,
+                    userId = patient.UserId,
+                    firstName = patient.FirstName,
+                    lastName = patient.LastName,
+                    dateOfBirth = patient.DateOfBirth,
+                    gender = patient.Gender,
+                    imageUrl = patient.ImageUrl,
+                    message = "Patient registered successfully"
+                };
+                return CreatedAtAction(nameof(GetPatientById), new { id = patient.PatientId }, response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while creating the patient", error = ex.Message });
+                var errorDetails = new
+                {
+                    message = "An error occurred while creating the patient",
+                    error = ex.Message,
+                    innerError = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                };
+                return StatusCode(500, errorDetails);
             }
         }
 
@@ -135,6 +214,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 existingPatient.LastName = patient.LastName;
                 existingPatient.DateOfBirth = patient.DateOfBirth;
                 existingPatient.Gender = patient.Gender;
+                existingPatient.ImageUrl = patient.ImageUrl;
 
                 await patientRepository.UpdateAsync(existingPatient);
                 await patientRepository.SaveChangesAsync();
@@ -168,6 +248,103 @@ namespace HospitalManagementSystem.Presentation.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while deleting the patient", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Upload patient profile image
+        /// </summary>
+        [HttpPost("upload-image")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest(new { message = "No file provided" });
+
+                // Validate file
+                if (!imageUploadService.IsValidImageFile(file.FileName, file.Length))
+                    return BadRequest(new { message = "Invalid file. Only images (jpg, jpeg, png, gif, webp) up to 5MB are allowed." });
+
+                // Upload image
+                using (var stream = file.OpenReadStream())
+                {
+                    string imagePath = await imageUploadService.UploadImageAsync(stream, file.FileName);
+                    return Ok(new { message = "Image uploaded successfully", imageUrl = imagePath });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while uploading the image", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Save additional patient details (emergency contact, medical history, medical info)
+        /// </summary>
+        [HttpPost("additional-details")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SaveAdditionalDetails([FromBody] AdditionalPatientDetailsDTO additionalDetailsDto)
+        {
+            try
+            {
+                if (additionalDetailsDto == null)
+                    return BadRequest(new { message = "Additional details data is required" });
+
+                // Check if patient exists
+                var existingPatient = await patientRepository.GetByIdAsync(additionalDetailsDto.PatientId);
+                if (existingPatient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                // Create emergency contact
+                var emergencyContact = new Patient_Emergency_Contact
+                {
+                    Id = Guid.NewGuid(),
+                    PatientId = additionalDetailsDto.PatientId,
+                    ContactName = additionalDetailsDto.EmergencyContact.ContactName,
+                    ContactEmail = additionalDetailsDto.EmergencyContact.ContactEmail,
+                    ContactPhone = additionalDetailsDto.EmergencyContact.ContactPhone,
+                    RelationshipToPatient = additionalDetailsDto.EmergencyContact.RelationshipToPatient
+                };
+
+                // Create medical history
+                var medicalHistory = new Patient_Medical_History
+                {
+                    PatientId = additionalDetailsDto.PatientId,
+                    PastIllnesses = additionalDetailsDto.MedicalHistory.PastIllnesses,
+                    Surgeries = additionalDetailsDto.MedicalHistory.Surgeries,
+                    MedicalHistoryNotes = additionalDetailsDto.MedicalHistory.MedicalHistoryNotes
+                };
+
+                // Create medical related info
+                var medicalInfo = new Patient_Medical_Related_Info
+                {
+                    PatientId = additionalDetailsDto.PatientId,
+                    BloodType = additionalDetailsDto.MedicalInfo.BloodType,
+                    Allergies = additionalDetailsDto.MedicalInfo.Allergies,
+                    ChronicConditions = additionalDetailsDto.MedicalInfo.ChronicConditions
+                };
+
+                // Add to context and save
+                dbContext.Set<Patient_Emergency_Contact>().Add(emergencyContact);
+                dbContext.Set<Patient_Medical_History>().Add(medicalHistory);
+                dbContext.Set<Patient_Medical_Related_Info>().Add(medicalInfo);
+                
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { message = "Additional patient details saved successfully" });
+            }
+            catch (Exception ex)
+            {
+                var errorDetails = new
+                {
+                    message = "An error occurred while saving additional patient details",
+                    error = ex.Message,
+                    innerError = ex.InnerException?.Message,
+                    stackTrace = ex.StackTrace
+                };
+                return StatusCode(500, errorDetails);
             }
         }
     }

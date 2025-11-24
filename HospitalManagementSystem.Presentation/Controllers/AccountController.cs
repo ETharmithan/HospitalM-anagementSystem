@@ -10,9 +10,9 @@ using System.Text;
 
 namespace HospitalManagementSystem.Presentation.Controllers
 {
-     [Authorize]
     public class AccountController(IUserRepository userRepository, ITokenService tokenService) : BaseApiController
     {
+        [Authorize]
         [HttpGet]
         public ActionResult<string> Login_()  
         {
@@ -25,7 +25,15 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (await UserExists(registerUserDto.Email)) return BadRequest("Email is already taken");
+            // For development: Clear existing users with this email to prevent duplicates
+            var existingUser = await userRepository.GetByEmailAsync(registerUserDto.Email);
+            if (existingUser != null) 
+            {
+                Console.WriteLine($"Found existing user with email {registerUserDto.Email}, deleting to prevent duplicates...");
+                await userRepository.DeleteAsync(existingUser.UserId);
+                await userRepository.SaveChangesAsync();
+                Console.WriteLine("Existing user deleted, proceeding with new registration");
+            }
             using var hmac = new HMACSHA512();
             var user = new User
             {
@@ -43,6 +51,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpPost("login")] // http://localhost:5170/api/account/login
         public async Task<ActionResult<User_Dto>> Login(LoginDto loginDto)
         {
@@ -53,6 +62,13 @@ namespace HospitalManagementSystem.Presentation.Controllers
             using var hmac = new HMACSHA512(user.PasswordSalt);
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password)); // compute the hash of the password provided during login
 
+            // Check if hash lengths match
+            if (computedHash.Length != user.PasswordHash.Length) 
+            {
+                return Unauthorized("Invalid password");
+            }
+
+            // Compare password hashes
             for (int i = 0; i < computedHash.Length; i++)
             {
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
