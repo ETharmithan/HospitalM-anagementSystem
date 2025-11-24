@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Presentation.Controllers
@@ -112,18 +113,30 @@ namespace HospitalManagementSystem.Presentation.Controllers
 
                 // Create patient object
                 var patientId = Guid.NewGuid();
-                var userId = Guid.NewGuid();
+                User user = null;
+                Guid userId;
                 
-                // Create a user for this patient
-                var user = new User
+                // Only create a user if userId is not provided
+                if (!patientDto.UserId.HasValue || patientDto.UserId == Guid.Empty)
                 {
-                    UserId = userId,
-                    Username = patientDto.EmailAddress ?? $"patient_{patientId}",
-                    Email = patientDto.EmailAddress ?? "",
-                    PasswordHash = new byte[0],
-                    PasswordSalt = new byte[0],
-                    Role = "Patient"
-                };
+                    userId = Guid.NewGuid();
+                    
+                    // Create a user for this patient (only if no userId provided)
+                    user = new User
+                    {
+                        UserId = userId,
+                        Username = patientDto.EmailAddress ?? $"patient_{patientId}",
+                        Email = patientDto.EmailAddress ?? "",
+                        PasswordHash = new byte[0],
+                        PasswordSalt = new byte[0],
+                        Role = "Patient"
+                    };
+                }
+                else
+                {
+                    // Use the provided userId
+                    userId = patientDto.UserId.Value;
+                }
                 
                 var patient = new Patient
                 {
@@ -161,7 +174,10 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 patient.IdentificationDetails = identificationDetails;
 
                 // Add user and patient with nested objects to context
-                dbContext.Users.Add(user);
+                if (user != null)
+                {
+                    dbContext.Users.Add(user);
+                }
                 dbContext.Patients.Add(patient);
                 dbContext.Set<Patient_Contact_Information>().Add(contactInfo);
                 dbContext.Set<Patient_Identification_Details>().Add(identificationDetails);

@@ -17,5 +17,6 @@ namespace HospitalManagementSystem.Application.DTOs
         [Required]
         public string Password { get; set; } = "";
         public required string Role { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

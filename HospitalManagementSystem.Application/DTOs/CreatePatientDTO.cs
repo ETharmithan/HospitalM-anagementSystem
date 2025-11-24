@@ -17,5 +17,6 @@ namespace HospitalManagementSystem.Application.DTOs
         public string PostalCode { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
         public string Nationality { get; set; } = string.Empty;
+        public Guid? UserId { get; set; }  // Optional - for linking to existing user
     }
 }

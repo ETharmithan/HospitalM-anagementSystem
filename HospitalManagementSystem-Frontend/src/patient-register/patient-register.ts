@@ -152,7 +152,7 @@ export class PatientRegister implements OnInit {
 
   private submitPatientData(formValue: any, imageUrl: string): void {
     // Prepare patient data
-    const patientData = {
+    const patientData: any = {
       firstName: formValue.firstName,
       lastName: formValue.lastName,
       dateOfBirth: formValue.dateOfBirth,
@@ -170,12 +170,17 @@ export class PatientRegister implements OnInit {
       nationality: formValue.nationality,
     };
 
-    // First create patient, then register user account
-    this.patientService.createPatient(patientData).subscribe({
-      next: (patientResponse: any) => {
-        // Now register user account with password first
-        this.registerUserAccount(formValue, patientResponse, imageUrl, () => {
-          // Only show patient details after successful user account creation
+    // First register user account, then create patient
+    this.registerUserAccount(formValue, null, imageUrl, (userResponse: any) => {
+      // Associate patient with the created user account
+      patientData.userId = userResponse.id;
+      // Also try with capital U for C# convention
+      patientData.UserId = userResponse.id;
+      
+      // Only create patient after successful user account creation
+      this.patientService.createPatient(patientData).subscribe({
+        next: (patientResponse: any) => {
+          // Show patient details after both user account and patient creation succeed
           this.registeredPatient = {
             ...patientResponse,
             // Add form data for complete details
@@ -197,43 +202,38 @@ export class PatientRegister implements OnInit {
           this.patientForm.reset();
           this.selectedFile = null;
           this.imagePreview = null;
-        });
-      },
-      error: (error: any) => {
-        this.isLoading = false;
-        const errorMessage = error?.error?.message || error?.error?.title || 'Failed to register patient';
-        this.toastService.error(errorMessage);
-        console.error('Registration error:', error);
-      },
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+          const errorMessage = error?.error?.message || error?.error?.title || 'Failed to create patient record';
+          this.toastService.error(errorMessage);
+          console.error('Patient creation error:', error);
+        },
+      });
     });
   }
 
-  private registerUserAccount(formValue: any, patientResponse: any, imageUrl: string, onSuccess: () => void): void {
+  private registerUserAccount(formValue: any, patientResponse: any, imageUrl: string, onSuccess: (userResponse: any) => void): void {
     // Prepare user account data
     const registerData = {
       email: formValue.emailAddress,
       displayName: `${formValue.firstName} ${formValue.lastName}`,
       password: formValue.password,
-      role: 'Patient' // Backend expects 'Role' not 'userType'
+      role: 'Patient', // Backend expects 'Role' not 'userType'
+      imageUrl: imageUrl // Include the image URL
     };
 
-    // Debug: Log registration data
-    console.log('Attempting to register user with data:', registerData);
-    
+        
     // Register user account
     this.accountService.register(registerData).subscribe({
       next: (userResponse: any) => {
-        this.isLoading = false;
+        // Don't set isLoading = false here - patient creation will handle it
         
-        // Update patient with user ID
-        this.registeredPatient = {
-          userId: userResponse.id
-        };
+        this.toastService.success('User account created successfully!');
         
-        this.toastService.success('User account created successfully! You can now login.');
-        
-        // Call success callback to show patient details
-        onSuccess();
+        // Call success callback with user response to continue with patient creation
+        onSuccess(userResponse);
       },
       error: (error: any) => {
         this.isLoading = false;

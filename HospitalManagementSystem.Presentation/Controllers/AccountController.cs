@@ -25,29 +25,28 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // For development: Clear existing users with this email to prevent duplicates
+            // Check if user exists
             var existingUser = await userRepository.GetByEmailAsync(registerUserDto.Email);
             if (existingUser != null) 
             {
-                Console.WriteLine($"Found existing user with email {registerUserDto.Email}, deleting to prevent duplicates...");
-                await userRepository.DeleteAsync(existingUser.UserId);
-                await userRepository.SaveChangesAsync();
-                Console.WriteLine("Existing user deleted, proceeding with new registration");
+                return BadRequest("Email is already taken");
             }
+            
             using var hmac = new HMACSHA512();
-            var user = new User
+            var newUser = new User
             {
                 Username = registerUserDto.DisplayName,
                 Email = registerUserDto.Email,
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerUserDto.Password)),
                 PasswordSalt = hmac.Key,
-                Role = registerUserDto.Role
+                Role = registerUserDto.Role,
+                ImageUrl = registerUserDto.ImageUrl
             };
 
-            await userRepository.AddAsync(user);
+            await userRepository.AddAsync(newUser);
             await userRepository.SaveChangesAsync();
 
-            return user.ToDto(tokenService);
+            return newUser.ToDto(tokenService);
         }
 
 
