@@ -1,19 +1,17 @@
 ﻿using HospitalManagementSystem.Application.DTOs;
 using HospitalManagementSystem.Application.IServices;
 using HospitalManagementSystem.Domain.Models;
-using HospitalManagementSystem.Infrastructure.Data;
 using HospitalManagementSystem.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace HospitalManagementSystem.Presentation.Controllers
 {
      [Authorize]
-    public class AccountController(AppDbContext dbContext, ITokenService tokenService) : BaseApiController
+    public class AccountController(IUserRepository userRepository, ITokenService tokenService) : BaseApiController
     {
         [HttpGet]
         public ActionResult<string> Login_()  
@@ -27,7 +25,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            //if (await UserExists(registerUserDto.Email)) return BadRequest("Email is already taken");
+            if (await UserExists(registerUserDto.Email)) return BadRequest("Email is already taken");
             using var hmac = new HMACSHA512();
             var user = new User
             {
@@ -38,11 +36,8 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 Role = registerUserDto.Role
             };
 
-            dbContext.Users.Add(user);
-
-
-
-            await dbContext.SaveChangesAsync();
+            await userRepository.AddAsync(user);
+            await userRepository.SaveChangesAsync();
 
             return user.ToDto(tokenService);
         }
@@ -52,7 +47,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
         public async Task<ActionResult<User_Dto>> Login(LoginDto loginDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var user = await dbContext.Users.SingleOrDefaultAsync(x => x.Email == loginDto.Email.ToLower());
+            var user = await userRepository.GetByEmailAsync(loginDto.Email);
             if (user == null) return Unauthorized("Invalid email address");
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
@@ -73,7 +68,8 @@ namespace HospitalManagementSystem.Presentation.Controllers
 
         private async Task<bool> UserExists(string email)
         {
-            return await dbContext.Users.AnyAsync(x => x.Email.ToLower() == email.ToLower());
+            var user = await userRepository.GetByEmailAsync(email);
+            return user != null;
         }
 
     }
