@@ -1,14 +1,18 @@
 
-using System.Text;
 using HospitalManagementSystem.Application.IServices;
+using HospitalManagementSystem.Application.IServices.Doctor;
 using HospitalManagementSystem.Application.Services;
+using HospitalManagementSystem.Application.Services.Doctor;
+using HospitalManagementSystem.Domain.IRepository;
 using HospitalManagementSystem.Infrastructure.Data;
+using HospitalManagementSystem.Infrastructure.Repository.Doctor;
 using HospitalManagementSystem.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace HospitalManagementSystem.Presentation
 {
@@ -25,6 +29,19 @@ namespace HospitalManagementSystem.Presentation
 
             // Register Services
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+            builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+            builder.Services.AddScoped<IDoctorService, DoctorService>();
+            builder.Services.AddScoped<IDoctorAppointmentRepository, DoctorAppointmentRepository>();
+            builder.Services.AddScoped<IDoctorAppointmentService, DoctorAppointmentService>();
+
+
+
+
+
+
+
             builder.Services.AddScoped<IImageUploadService>(provider => 
                 new ImageUploadService(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/patients")));
 
