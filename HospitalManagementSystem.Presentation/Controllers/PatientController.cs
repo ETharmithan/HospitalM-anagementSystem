@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Presentation.Controllers
 {
-    [Authorize]
+    // [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PatientController(IPatientRepository patientRepository, IImageUploadService imageUploadService, HospitalManagementSystem.Infrastructure.Data.AppDbContext dbContext) : ControllerBase

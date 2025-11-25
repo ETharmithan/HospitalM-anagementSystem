@@ -1,4 +1,4 @@
-﻿using HospitalManagementSystem.Domain.Models.Doctor;
+﻿using HospitalManagementSystem.Domain.Models.Doctors;
 ﻿using HospitalManagementSystem.Domain.Models;
 using HospitalManagementSystem.Domain.Models.Patient;
 using Microsoft.EntityFrameworkCore;

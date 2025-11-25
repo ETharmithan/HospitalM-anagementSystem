@@ -1,5 +1,5 @@
 ﻿using HospitalManagementSystem.Domain.IRepository;
-using HospitalManagementSystem.Domain.Models.Doctor;
+using HospitalManagementSystem.Domain.Models.Doctors;
 using HospitalManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
 {
-    internal class DoctorScheduleRepository : IDoctorScheduleRepository
+    public class DoctorScheduleRepository : IDoctorScheduleRepository
     {
         private readonly AppDbContext _appDbContext;
 
