@@ -1,5 +1,5 @@
-<nav class="fixed w-full top-4 left-0 z-50 px-4">
-  <div class="max-w-7xl mx-auto">
+<nav class="fixed w-[75%] top-4 left-1/2 transform -translate-x-1/2 z-[30] px-4">
+  <div class="w-full mx-auto">
     <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-slate-700/40 rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
       <div class="flex items-center justify-between gap-4 px-4 py-3 md:py-4">
         <!-- left: logo -->
@@ -35,20 +35,63 @@
           </form>
         </div>
 
-        <!-- right: CTA + avatar + mobile btn -->
+        <!-- right: auth buttons + avatar + mobile btn -->
         <div class="flex items-center gap-3">
-          <a routerLink="/book"
-             class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold shadow-md hover:scale-[1.03] transition">
-            Book Appointment
-          </a>
+          <!-- Not logged in - show Login & Register buttons -->
+          <ng-container *ngIf="!currentUser">
+            <a routerLink="/login"
+               class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              Login
+            </a>
+            <a routerLink="/register"
+               class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-md hover:scale-[1.03] transition">
+              Register
+            </a>
+          </ng-container>
 
-          <!-- avatar -->
-          <a routerLink="/profile" class="hidden sm:flex items-center gap-2 px-2 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-            <img src="/assets/avatar-placeholder.png" alt="avatar"
-                 class="w-8 h-8 rounded-full object-cover shadow-sm" />
-            <span class="text-sm text-slate-700 dark:text-slate-200">Hi, User</span>
-          </a>
+          
+          <!-- User avatar (always visible, but changes based on login state) -->
+          <div class="relative user-menu-container">
+            <!-- Logged in user avatar with dropdown -->
+            <div *ngIf="currentUser" class="hidden sm:flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                 (click)="toggleUserMenu()">
+              <!-- Avatar -->
+              <div class="relative">
+                <img *ngIf="currentUser?.imageUrl" 
+                     [src]="getImageUrl(currentUser?.imageUrl)" 
+                     [alt]="currentUser?.name || 'User'"
+                     (error)="onImageError($event)"
+                     class="w-10 h-10 rounded-full object-cover shadow-sm border-2 border-white dark:border-slate-800" />
+                <div *ngIf="!currentUser?.imageUrl" 
+                     class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-semibold shadow-sm border-2 border-white dark:border-slate-800">
+                  {{ userInitials }}
+                </div>
+                <!-- Online indicator -->
+                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+              </div>
+              <!-- User name -->
+              <div class="flex flex-col items-start">
+                <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ currentUser?.name || 'User' }}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">{{ currentUser?.role || 'Patient' }}</span>
+              </div>
+              <!-- Dropdown arrow -->
+              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
 
+            <!-- Guest avatar (not logged in) -->
+            <div *ngIf="!currentUser" class="hidden sm:flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              <img src="/assets/avatar-placeholder.svg" alt="Guest avatar"
+                   class="w-10 h-10 rounded-full object-cover shadow-sm border-2 border-white dark:border-slate-800" />
+              <div class="flex flex-col items-start">
+                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Guest User</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Not logged in</span>
+              </div>
+            </div>
+          </div>
+
+          
           <!-- mobile menu button -->
           <button (click)="toggleMenu()" aria-label="Open menu"
                   class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
@@ -68,6 +111,49 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- User dropdown menu (moved outside nav container to prevent clipping) -->
+  <div *ngIf="showUserMenu && currentUser" 
+       class="fixed top-24 right-4 w-64 bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-3 z-[70] overflow-visible"
+       style="max-height: 500px; overflow-y: auto;">
+    <!-- User info header -->
+    <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+      <div class="flex items-center gap-3">
+        <img *ngIf="currentUser?.imageUrl" 
+             [src]="getImageUrl(currentUser?.imageUrl)" 
+             [alt]="currentUser?.name || 'User'"
+             (error)="onImageError($event)"
+             class="w-12 h-12 rounded-full object-cover shadow-sm" />
+        <div *ngIf="!currentUser?.imageUrl" 
+             class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-semibold shadow-sm">
+          {{ userInitials }}
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ currentUser?.name || 'User' }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ currentUser?.email || 'No email' }}</p>
+          <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{{ currentUser?.role || 'Patient' }}</p>
+          <!-- Logout link under name -->
+          <a (click)="logout(); showUserMenu = false" class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition cursor-pointer mt-1 inline-block">
+            🚪 Logout
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Menu items -->
+    <a routerLink="/profile" (click)="showUserMenu = false" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+      👤 Profile
+    </a>
+    <a routerLink="/dashboard" (click)="showUserMenu = false" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+      📊 Dashboard
+    </a>
+    <a routerLink="/appointments" (click)="showUserMenu = false" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+      📅 My Appointments
+    </a>
+    <a routerLink="/settings" (click)="showUserMenu = false" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+      ⚙️ Settings
+    </a>
   </div>
 
   <!-- Mobile slide-over -->
@@ -114,10 +200,72 @@
         </button>
       </form>
 
-      <a routerLink="/book" (click)="closeMenu()"
-         class="block text-center mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold shadow-sm hover:scale-[1.02] transition">
-        Book Appointment
-      </a>
+      <!-- Mobile menu content based on login status -->
+      <ng-container *ngIf="!currentUser">
+        <!-- Auth buttons for guests -->
+        <div class="mt-4 space-y-2">
+          <a routerLink="/login" (click)="closeMenu()"
+             class="block w-full text-center px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            Login
+          </a>
+          <a routerLink="/register" (click)="closeMenu()"
+             class="block w-full text-center px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-sm hover:scale-[1.02] transition">
+            Register
+          </a>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="currentUser">
+        <!-- User info in mobile menu -->
+        <div class="mt-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <img *ngIf="currentUser?.imageUrl" 
+                   [src]="getImageUrl(currentUser?.imageUrl)" 
+                   [alt]="currentUser?.name || 'User'"
+                   (error)="onImageError($event)"
+                   class="w-12 h-12 rounded-full object-cover shadow-sm border-2 border-white dark:border-slate-700" />
+              <div *ngIf="!currentUser?.imageUrl" 
+                   class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-semibold shadow-sm border-2 border-white dark:border-slate-700">
+                {{ userInitials }}
+              </div>
+              <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-700 rounded-full"></div>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ currentUser?.name || 'User' }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">{{ currentUser?.email || 'No email' }}</p>
+              <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{{ currentUser?.role || 'Patient' }}</p>
+              <!-- Logout link under name -->
+              <a (click)="logout(); closeMenu()" class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition cursor-pointer mt-1 inline-block">
+                🚪 Logout
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile menu items -->
+        <div class="mt-4 space-y-2">
+          <a routerLink="/dashboard" (click)="closeMenu()"
+             class="block w-full text-center px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-sm hover:scale-[1.02] transition">
+            📊 Dashboard
+          </a>
+
+          <a routerLink="/appointments" (click)="closeMenu()"
+             class="block w-full text-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold shadow-sm hover:scale-[1.02] transition">
+            📅 My Appointments
+          </a>
+
+          <a routerLink="/profile" (click)="closeMenu()"
+             class="block w-full text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            👤 Profile
+          </a>
+
+          <a routerLink="/settings" (click)="closeMenu()"
+             class="block w-full text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            ⚙️ Settings
+          </a>
+        </div>
+      </ng-container>
     </aside>
   </div>
 </nav>

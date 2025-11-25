@@ -22,6 +22,211 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient", b =>
+                {
+                    b.Property<Guid>("PatientId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PatientId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Patients");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Contact_Information", b =>
+                {
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AddressLine1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AddressLine2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nationality")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PatientId");
+
+                    b.ToTable("PatientContactInformation");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Emergency_Contact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContactEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RelationshipToPatient")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId")
+                        .IsUnique();
+
+                    b.ToTable("PatientEmergencyContact");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Identification_Details", b =>
+                {
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DriversLicenseNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NIC")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassportNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PatientId");
+
+                    b.ToTable("PatientIdentificationDetails");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Login_Info", b =>
+                {
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PatientId");
+
+                    b.ToTable("PatientLoginInfo");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_History", b =>
+                {
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MedicalHistoryNotes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PastIllnesses")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Surgeries")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PatientId");
+
+                    b.ToTable("PatientMedicalHistory");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_Related_Info", b =>
+                {
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Allergies")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BloodType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChronicConditions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PatientId");
+
+                    b.ToTable("PatientMedicalRelatedInfo");
+                });
+
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.User", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -54,6 +259,103 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.User", "UserLogin")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserLogin");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Contact_Information", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithOne("ContactInfo")
+                        .HasForeignKey("HospitalManagementSystem.Domain.Models.Patient.Patient_Contact_Information", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Emergency_Contact", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithOne("EmergencyContact")
+                        .HasForeignKey("HospitalManagementSystem.Domain.Models.Patient.Patient_Emergency_Contact", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Identification_Details", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithOne("IdentificationDetails")
+                        .HasForeignKey("HospitalManagementSystem.Domain.Models.Patient.Patient_Identification_Details", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Login_Info", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithOne("LoginInfo")
+                        .HasForeignKey("HospitalManagementSystem.Domain.Models.Patient.Patient_Login_Info", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_History", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithOne("MedicalHistory")
+                        .HasForeignKey("HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_History", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_Related_Info", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithOne("MedicalRelatedInfo")
+                        .HasForeignKey("HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_Related_Info", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient", b =>
+                {
+                    b.Navigation("ContactInfo")
+                        .IsRequired();
+
+                    b.Navigation("EmergencyContact")
+                        .IsRequired();
+
+                    b.Navigation("IdentificationDetails")
+                        .IsRequired();
+
+                    b.Navigation("LoginInfo");
+
+                    b.Navigation("MedicalHistory")
+                        .IsRequired();
+
+                    b.Navigation("MedicalRelatedInfo")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
