@@ -1,5 +1,6 @@
 using HospitalManagementSystem.Application.IServices;
-using HospitalManagementSystem.Domain.Models.Doctor;
+using HospitalManagementSystem.Domain.IRepository;
+using HospitalManagementSystem.Domain.Models.DoctorModel;
 using HospitalManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,14 +11,14 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Infrastructure.Repositories
 {
-    public class DoctorRepository(AppDbContext dbContext) : GenericRepository<Doctors>(dbContext), IDoctorRepository
+    public class DoctorRepository(AppDbContext dbContext) : GenericRepository<Doctor>(dbContext), IDoctorRepository
     {
-        public async Task<Doctors> GetByNameAsync(string doctorName)
+        public async Task<Doctor> GetByNameAsync(string doctorName)
         {
             return await _dbSet.FirstOrDefaultAsync(d => d.DoctorName.ToLower() == doctorName.ToLower());
         }
 
-        public async Task<IEnumerable<Doctors>> GetAllDoctorsAsync()
+        public async Task<IEnumerable<Doctor>> GetAllDoctorsAsync()
         {
             return await _dbSet.ToListAsync();
         }

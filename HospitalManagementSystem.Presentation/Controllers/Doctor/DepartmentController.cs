@@ -1,5 +1,5 @@
 ﻿using HospitalManagementSystem.Application.DTOs.Doctor.Request_Dto;
-using HospitalManagementSystem.Application.IServices.Doctor;
+using HospitalManagementSystem.Application.IServices.Doctor_IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

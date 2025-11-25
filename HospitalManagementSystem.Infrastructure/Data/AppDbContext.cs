@@ -1,5 +1,4 @@
-﻿using HospitalManagementSystem.Domain.Models.Doctor;
-﻿using HospitalManagementSystem.Domain.Models;
+﻿﻿using HospitalManagementSystem.Domain.Models;
 using HospitalManagementSystem.Domain.Models.Patient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HospitalManagementSystem.Domain.Models.DoctorModel;
 
 namespace HospitalManagementSystem.Infrastructure.Data
 {

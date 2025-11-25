@@ -1,11 +1,8 @@
 
 using HospitalManagementSystem.Application.IServices;
-using HospitalManagementSystem.Application.IServices.Doctor;
 using HospitalManagementSystem.Application.Services;
-using HospitalManagementSystem.Application.Services.Doctor;
 using HospitalManagementSystem.Domain.IRepository;
 using HospitalManagementSystem.Infrastructure.Data;
-using HospitalManagementSystem.Infrastructure.Repository.Doctor;
 using HospitalManagementSystem.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +10,9 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using HospitalManagementSystem.Infrastructure.Repository.DoctorRepo;
+using HospitalManagementSystem.Application.Services.Doctor_Services;
+using HospitalManagementSystem.Application.IServices.Doctor_IServices;
 
 namespace HospitalManagementSystem.Presentation
 {

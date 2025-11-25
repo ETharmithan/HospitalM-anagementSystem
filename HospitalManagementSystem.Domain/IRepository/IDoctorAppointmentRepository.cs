@@ -1,4 +1,4 @@
-﻿using HospitalManagementSystem.Domain.Models.Doctor;
+﻿using HospitalManagementSystem.Domain.Models.DoctorModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;

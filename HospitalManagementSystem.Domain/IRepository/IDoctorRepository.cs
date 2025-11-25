@@ -1,4 +1,4 @@
-﻿using HospitalManagementSystem.Domain.Models.Doctor;
+﻿using HospitalManagementSystem.Domain.Models.DoctorModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +14,6 @@ namespace HospitalManagementSystem.Domain.IRepository
         Task<Doctor> CreateAsync(Doctor doctor);
         Task<Doctor?> UpdateAsync(Doctor doctor);
         Task<bool> DeleteAsync(Guid id);
-
+        
     }
 }
