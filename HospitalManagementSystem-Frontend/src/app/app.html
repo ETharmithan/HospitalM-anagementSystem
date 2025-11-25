@@ -1,1 +1,7 @@
-<h1>App components</h1>
+@if(role() ==="Patient"){
+    <app-dashboard></app-dashboard>
+}@else{
+    <app-nav></app-nav>
+}
+
+

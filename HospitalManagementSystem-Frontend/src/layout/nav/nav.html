@@ -1,0 +1,123 @@
+<nav class="fixed w-full top-4 left-0 z-50 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white/30 dark:border-slate-700/40 rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
+      <div class="flex items-center justify-between gap-4 px-4 py-3 md:py-4">
+        <!-- left: logo -->
+        <div class="flex items-center gap-3">
+          <a routerLink="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-bold shadow-md transform group-hover:scale-105 transition">
+              MB
+            </div>
+            <div class="hidden sm:block">
+              <span class="block font-semibold text-slate-900 dark:text-white">MyBrand</span>
+              <span class="text-xs text-slate-500 dark:text-slate-300">Caring for Life</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- center: desktop links + search -->
+        <div class="hidden md:flex items-center flex-1 justify-center gap-8">
+          <div class="flex gap-6">
+            <a routerLink="/" class="nav-link text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition">Home</a>
+            <a routerLink="/about" class="nav-link text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition">About</a>
+            <a routerLink="/services" class="nav-link text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition">Services</a>
+            <a routerLink="/contact" class="nav-link text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition">Contact</a>
+          </div>
+
+          <!-- search -->
+          <form (ngSubmit)="onSearch()" class="ml-6 flex items-center gap-2">
+            <input [(ngModel)]="query" name="q" type="search" placeholder="Search doctors, services..."
+                   class="w-64 md:w-80 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-400 outline-none bg-white/60 dark:bg-slate-800/60 text-slate-900 dark:text-white transition" />
+            <button type="submit"
+                    class="hidden md:inline-flex items-center px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 text-white font-medium shadow-sm hover:brightness-105 transition">
+              Search
+            </button>
+          </form>
+        </div>
+
+        <!-- right: CTA + avatar + mobile btn -->
+        <div class="flex items-center gap-3">
+          <a routerLink="/book"
+             class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold shadow-md hover:scale-[1.03] transition">
+            Book Appointment
+          </a>
+
+          <!-- avatar -->
+          <a routerLink="/profile" class="hidden sm:flex items-center gap-2 px-2 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <img src="/assets/avatar-placeholder.png" alt="avatar"
+                 class="w-8 h-8 rounded-full object-cover shadow-sm" />
+            <span class="text-sm text-slate-700 dark:text-slate-200">Hi, User</span>
+          </a>
+
+          <!-- mobile menu button -->
+          <button (click)="toggleMenu()" aria-label="Open menu"
+                  class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <svg *ngIf="!isMenuOpen" xmlns="http://www.w3.org/2000/svg"
+                 class="h-6 w-6 text-slate-700 dark:text-slate-200" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+            <svg *ngIf="isMenuOpen" xmlns="http://www.w3.org/2000/svg"
+                 class="h-6 w-6 text-slate-700 dark:text-slate-200" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile slide-over -->
+  <div class="fixed inset-0 z-40" *ngIf="isMenuOpen">
+    <!-- backdrop -->
+    <div (click)="closeMenu()" class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"></div>
+
+    <!-- panel -->
+    <aside class="absolute right-4 top-20 w-[92%] max-w-sm bg-white/90 dark:bg-slate-900/90 rounded-xl shadow-2xl border border-white/30 dark:border-slate-700/40 p-4 transform transition duration-300">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-bold">MB</div>
+          <div>
+            <div class="font-semibold text-slate-900 dark:text-white">MyBrand</div>
+            <div class="text-xs text-slate-500 dark:text-slate-300">Healthcare</div>
+          </div>
+        </div>
+        <button (click)="closeMenu()" aria-label="Close menu"
+                class="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               class="h-5 w-5 text-slate-700 dark:text-slate-200" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- mobile links -->
+      <nav class="flex flex-col gap-3">
+        <a (click)="closeMenu()" routerLink="/" class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200">Home</a>
+        <a (click)="closeMenu()" routerLink="/about" class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200">About</a>
+        <a (click)="closeMenu()" routerLink="/services" class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200">Services</a>
+        <a (click)="closeMenu()" routerLink="/contact" class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200">Contact</a>
+      </nav>
+
+      <!-- mobile search + CTA -->
+      <form (ngSubmit)="onSearch()" class="mt-4 flex gap-2">
+        <input [(ngModel)]="query" name="mobile-q" type="search"
+               placeholder="Search doctors, services..."
+               class="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-400 outline-none bg-white/80 dark:bg-slate-800/60 text-slate-900 dark:text-white" />
+        <button type="submit" class="px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 text-white shadow-sm hover:brightness-105 transition">
+          Go
+        </button>
+      </form>
+
+      <a routerLink="/book" (click)="closeMenu()"
+         class="block text-center mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold shadow-sm hover:scale-[1.02] transition">
+        Book Appointment
+      </a>
+    </aside>
+  </div>
+</nav>

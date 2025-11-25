@@ -6,16 +6,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HospitalManagementSystem.Domain.Models
+namespace HospitalManagementSystem.Domain.Models.Patient
 {
-    public class Patient_Medical_History
+    public class Patient_Login_Info
     {
         [Key]
         [ForeignKey(nameof(Patient))]
         public Guid PatientId { get; set; }
+
+        public required string Email { get; set; }
+        public string? ImageUrl { get; set; }
+        public required string Username { get; set; }
+        public required byte[] PasswordHash { get; set; }
+        public required byte[] PasswordSalt { get; set; }
+
+
+
         public Patient Patient { get; set; } = null!;
-        public string PastIllnesses { get; set; } = string.Empty;
-        public string Surgeries { get; set; } = string.Empty;
-        public string? MedicalHistoryNotes { get; set; } = string.Empty;
+
     }
 }
