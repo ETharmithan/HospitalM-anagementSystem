@@ -6,6 +6,7 @@ using HospitalManagementSystem.Application.Services.Doctor;
 using HospitalManagementSystem.Domain.IRepository;
 using HospitalManagementSystem.Infrastructure.Data;
 using HospitalManagementSystem.Infrastructure.Repository.Doctor;
+using HospitalManagementSystem.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -22,10 +23,11 @@ namespace HospitalManagementSystem.Presentation
             var builder = WebApplication.CreateBuilder(args);
             // change
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("HospitalDB")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("HMSConnection"), sql => sql.MigrationsAssembly("HospitalManagementSystem.Infrastructure")));
 
             builder.Services.AddCors();
 
+            // Register Services
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             builder.Services.AddScoped<IDepartmentService, DepartmentService>();
@@ -40,6 +42,13 @@ namespace HospitalManagementSystem.Presentation
 
 
 
+            builder.Services.AddScoped<IImageUploadService>(provider => 
+                new ImageUploadService(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/patients")));
+
+            // Register Repositories
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+            builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => // Configure the JWT bearer authentication options. This will specify how the JWT token should be validated and used for authentication.
@@ -93,6 +102,9 @@ namespace HospitalManagementSystem.Presentation
             }
 
             app.UseHttpsRedirection();
+
+            // Enable static files serving
+            app.UseStaticFiles();
 
             app.UseCors(policy =>
                 policy.AllowAnyHeader()

@@ -16,7 +16,7 @@ namespace HospitalManagementSystem.Application.Services
     public class TokenService(IConfiguration configuration) : ITokenService
     {
 
-        public string CreateToken(UserLogin user)
+        public string CreateToken(User user)
 
         {
             //if (patient == null) throw new ArgumentNullException(nameof(patient));
@@ -29,14 +29,13 @@ namespace HospitalManagementSystem.Application.Services
             var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
 
             var claims = new List<Claim>
-        {
-            // new Claim(ClaimTypes.Email, user.Email),
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                    new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                    new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+                    new Claim(ClaimTypes.Role, user.Role ?? string.Empty)
 
-            new(ClaimTypes.Email, user.Email),
-
-            //new(ClaimTypes.NameIdentifier, patient.PatientId.ToString())
-
-        };
+                };
 
             var creds = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha512Signature);
             var tokenDescriptor = new SecurityTokenDescriptor

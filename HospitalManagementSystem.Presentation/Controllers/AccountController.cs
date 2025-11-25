@@ -1,16 +1,91 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using HospitalManagementSystem.Application.DTOs;
+using HospitalManagementSystem.Application.IServices;
+using HospitalManagementSystem.Domain.Models;
+using HospitalManagementSystem.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace HospitalManagementSystem.Presentation.Controllers
 {
-    // [Authorize]
-    public class AccountController : BaseApiController
+    public class AccountController(IUserRepository userRepository, ITokenService tokenService) : BaseApiController
     {
+        [Authorize]
         [HttpGet]
-        public ActionResult<string> Login()   // 
+        public ActionResult<string> Login_()  
         {
             return "Login Successful";
         }
+
+        [AllowAnonymous]
+        [HttpPost("register")] // http://localhost:5170/api/account/register
+        public async Task<ActionResult<User_Dto>> Register(RegisterUserDto registerUserDto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // Check if user exists
+            var existingUser = await userRepository.GetByEmailAsync(registerUserDto.Email);
+            if (existingUser != null) 
+            {
+                return BadRequest("Email is already taken");
+            }
+            
+            using var hmac = new HMACSHA512();
+            var newUser = new User
+            {
+                Username = registerUserDto.DisplayName,
+                Email = registerUserDto.Email,
+                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerUserDto.Password)),
+                PasswordSalt = hmac.Key,
+                Role = registerUserDto.Role,
+                ImageUrl = registerUserDto.ImageUrl
+            };
+
+            await userRepository.AddAsync(newUser);
+            await userRepository.SaveChangesAsync();
+
+            return newUser.ToDto(tokenService);
+        }
+
+
+        [AllowAnonymous]
+        [HttpPost("login")] // http://localhost:5170/api/account/login
+        public async Task<ActionResult<User_Dto>> Login(LoginDto loginDto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var user = await userRepository.GetByEmailAsync(loginDto.Email);
+            if (user == null) return Unauthorized("Invalid email address");
+
+            using var hmac = new HMACSHA512(user.PasswordSalt);
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password)); // compute the hash of the password provided during login
+
+            // Check if hash lengths match
+            if (computedHash.Length != user.PasswordHash.Length) 
+            {
+                return Unauthorized("Invalid password");
+            }
+
+            // Compare password hashes
+            for (int i = 0; i < computedHash.Length; i++)
+            {
+                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
+            }
+
+            return user.ToDto(tokenService);
+        }
+
+
+
+
+
+
+        private async Task<bool> UserExists(string email)
+        {
+            var user = await userRepository.GetByEmailAsync(email);
+            return user != null;
+        }
+
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Domain.Models
 {
-    public class UserLogin
+    public class User
     {
 
         [Key]   
