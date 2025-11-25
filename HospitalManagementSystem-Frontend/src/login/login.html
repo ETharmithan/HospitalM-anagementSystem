@@ -1,0 +1,128 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo-section">
+        <div class="logo">
+          <span class="logo-text">MB</span>
+        </div>
+        <div class="brand-info">
+          <h1>MyBrand</h1>
+          <p>Hospital Management</p>
+        </div>
+      </div>
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Sign in to your account to continue</p>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email Address *</label>
+        <div class="input-wrapper">
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="Enter your email"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('email')"
+            autocomplete="email"
+          />
+          <span class="input-icon">📧</span>
+        </div>
+        <div class="error-message" *ngIf="isFieldInvalid('email')">
+          {{ getFieldError('email') }}
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password *</label>
+        <div class="input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('password')"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <span class="toggle-icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
+          </button>
+        </div>
+        <div class="error-message" *ngIf="isFieldInvalid('password')">
+          {{ getFieldError('password') }}
+        </div>
+      </div>
+
+      <!-- Remember Me & Forgot Password -->
+      <div class="form-options">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" formControlName="rememberMe" />
+          <span class="checkmark"></span>
+          Remember me
+        </label>
+        <button type="button" class="forgot-password-link" (click)="onForgotPassword()">
+          Forgot password?
+        </button>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || loginForm.invalid"
+        >
+          <span *ngIf="!isLoading">Sign In</span>
+          <span *ngIf="isLoading">
+            <span class="spinner"></span>
+            Signing in...
+          </span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Divider -->
+    <div class="divider">
+      <span>OR</span>
+    </div>
+
+    <!-- Social Login -->
+    <div class="social-login">
+      <button type="button" class="btn btn-google" (click)="onGoogleLogin()">
+        <span class="social-icon">🔍</span>
+        Continue with Google
+      </button>
+      <button type="button" class="btn btn-facebook" (click)="onFacebookLogin()">
+        <span class="social-icon">📘</span>
+        Continue with Facebook
+      </button>
+    </div>
+
+    <!-- Register Link -->
+    <div class="register-link">
+      <p>Don't have an account?</p>
+      <button type="button" class="btn btn-link" (click)="onRegister()">
+        Register as Patient
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div *ngIf="isLoading" class="loading-overlay">
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Signing you in...</p>
+  </div>
+</div>

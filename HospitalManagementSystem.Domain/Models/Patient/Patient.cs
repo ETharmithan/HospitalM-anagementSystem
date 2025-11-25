@@ -10,12 +10,13 @@ namespace HospitalManagementSystem.Domain.Models.Patient
 
         [ForeignKey(nameof(UserLogin))]
         public Guid UserId { get; set; }
-        public UserLogin UserLogin { get; set; } = null!;
+        public User UserLogin { get; set; } = null!;
 
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
         public string Gender { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
 
 
 

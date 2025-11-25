@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Domain.Models.Pharmachy
 {
-    internal class supplier
+    internal class Supplier
     {
     }
 }

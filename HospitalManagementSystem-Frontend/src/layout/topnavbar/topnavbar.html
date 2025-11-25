@@ -1,0 +1,37 @@
+<header class="flex items-center justify-between px-6 py-3 bg-white dark:bg-[#1C252F] border-b border-gray-200 dark:border-[#2E3A47] shadow-sm sticky top-0 z-20">
+  
+  <!-- Search -->
+  <div class="flex-1 max-w-xl">
+    <div class="relative w-full">
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 material-symbols-outlined text-2xl">search</span>
+      <input 
+        type="text"
+        placeholder="Search doctors, specialties..." 
+        class="w-full pl-12 pr-4 py-2 rounded-xl border border-gray-200 dark:border-[#2B3440] bg-gray-50 dark:bg-[#2B3440] text-gray-900 dark:text-[#F9FAFB] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6] transition-all duration-200"
+      />
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="flex items-center gap-4 ml-6">
+
+    <!-- Notifications -->
+    <button class="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3A3F4B] transition-colors">
+      <span class="material-symbols-outlined text-2xl">notifications</span>
+      <span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 dark:bg-[#F87171] animate-pulse"></span>
+    </button>
+
+    <!-- Profile -->
+    <div class="flex items-center gap-3 cursor-pointer group">
+      <div 
+        class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 bg-cover bg-center transition-transform duration-200 group-hover:scale-105"
+        [ngStyle]="{'background-image': avatarUrl ? 'url(' + avatarUrl + ')' : '' }">
+      </div>
+      <div class="hidden sm:flex flex-col">
+        <p class="text-sm font-semibold text-gray-900 dark:text-[#F9FAFB]">{{ userName }}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Patient ID: {{ patientId }}</p>
+      </div>
+    </div>
+
+  </div>
+</header>

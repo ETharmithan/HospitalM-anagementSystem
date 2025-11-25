@@ -9,6 +9,6 @@ namespace HospitalManagementSystem.Application.IServices
 {
     public interface ITokenService
     {
-        string CreateToken(UserLogin Patient);
+        string CreateToken(User Patient);
     }
 }
