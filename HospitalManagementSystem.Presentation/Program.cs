@@ -25,6 +25,8 @@ namespace HospitalManagementSystem.Presentation
 
             // Register Services
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IImageUploadService>(provider => 
+                new ImageUploadService(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/patients")));
 
             // Register Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -83,6 +85,9 @@ namespace HospitalManagementSystem.Presentation
             }
 
             app.UseHttpsRedirection();
+
+            // Enable static files serving
+            app.UseStaticFiles();
 
             app.UseCors(policy =>
                 policy.AllowAnyHeader()

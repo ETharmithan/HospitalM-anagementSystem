@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 *.md
+
+HospitalManagementSystem.Presentation/wwwroot/
+**/wwwroot/
