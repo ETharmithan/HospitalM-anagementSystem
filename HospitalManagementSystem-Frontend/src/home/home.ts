@@ -1,3 +1,4 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
@@ -40,5 +41,6 @@ export class Home implements OnInit {
     } else {
       this.router.navigate(['/dashboard']);
     }
+
   }
 }
