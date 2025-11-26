@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Nav } from '../layout/nav/nav';
+
 import { PatientRegister } from '../patient-register/patient-register';
 import { Home } from '../home/home';
 import { QuickCard } from '../layout/cards/quick-card/quick-card';
@@ -12,7 +13,8 @@ import { Dashboard } from '../layout/patient/dashboard/dashboard';
 
 @Component({
   selector: 'app-root',
-  imports: [ Nav, PatientRegister, Home, QuickCard, Sidebar, Topnavbar, Dashboard],
+  imports: [ Nav, PatientRegister, Home, QuickCard, Sidebar, Topnavbar, Dashboard, RouterOutlet ],
+
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

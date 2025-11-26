@@ -1,35 +1,46 @@
-import { Component, signal } from '@angular/core';
-import { AppointmentItem } from '../features/patient/appointment-item/appointment-item';
-import { QuickCard } from '../layout/cards/quick-card/quick-card';
-import { Footer } from '../layout/patient/footer/footer';
-import { Appointment, QuickAction } from '../types/patientdetails';
+
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
-  imports: [AppointmentItem, QuickCard, Footer],
+  imports: [CommonModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home {
-  protected registermode = signal(false);
+export class Home implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  welcomeName = 'Alex';
-  quickActions: QuickAction[] = [
-    { icon: 'add_box', title: 'Book a New Appointment', description: 'Find available slots and schedule your next visit with a specialist.', actionText: 'Book Now' },
-    { icon: 'stethoscope', title: 'Find a Doctor', description: 'Search our directory of world-class doctors and specialists.', actionText: 'Search Doctors' },
-    { icon: 'folder_open', title: 'View Medical Records', description: 'Access your health history, lab results, and prescriptions securely.', actionText: 'View Records' },
-  ];
+  currentUser: any = null;
+  isLoggedIn = false;
 
-  nextAppointments: Appointment[] = [
-    { doctorName: 'Dr. Evelyn Reed', specialty: 'Cardiology', date: 'November 15, 2023', time: '10:30 AM', avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuACplVZt...' }
-  ];
+  ngOnInit(): void {
+    this.currentUser = this.authService.getCurrentUser();
+    this.isLoggedIn = this.authService.isLoggedInValue;
+  }
 
+  onLogin(): void {
+    this.router.navigate(['/login']);
+  }
 
+  onRegister(): void {
+    this.router.navigate(['/register']);
+  }
 
+  onLogout(): void {
+    this.authService.logout();
+  }
 
+  onDashboard(): void {
+    // TODO: Navigate to dashboard based on user role
+    if (this.currentUser?.role === 'Patient') {
+      this.router.navigate(['/patient-dashboard']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
 
-  showRegister()
-  {
-    this.registermode.set(true);
   }
 }

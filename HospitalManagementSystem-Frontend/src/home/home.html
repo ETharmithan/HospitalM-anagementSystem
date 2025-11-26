@@ -1,205 +1,86 @@
-<div class="p-6 lg:p-8 space-y-8">
-  <div class="flex flex-wrap justify-between gap-3">
-    <p class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-tight min-w-72">
-      Welcome back, {{ welcomeName }}!
-    </p>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <app-quick-card *ngFor="let card of quickActions"
-                    [icon]="card.icon"
-                    [title]="card.title"
-                    [description]="card.description"
-                    [actionText]="card.actionText">
-    </app-quick-card>
-  </div>
-
-  <div class="bg-white dark:bg-[#1C252F] rounded-xl shadow-sm p-6">
-    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Your Next Appointment</h3>
-    <div class="divide-y divide-gray-200 dark:divide-gray-700">
-      <app-appointment-item *ngFor="let appt of nextAppointments"
-                            [doctorName]="appt.doctorName"
-                            [specialty]="appt.specialty"
-                            [date]="appt.date"
-                            [time]="appt.time"
-                            [avatarUrl]="appt.avatarUrl">
-      </app-appointment-item>
+<div class="home-container">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Welcome to MyBrand Hospital</h1>
+        <p>Your trusted healthcare partner for comprehensive medical services</p>
+        <div class="hero-actions" *ngIf="!isLoggedIn">
+          <button class="btn btn-primary" (click)="onLogin()">Sign In</button>
+          <button class="btn btn-secondary" (click)="onRegister()">Register</button>
+        </div>
+        <div class="hero-actions" *ngIf="isLoggedIn">
+          <div class="welcome-message">
+            <h3>Welcome back, {{ currentUser?.name || 'User' }}!</h3>
+            <p>You are logged in as {{ currentUser?.role || 'User' }}</p>
+          </div>
+          <div class="user-actions">
+            <button class="btn btn-primary" (click)="onDashboard()">Go to Dashboard</button>
+            <button class="btn btn-outline" (click)="onLogout()">Logout</button>
+          </div>
+        </div>
+      </div>
+      <div class="hero-image">
+        <div class="hero-placeholder">
+          <span class="hero-icon">🏥</span>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <app-footer></app-footer>
-</div>
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2>Our Services</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">👨‍⚕️</div>
+          <h3>Expert Doctors</h3>
+          <p>Experienced medical professionals dedicated to your health</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h3>Easy Appointments</h3>
+          <p>Book appointments online with just a few clicks</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏥</div>
+          <h3>Modern Facilities</h3>
+          <p>State-of-the-art medical equipment and facilities</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💊</div>
+          <h3>Pharmacy Services</h3>
+          <p>Complete pharmacy services with prescription management</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-
-
-
-
-
-
-
-
-
-
-
-<!-- <div class="flex h-screen w-full"> -->
-            <!-- SideNavBar -->
-<!-- <aside class="flex w-64 flex-col bg-white dark:bg-[#1C252F] border-r border-gray-200 dark:border-gray-800">
-<div class="flex h-full flex-col justify-between p-4">
-<div class="flex flex-col gap-6">
-<div class="flex items-center gap-3 px-2">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-10 flex items-center justify-center bg-primary/20 text-primary">
-<span class="material-symbols-outlined text-2xl">health_and_safety</span>
+  <!-- About Section -->
+  <section class="about">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text">
+          <h2>About MyBrand Hospital</h2>
+          <p>For over 20 years, MyBrand Hospital has been providing exceptional healthcare services to our community. We combine cutting-edge medical technology with compassionate care to ensure the best possible outcomes for our patients.</p>
+          <p>Our team of dedicated healthcare professionals is committed to providing personalized care tailored to your unique needs. From routine check-ups to complex procedures, we're here to support your health journey every step of the way.</p>
+        </div>
+        <div class="about-stats">
+          <div class="stat">
+            <h3>20+</h3>
+            <p>Years of Service</p>
+          </div>
+          <div class="stat">
+            <h3>50+</h3>
+            <p>Expert Doctors</p>
+          </div>
+          <div class="stat">
+            <h3>1000+</h3>
+            <p>Happy Patients</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
-<div class="flex flex-col">
-<h1 class="text-gray-900 dark:text-white text-base font-medium leading-normal">E-Channeling</h1>
-<p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Hospital System</p>
-</div>
-</div>
-<nav class="flex flex-col gap-2">
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#">
-<span class="material-symbols-outlined text-2xl">dashboard</span>
-<p class="text-sm font-medium leading-normal">Dashboard</p>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#">
-<span class="material-symbols-outlined text-2xl">add_box</span>
-<p class="text-sm font-medium leading-normal">Book Appointment</p>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#">
-<span class="material-symbols-outlined text-2xl">calendar_month</span>
-<p class="text-sm font-medium leading-normal">My Appointments</p>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#">
-<span class="material-symbols-outlined text-2xl">stethoscope</span>
-<p class="text-sm font-medium leading-normal">Find a Doctor</p>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#">
-<span class="material-symbols-outlined text-2xl">folder_open</span>
-<p class="text-sm font-medium leading-normal">Medical Records</p>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#">
-<span class="material-symbols-outlined text-2xl">person</span>
-<p class="text-sm font-medium leading-normal">My Profile</p>
-</a>
-</nav>
-</div>
-<div class="flex flex-col gap-2">
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5" href="#">
-<span class="material-symbols-outlined text-2xl">help</span>
-<p class="text-sm font-medium leading-normal">Help/Support</p>
-</a>
-</div>
-</div>
-</aside> -->
-            <!-- Main Content -->
-<!-- <main class="flex flex-1 flex-col overflow-y-auto"> -->
-            <!-- TopNavBar -->
-<!-- <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1C252F] px-6 py-3 sticky top-0 z-10">
-<div class="flex-1 max-w-xl">
-<label class="flex flex-col min-w-40 h-10">
-<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
-<div class="text-gray-400 dark:text-gray-500 flex border border-r-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-background-dark items-center justify-center pl-4 rounded-l-lg">
-<span class="material-symbols-outlined text-2xl">search</span>
-</div>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-background-dark h-full placeholder:text-gray-400 dark:placeholder:text-gray-500 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal focus:border-primary" placeholder="Search for doctors, specialties..." value=""/>
-</div>
-</label>
-</div>
-<div class="flex items-center justify-end gap-4">
-<button class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg size-10 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5">
-<span class="material-symbols-outlined text-2xl">notifications</span>
-</button>
-<div class="flex items-center gap-3">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar image" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBIdllKYmPq_LPs74Idb575GQDeXWxgYzCA9Pfz2JsalLFtGU1WaQIgKYFpSV2EyOW_htU0jMNk7-77d5wzusImg1URHSQt-6iQkVgXQU6nZQnBuEX_IzWyfMZk0pIeQKjE5222TISxIKrAFAdtSFv77KoVHfYV-DiBQ-I3__fWwX3H42ROyla-HnMx0I2P0rptbC8JWmvhuz8vW4j37LAd-dSqOoSzY8UQ0a2nUS38c0KuK2E0Rqbs_wKp4O6XX9W5a6GxH8ow5OVy");'></div>
-<div class="flex-col hidden sm:flex">
-<p class="text-sm font-semibold text-gray-900 dark:text-white">Alex Johnson</p>
-<p class="text-xs text-gray-500 dark:text-gray-400">Patient ID: 738491</p>
-</div>
-</div>
-</div>
-</header> -->
-            <!-- Page Content -->
-<!-- <div class="p-6 lg:p-8 space-y-8"> -->
-            <!-- PageHeading -->
-<!-- <div class="flex flex-wrap justify-between gap-3">
-<p class="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-tight min-w-72">Welcome back, Alex!</p>
-</div> -->
-            <!-- ImageGrid / Quick Actions -->
-<!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-<div class="flex flex-col gap-4 p-6 bg-white dark:bg-[#1C252F] rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-<div class="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary">
-<span class="material-symbols-outlined text-3xl">add_box</span>
-</div>
-<div class="flex flex-col gap-2">
-<h3 class="text-gray-900 dark:text-white text-lg font-semibold leading-normal">Book a New Appointment</h3>
-<p class="text-gray-500 dark:text-gray-400 text-sm">Find available slots and schedule your next visit with a specialist.</p>
-</div>
-<button class="mt-2 w-fit text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg">Book Now</button>
-</div>
-<div class="flex flex-col gap-4 p-6 bg-white dark:bg-[#1C252F] rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-<div class="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary">
-<span class="material-symbols-outlined text-3xl">stethoscope</span>
-</div>
-<div class="flex flex-col gap-2">
-<h3 class="text-gray-900 dark:text-white text-lg font-semibold leading-normal">Find a Doctor</h3>
-<p class="text-gray-500 dark:text-gray-400 text-sm">Search our directory of world-class doctors and specialists.</p>
-</div>
-<button class="mt-2 w-fit text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg">Search Doctors</button>
-</div>
-<div class="flex flex-col gap-4 p-6 bg-white dark:bg-[#1C252F] rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-<div class="flex items-center justify-center size-12 rounded-lg bg-primary/20 text-primary">
-<span class="material-symbols-outlined text-3xl">folder_open</span>
-</div>
-<div class="flex flex-col gap-2">
-<h3 class="text-gray-900 dark:text-white text-lg font-semibold leading-normal">View Medical Records</h3>
-<p class="text-gray-500 dark:text-gray-400 text-sm">Access your health history, lab results, and prescriptions securely.</p>
-</div>
-<button class="mt-2 w-fit text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-lg">View Records</button>
-</div>
-</div> -->
-            <!-- Upcoming Appointments -->
-<!-- <div class="bg-white dark:bg-[#1C252F] rounded-xl shadow-sm p-6">
-<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Your Next Appointment</h3>
-<div class="divide-y divide-gray-200 dark:divide-gray-700"> -->
-            <!-- Appointment Item -->
-<!-- <div class="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-<div class="flex items-center gap-4">
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" data-alt="Photo of Dr. Evelyn Reed" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuACplVZtGwHM56NlJ_4py1s3yFVEwdfb2zhRxi9U-O_YYFHupmqoM9tFedayT6qu7_2PfwoVabuYUv0GVyaKc3qEv37wko7qbob54THGhYgOS0UeVsnRcJad3vfXeq1aDNm7HnHehvAaggWD14u8GqIP3cVBe2i3QBA7kKdhqxCDTZzoisGwelYQCI7eVrmVX5BwYcJYpTl4eL-phXxJWJZRDBhDjaSn_MhorrwGjuW9yOTozuwwdg5fXn6gc4rFbLLmVMmCwsi4kwF");'></div>
-<div>
-<p class="font-semibold text-gray-900 dark:text-white">Dr. Evelyn Reed</p>
-<p class="text-sm text-gray-500 dark:text-gray-400">Cardiology</p>
-</div>
-</div>
-<div class="flex items-center gap-6 text-sm text-gray-700 dark:text-gray-300">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-lg text-gray-400">calendar_today</span>
-<span>November 15, 2023</span>
-</div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-lg text-gray-400">schedule</span>
-<span>10:30 AM</span>
-</div>
-</div>
-<button class="text-sm font-semibold text-primary hover:underline text-left md:text-right">View Details</button>
-</div> -->
-                                    <!-- Empty State Example -->
-                                    <!-- 
-                                                            <div class="py-12 flex flex-col items-center justify-center text-center">
-                                                                <span class="material-symbols-outlined text-5xl text-gray-300 dark:text-gray-600">event_busy</span>
-                                                                <p class="mt-2 font-semibold text-gray-700 dark:text-gray-300">No upcoming appointments</p>
-                                                                <p class="text-sm text-gray-500 dark:text-gray-400">You can book a new one from the dashboard.</p>
-                                                            </div>
-                                                            -->
-<!-- </div>
-</div> -->
-            <!-- Footer -->
-<!-- <footer class="pt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-<div class="flex justify-center gap-6">
-<a class="hover:text-primary" href="#">Privacy Policy</a>
-<a class="hover:text-primary" href="#">Terms of Service</a>
-<a class="hover:text-primary" href="#">Contact Us</a>
-</div>
-<p class="mt-4">© 2023 E-Channeling Hospital System. All rights reserved.</p>
-</footer>
-</div>
-</main>
-</div> -->

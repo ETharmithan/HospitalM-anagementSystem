@@ -1,1 +1,625 @@
-<p>patient-register works!</p>
+<div class="patient-register-container">
+  <!-- Patient Details Display -->
+  <div *ngIf="showPatientDetails && registeredPatient" class="patient-details-overlay">
+    <div class="patient-details-card">
+      <div class="details-header">
+        <h2>✅ Registration Successful!</h2>
+        <h3>Patient Details</h3>
+        <div class="header-actions">
+          <button type="button" class="next-btn" (click)="showAdditionalDetailsForm()">Next → Add Additional Details</button>
+          <button type="button" class="close-btn" (click)="hidePatientDetails()">×</button>
+        </div>
+      </div>
+      
+      <div class="details-content">
+        <!-- Basic Information -->
+        <div class="detail-section">
+          <h4>Basic Information</h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Patient ID:</label>
+              <span>{{ registeredPatient.patientId }}</span>
+            </div>
+            <div class="detail-item">
+              <label>User ID:</label>
+              <span>{{ registeredPatient.userId }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Full Name:</label>
+              <span>{{ registeredPatient.firstName }} {{ registeredPatient.lastName }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Date of Birth:</label>
+              <span>{{ registeredPatient.dateOfBirth | date:'mediumDate' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Gender:</label>
+              <span>{{ registeredPatient.gender }}</span>
+            </div>
+            <div class="detail-item" *ngIf="registeredPatient.imageUrl">
+              <label>Profile Image:</label>
+              <img [src]="getImageUrl(registeredPatient.imageUrl)" 
+                   alt="Profile" class="detail-image" 
+                   (error)="onImageError($event)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Identification -->
+        <div class="detail-section">
+          <h4>Identification</h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>NIC:</label>
+              <span>{{ registeredPatient.nic }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="detail-section">
+          <h4>Contact Information</h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Phone:</label>
+              <span>{{ registeredPatient.phoneNumber }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Email:</label>
+              <span>{{ registeredPatient.emailAddress }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Address:</label>
+              <span>{{ registeredPatient.addressLine1 }}, {{ registeredPatient.addressLine2 || '' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>City:</label>
+              <span>{{ registeredPatient.city }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Province:</label>
+              <span>{{ registeredPatient.province }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Postal Code:</label>
+              <span>{{ registeredPatient.postalCode }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Country:</label>
+              <span>{{ registeredPatient.country }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Nationality:</label>
+              <span>{{ registeredPatient.nationality }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Details Form -->
+  <div *ngIf="showAdditionalDetails" class="patient-details-overlay">
+    <div class="patient-details-card">
+      <div class="details-header">
+        <h2>Additional Patient Details</h2>
+        <h3>Please provide emergency contact and medical information</h3>
+        <button type="button" class="close-btn" (click)="hidePatientDetails()">×</button>
+      </div>
+      
+      <div class="details-content">
+        <form [formGroup]="additionalDetailsForm" (ngSubmit)="submitAdditionalDetails()">
+          <!-- Emergency Contact Section -->
+          <div class="detail-section">
+            <h4>Emergency Contact</h4>
+            <div class="detail-grid">
+              <div class="form-group">
+                <label for="emergencyContactName">Contact Name *</label>
+                <input type="text" id="emergencyContactName" formControlName="emergencyContactName" class="form-control" />
+                <div *ngIf="additionalDetailsForm.get('emergencyContactName')?.invalid && additionalDetailsForm.get('emergencyContactName')?.touched" class="error-message">
+                  Contact name is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="emergencyContactEmail">Contact Email *</label>
+                <input type="email" id="emergencyContactEmail" formControlName="emergencyContactEmail" class="form-control" />
+                <div *ngIf="additionalDetailsForm.get('emergencyContactEmail')?.invalid && additionalDetailsForm.get('emergencyContactEmail')?.touched" class="error-message">
+                  Valid email is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="emergencyContactPhone">Contact Phone *</label>
+                <input type="tel" id="emergencyContactPhone" formControlName="emergencyContactPhone" class="form-control" />
+                <div *ngIf="additionalDetailsForm.get('emergencyContactPhone')?.invalid && additionalDetailsForm.get('emergencyContactPhone')?.touched" class="error-message">
+                  Valid 10-digit phone number is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="emergencyContactRelationship">Relationship to Patient *</label>
+                <input type="text" id="emergencyContactRelationship" formControlName="emergencyContactRelationship" class="form-control" 
+                       placeholder="e.g., Spouse, Parent, Sibling, Friend" />
+                <div *ngIf="additionalDetailsForm.get('emergencyContactRelationship')?.invalid && additionalDetailsForm.get('emergencyContactRelationship')?.touched" class="error-message">
+                  Relationship is required
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical History Section -->
+          <div class="detail-section">
+            <h4>Medical History</h4>
+            <div class="detail-grid">
+              <div class="form-group">
+                <label for="pastIllnesses">Past Illnesses</label>
+                <textarea id="pastIllnesses" formControlName="pastIllnesses" class="form-control" rows="3"
+                          placeholder="List any previous illnesses..."></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="surgeries">Surgeries</label>
+                <textarea id="surgeries" formControlName="surgeries" class="form-control" rows="3"
+                          placeholder="List any previous surgeries..."></textarea>
+              </div>
+              
+              <div class="form-group full-width">
+                <label for="medicalHistoryNotes">Additional Medical Notes</label>
+                <textarea id="medicalHistoryNotes" formControlName="medicalHistoryNotes" class="form-control" rows="3"
+                          placeholder="Any additional medical information..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical Related Info Section -->
+          <div class="detail-section">
+            <h4>Medical Information</h4>
+            <div class="detail-grid">
+              <div class="form-group">
+                <label for="bloodType">Blood Type *</label>
+                <select id="bloodType" formControlName="bloodType" class="form-control">
+                  <option value="">Select Blood Type</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+                <div *ngIf="additionalDetailsForm.get('bloodType')?.invalid && additionalDetailsForm.get('bloodType')?.touched" class="error-message">
+                  Blood type is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="allergies">Allergies</label>
+                <textarea id="allergies" formControlName="allergies" class="form-control" rows="3"
+                          placeholder="List any known allergies..."></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="chronicConditions">Chronic Conditions</label>
+                <textarea id="chronicConditions" formControlName="chronicConditions" class="form-control" rows="3"
+                          placeholder="List any chronic conditions..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="skipAdditionalDetails()">Skip This Step</button>
+            <button type="submit" class="btn btn-primary" [disabled]="additionalDetailsForm.invalid">
+              Save Additional Details
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="register-card">
+    <h1>Patient Registration</h1>
+    <p class="subtitle">Create your patient profile</p>
+
+    <form [formGroup]="patientForm" (ngSubmit)="registerPatient()">
+      <!-- Profile Picture Section -->
+      <div class="form-section">
+        <h2>Profile Picture (Optional)</h2>
+
+        <div class="image-upload-container">
+          <!-- Image Preview -->
+          <div class="image-preview-area">
+            <div *ngIf="imagePreview || patientForm.get('imageUrl')?.value" class="image-preview">
+              <img [src]="imagePreview || patientForm.get('imageUrl')?.value" alt="Profile preview" />
+            </div>
+            <div *ngIf="!imagePreview && !patientForm.get('imageUrl')?.value" class="image-placeholder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <p>No image selected</p>
+            </div>
+          </div>
+
+          <!-- Upload Options -->
+          <div class="image-upload-controls">
+            <!-- Upload Method Tabs -->
+            <div class="upload-method-tabs">
+              <button
+                type="button"
+                class="tab-btn"
+                [class.active]="uploadMethod === 'file'"
+                (click)="switchUploadMethod('file')"
+              >
+                Choose File
+              </button>
+              <button
+                type="button"
+                class="tab-btn"
+                [class.active]="uploadMethod === 'url'"
+                (click)="switchUploadMethod('url')"
+              >
+                Enter URL
+              </button>
+            </div>
+
+            <!-- File Upload Option -->
+            <div *ngIf="uploadMethod === 'file'" class="upload-option">
+              <label for="imageInput" class="file-input-label">
+                <input
+                  type="file"
+                  id="imageInput"
+                  accept="image/*"
+                  (change)="onImageSelected($event)"
+                  class="file-input"
+                />
+                <span class="file-input-text">Choose Image</span>
+              </label>
+              <small class="file-info">JPG, PNG, GIF, WebP (Max 5MB)</small>
+            </div>
+
+            <!-- URL Input Option -->
+            <div *ngIf="uploadMethod === 'url'" class="upload-option">
+              <input
+                type="url"
+                formControlName="imageUrl"
+                placeholder="https://example.com/image.jpg"
+                class="form-control"
+              />
+              <small class="file-info">Enter image URL directly</small>
+            </div>
+
+            <!-- Remove Button -->
+            <button
+              type="button"
+              class="btn btn-remove"
+              (click)="removeImage()"
+              *ngIf="selectedFile || patientForm.get('imageUrl')?.value"
+            >
+              Remove Image
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <h2>Personal Information</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name *</label>
+            <input
+              type="text"
+              id="firstName"
+              formControlName="firstName"
+              placeholder="Enter first name"
+              class="form-control"
+              [class.is-invalid]="firstName?.invalid && firstName?.touched"
+            />
+            <div class="error-message" *ngIf="firstName?.invalid && firstName?.touched">
+              <span *ngIf="firstName?.errors?.['required']">First name is required</span>
+              <span *ngIf="firstName?.errors?.['minlength']">Minimum 2 characters required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Last Name *</label>
+            <input
+              type="text"
+              id="lastName"
+              formControlName="lastName"
+              placeholder="Enter last name"
+              class="form-control"
+              [class.is-invalid]="lastName?.invalid && lastName?.touched"
+            />
+            <div class="error-message" *ngIf="lastName?.invalid && lastName?.touched">
+              <span *ngIf="lastName?.errors?.['required']">Last name is required</span>
+              <span *ngIf="lastName?.errors?.['minlength']">Minimum 2 characters required</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateOfBirth">Date of Birth *</label>
+            <input
+              type="date"
+              id="dateOfBirth"
+              formControlName="dateOfBirth"
+              class="form-control"
+              [class.is-invalid]="dateOfBirth?.invalid && dateOfBirth?.touched"
+            />
+            <div class="error-message" *ngIf="dateOfBirth?.invalid && dateOfBirth?.touched">
+              <span *ngIf="dateOfBirth?.errors?.['required']">Date of birth is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="gender">Gender *</label>
+            <select
+              id="gender"
+              formControlName="gender"
+              class="form-control"
+              [class.is-invalid]="gender?.invalid && gender?.touched"
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+            <div class="error-message" *ngIf="gender?.invalid && gender?.touched">
+              <span *ngIf="gender?.errors?.['required']">Gender is required</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nic">National ID (NIC) *</label>
+          <input
+            type="text"
+            id="nic"
+            formControlName="nic"
+            placeholder="Enter your NIC number"
+            class="form-control"
+            [class.is-invalid]="nic?.invalid && nic?.touched"
+          />
+          <div class="error-message" *ngIf="nic?.invalid && nic?.touched">
+            <span *ngIf="nic?.errors?.['required']">NIC is required</span>
+            <span *ngIf="nic?.errors?.['minlength']">NIC must be at least 9 numbers and a letter</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Security Section -->
+      <div class="form-section">
+        <h2>Account Security</h2>
+        <p class="section-description">Create a secure password for your account</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password *</label>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="Enter password"
+              class="form-control"
+              [class.is-invalid]="password?.invalid && password?.touched"
+            />
+            <div class="error-message" *ngIf="password?.invalid && password?.touched">
+              <span *ngIf="password?.errors?.['required']">Password is required</span>
+              <span *ngIf="password?.errors?.['minlength']">Password must be at least 8 characters</span>
+              <span *ngIf="password?.errors?.['pattern']">Password must contain uppercase, lowercase, number, and special character</span>
+            </div>
+            <div class="password-requirements">
+              <small class="requirement-title">Password requirements:</small>
+              <ul class="requirement-list">
+                <li [class.valid]="hasUppercase()" [class.invalid]="password?.value && !hasUppercase()">
+                  <span class="bullet">•</span> At least one uppercase letter
+                </li>
+                <li [class.valid]="hasLowercase()" [class.invalid]="password?.value && !hasLowercase()">
+                  <span class="bullet">•</span> At least one lowercase letter
+                </li>
+                <li [class.valid]="hasNumber()" [class.invalid]="password?.value && !hasNumber()">
+                  <span class="bullet">•</span> At least one number
+                </li>
+                <li [class.valid]="hasSpecialChar()" [class.invalid]="password?.value && !hasSpecialChar()">
+                  <span class="bullet">•</span> At least one special character (@$!%*?&)
+                </li>
+                <li [class.valid]="hasMinLength()" [class.invalid]="password?.value && !hasMinLength()">
+                  <span class="bullet">•</span> Minimum 8 characters
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password *</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              placeholder="Confirm your password"
+              class="form-control"
+              [class.is-invalid]="confirmPassword?.invalid && confirmPassword?.touched"
+            />
+            <div class="error-message" *ngIf="confirmPassword?.invalid && confirmPassword?.touched">
+              <span *ngIf="confirmPassword?.errors?.['required']">Please confirm your password</span>
+              <span *ngIf="confirmPassword?.errors?.['passwordMismatch']">Passwords do not match</span>
+            </div>
+            <div class="password-match-indicator" *ngIf="password?.value && confirmPassword?.value">
+              <span [class.match]="passwordsMatch()" [class.no-match]="!passwordsMatch()">
+                {{ passwordsMatch() ? '✓ Passwords match' : '✗ Passwords do not match' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Information Section -->
+      <div class="form-section">
+        <h2>Contact Information</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number *</label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              formControlName="phoneNumber"
+              placeholder="10-digit phone number"
+              class="form-control"
+              [class.is-invalid]="phoneNumber?.invalid && phoneNumber?.touched"
+            />
+            <div class="error-message" *ngIf="phoneNumber?.invalid && phoneNumber?.touched">
+              <span *ngIf="phoneNumber?.errors?.['required']">Phone number is required</span>
+              <span *ngIf="phoneNumber?.errors?.['pattern']">Enter a valid 10-digit phone number</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="emailAddress">Email Address *</label>
+            <input
+              type="email"
+              id="emailAddress"
+              formControlName="emailAddress"
+              placeholder="Enter email address"
+              class="form-control"
+              [class.is-invalid]="emailAddress?.invalid && emailAddress?.touched"
+            />
+            <div class="error-message" *ngIf="emailAddress?.invalid && emailAddress?.touched">
+              <span *ngIf="emailAddress?.errors?.['required']">Email is required</span>
+              <span *ngIf="emailAddress?.errors?.['email']">Enter a valid email address</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="addressLine1">Address Line 1 *</label>
+          <input
+            type="text"
+            id="addressLine1"
+            formControlName="addressLine1"
+            placeholder="Street address"
+            class="form-control"
+            [class.is-invalid]="addressLine1?.invalid && addressLine1?.touched"
+          />
+          <div class="error-message" *ngIf="addressLine1?.invalid && addressLine1?.touched">
+            <span *ngIf="addressLine1?.errors?.['required']">Address is required</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="addressLine2">Address Line 2</label>
+          <input
+            type="text"
+            id="addressLine2"
+            formControlName="addressLine2"
+            placeholder="Apartment, suite, etc. (optional)"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City *</label>
+            <input
+              type="text"
+              id="city"
+              formControlName="city"
+              placeholder="City"
+              class="form-control"
+              [class.is-invalid]="city?.invalid && city?.touched"
+            />
+            <div class="error-message" *ngIf="city?.invalid && city?.touched">
+              <span *ngIf="city?.errors?.['required']">City is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="province">Province *</label>
+            <select
+              id="province"
+              formControlName="province"
+              class="form-control"
+              [class.is-invalid]="province?.invalid && province?.touched"
+            >
+              <option value="">Select Province</option>
+              <option *ngFor="let prov of srilankanProvinces" [value]="prov">
+                {{ prov }}
+              </option>
+            </select>
+            <div class="error-message" *ngIf="province?.invalid && province?.touched">
+              <span *ngIf="province?.errors?.['required']">Province is required</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="postalCode">Postal Code *</label>
+            <input
+              type="text"
+              id="postalCode"
+              formControlName="postalCode"
+              placeholder="Postal code"
+              class="form-control"
+              [class.is-invalid]="postalCode?.invalid && postalCode?.touched"
+            />
+            <div class="error-message" *ngIf="postalCode?.invalid && postalCode?.touched">
+              <span *ngIf="postalCode?.errors?.['required']">Postal code is required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="country">Country *</label>
+            <input
+              type="text"
+              id="country"
+              formControlName="country"
+              placeholder="Country"
+              class="form-control"
+              [class.is-invalid]="country?.invalid && country?.touched"
+            />
+            <div class="error-message" *ngIf="country?.invalid && country?.touched">
+              <span *ngIf="country?.errors?.['required']">Country is required</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nationality">Nationality *</label>
+          <input
+            type="text"
+            id="nationality"
+            formControlName="nationality"
+            placeholder="Nationality"
+            class="form-control"
+            [class.is-invalid]="nationality?.invalid && nationality?.touched"
+          />
+          <div class="error-message" *ngIf="nationality?.invalid && nationality?.touched">
+            <span *ngIf="nationality?.errors?.['required']">Nationality is required</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || patientForm.invalid"
+        >
+          <span *ngIf="!isLoading">Register Patient</span>
+          <span *ngIf="isLoading">
+            <span class="spinner"></span> Registering...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
