@@ -13,7 +13,7 @@ import { Dashboard } from '../layout/patient/dashboard/dashboard';
 
 @Component({
   selector: 'app-root',
-  imports: [ Nav, PatientRegister, Home, QuickCard, Sidebar, Topnavbar, Dashboard],
+  imports: [ Nav, PatientRegister, Home, QuickCard, Sidebar, Topnavbar, Dashboard, RouterOutlet ],
 
   templateUrl: './app.html',
   styleUrl: './app.css',
