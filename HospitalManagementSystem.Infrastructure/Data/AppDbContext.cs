@@ -1,5 +1,5 @@
 ﻿using HospitalManagementSystem.Domain.Models.Doctors;
-﻿using HospitalManagementSystem.Domain.Models;
+using HospitalManagementSystem.Domain.Models;
 using HospitalManagementSystem.Domain.Models.Patient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -20,6 +20,17 @@ namespace HospitalManagementSystem.Infrastructure.Data
         public DbSet<DoctorSalary> DoctorSalaries { get; set; } = null!;
         public DbSet<DoctorSchedule> DoctorSchedules { get; set; } = null!;
 
+        // --- Patient Sets (Initialized to avoid warnings) ---
+        public DbSet<User> Users { get; set; } = default!;
+        public DbSet<Patient> Patients { get; set; } = default!;
+        public DbSet<Patient_Contact_Information> PatientContactInformation { get; set; } = default!;
+        public DbSet<Patient_Identification_Details> PatientIdentificationDetails { get; set; } = default!;
+        public DbSet<Patient_Medical_History> PatientMedicalHistory { get; set; } = default!;
+        public DbSet<Patient_Medical_Related_Info> PatientMedicalRelatedInfo { get; set; } = default!;
+        public DbSet<Patient_Emergency_Contact> PatientEmergencyContact { get; set; } = default!;
+        public DbSet<Patient_Login_Info> PatientLoginInfo { get; set; } = default!;
+
+       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -42,11 +53,13 @@ namespace HospitalManagementSystem.Infrastructure.Data
             .HasForeignKey(doctor => doctor.DoctorId)
             .OnDelete(DeleteBehavior.Cascade);
 
+           // Patient Records: DO NOT CASCADE DELETE. 
+            // If a doctor is fired, the patient's medical history must remain.
             modelBuilder.Entity<Doctor>()
             .HasMany(doctor => doctor.DoctorPatientRecords)
             .WithOne(doctor => doctor.Doctor)
             .HasForeignKey(doctor => doctor.DoctorId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Doctor>()
             .HasMany(doctor => doctor.DoctorSalaries)
@@ -60,18 +73,10 @@ namespace HospitalManagementSystem.Infrastructure.Data
             .HasForeignKey(doctor => doctor.DoctorId)
             .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<DoctorSalary>()
+            .Property(ds => ds.MonthlySalary)
+            .HasColumnType("decimal(18,2)");
+
         }
-        //public AppDbContext()
-        //{
-            
-        //}
-        public DbSet<User> Users { get; set; }
-        public DbSet<Patient> Patients { get; set; }
-        public DbSet<Patient_Contact_Information> PatientContactInformation { get; set; }
-        public DbSet<Patient_Identification_Details> PatientIdentificationDetails { get; set; }
-        public DbSet<Patient_Medical_History> PatientMedicalHistory { get; set; }
-        public DbSet<Patient_Medical_Related_Info> PatientMedicalRelatedInfo { get; set; }
-        public DbSet<Patient_Emergency_Contact> PatientEmergencyContact { get; set; }
-        public DbSet<Patient_Login_Info> PatientLoginInfo { get; set; }
     }
 }
