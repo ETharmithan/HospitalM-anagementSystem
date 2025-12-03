@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace HospitalManagementSystem.Presentation.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PatientController(IPatientRepository patientRepository, IImageUploadService imageUploadService, HospitalManagementSystem.Infrastructure.Data.AppDbContext dbContext) : ControllerBase
@@ -96,7 +96,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
         /// Create a new patient
         /// </summary>
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ActionResult<Patient>> CreatePatient([FromBody] CreatePatientDTO patientDto)
         {
             try

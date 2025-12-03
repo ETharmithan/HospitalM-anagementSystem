@@ -11,6 +11,7 @@ namespace HospitalManagementSystem.Domain.IRepository
     {
         Task<IEnumerable<DoctorLeave>> GetAllAsync();
         Task<DoctorLeave?> GetByIdAsync(Guid id);
+        Task<IEnumerable<DoctorLeave>> GetByDoctorIdAsync(Guid doctorId);
         Task<DoctorLeave> CreateAsync(DoctorLeave doctorLeave);
         Task<DoctorLeave?> UpdateAsync(DoctorLeave doctorLeave);
         Task<bool> DeleteAsync(Guid id);

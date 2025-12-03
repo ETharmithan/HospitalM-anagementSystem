@@ -1,25 +1,44 @@
-
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../core/services/auth.service';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { AccountService } from '../core/services/account-service';
+import { DoctorService } from '../core/services/doctor-service';
+import { User } from '../types/user';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
 export class Home implements OnInit {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private accountService = inject(AccountService);
+  private doctorService = inject(DoctorService);
+  router = inject(Router);
 
-  currentUser: any = null;
-  isLoggedIn = false;
+  currentUser = signal<User | null>(null);
+  isLoggedIn = signal(false);
+  doctorCount = signal<number>(0);
+  isLoading = signal(false);
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    this.isLoggedIn = this.authService.isLoggedInValue;
+    const user = this.accountService.currentUser();
+    this.currentUser.set(user);
+    this.isLoggedIn.set(user !== null);
+    this.loadDoctorCount();
+  }
+
+  loadDoctorCount() {
+    this.isLoading.set(true);
+    this.doctorService.getAllDoctors().subscribe({
+      next: (doctors) => {
+        this.doctorCount.set(doctors.length);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      },
+    });
   }
 
   onLogin(): void {
@@ -31,16 +50,25 @@ export class Home implements OnInit {
   }
 
   onLogout(): void {
-    this.authService.logout();
+    this.accountService.logout();
+    this.currentUser.set(null);
+    this.isLoggedIn.set(false);
+    this.router.navigate(['/home']);
   }
 
   onDashboard(): void {
-    // TODO: Navigate to dashboard based on user role
-    if (this.currentUser?.role === 'Patient') {
-      this.router.navigate(['/patient-dashboard']);
+    if (this.currentUser()?.role === 'Patient') {
+      this.router.navigate(['/my-appointments']);
     } else {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/doctors']);
     }
+  }
 
+  onBookAppointment(): void {
+    this.router.navigate(['/doctors']);
+  }
+
+  onFindDoctors(): void {
+    this.router.navigate(['/doctors']);
   }
 }

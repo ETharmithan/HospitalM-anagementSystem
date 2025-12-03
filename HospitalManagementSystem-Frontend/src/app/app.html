@@ -1,10 +1,7 @@
-<!-- @if(role() ==="Patient"){
-    <app-dashboard></app-dashboard>
-}@else{
+@if(role() === 'Patient' || role() == null){
     <app-nav></app-nav>
-} -->
-
-
+}@else {
+    <app-dashboard></app-dashboard>
+}
 
 <router-outlet></router-outlet>
-
