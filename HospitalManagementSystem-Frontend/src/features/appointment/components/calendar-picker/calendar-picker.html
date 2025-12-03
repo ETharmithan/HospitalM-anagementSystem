@@ -1,0 +1,73 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+  <div class="flex items-center justify-between mb-6">
+    <button
+      (click)="previousMonth()"
+      class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+    
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+      {{ getMonthYearLabel() }}
+    </h3>
+    
+    <button
+      (click)="nextMonth()"
+      [disabled]="!canGoToNextMonth()"
+      class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+  </div>
+
+  <!-- Day names header -->
+  <div class="grid grid-cols-7 gap-2 mb-2">
+    @for (dayName of dayNames; track dayName) {
+      <div class="text-center text-sm font-medium text-gray-600 dark:text-gray-400 py-2">
+        {{ dayName }}
+      </div>
+    }
+  </div>
+
+  <!-- Calendar grid -->
+  <div class="grid grid-cols-7 gap-2">
+    @for (day of calendarDays(); track day.date.getTime()) {
+      <button
+        (click)="selectDate(day)"
+        [disabled]="day.isDisabled || !day.isCurrentMonth"
+        [class.bg-blue-600]="day.isSelected"
+        [class.text-white]="day.isSelected"
+        [class.bg-gray-100]="!day.isSelected && day.isCurrentMonth && !day.isDisabled"
+        [class.dark:bg-gray-700]="!day.isSelected && day.isCurrentMonth && !day.isDisabled"
+        [class.text-gray-400]="!day.isCurrentMonth || day.isDisabled"
+        [class.border-2]="day.isToday"
+        [class.border-blue-500]="day.isToday && !day.isSelected"
+        [class.border-white]="day.isToday && day.isSelected"
+        [class.opacity-50]="day.isDisabled"
+        [class.cursor-not-allowed]="day.isDisabled"
+        class="aspect-square rounded-lg font-medium transition-all duration-200 hover:scale-105 disabled:hover:scale-100 relative">
+        {{ day.date.getDate() }}
+        
+        <!-- Availability indicators -->
+        @if (day.isCurrentMonth && !day.isDisabled) {
+          @if (day.isFullyBooked) {
+            <span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-red-500 rounded-full"></span>
+          } @else if (day.isAvailable) {
+            <span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full"></span>
+          }
+        }
+      </button>
+    }
+  </div>
+
+  <!-- Legend -->
+  <div class="mt-4 flex items-center justify-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+    <div class="flex items-center gap-1">
+      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+      <span>Available</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+      <span>Fully Booked</span>
+    </div>
+  </div>
+</div>
+

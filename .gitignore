@@ -364,5 +364,5 @@ FodyWeavers.xsd
 
 *.md
 
-HospitalManagementSystem.Presentation/wwwroot/
-**/wwwroot/
+HospitalManagementSystem.Presentation/wwwroot/uploads/patients/**
+!HospitalManagementSystem.Presentation/wwwroot/uploads/patients/

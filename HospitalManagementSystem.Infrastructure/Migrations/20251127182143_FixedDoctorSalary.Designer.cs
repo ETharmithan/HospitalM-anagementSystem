@@ -4,6 +4,7 @@ using HospitalManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HospitalManagementSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127182143_FixedDoctorSalary")]
+    partial class FixedDoctorSalary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,12 +45,6 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.Property<Guid>("DoctorId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AppointmentDurationMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BreakTimeMinutes")
-                        .HasColumnType("int");
 
                     b.Property<Guid?>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
@@ -114,46 +111,6 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.HasIndex("DoctorId");
 
                     b.ToTable("DoctorAppointments");
-                });
-
-            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.DoctorAvailability", b =>
-                {
-                    b.Property<Guid>("AvailabilityId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("DoctorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("EndTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StartTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("AvailabilityId");
-
-                    b.HasIndex("DoctorId", "Date")
-                        .IsUnique();
-
-                    b.ToTable("DoctorAvailabilities");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.DoctorLeave", b =>
@@ -530,17 +487,6 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.Navigation("Doctor");
                 });
 
-            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.DoctorAvailability", b =>
-                {
-                    b.HasOne("HospitalManagementSystem.Domain.Models.Doctors.Doctor", "Doctor")
-                        .WithMany("DoctorAvailabilities")
-                        .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Doctor");
-                });
-
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.DoctorLeave", b =>
                 {
                     b.HasOne("HospitalManagementSystem.Domain.Models.Doctors.Doctor", "Doctor")
@@ -670,8 +616,6 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.Doctor", b =>
                 {
                     b.Navigation("DoctorAppointments");
-
-                    b.Navigation("DoctorAvailabilities");
 
                     b.Navigation("DoctorLeaves");
 
