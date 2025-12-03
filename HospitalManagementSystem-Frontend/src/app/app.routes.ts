@@ -6,6 +6,8 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('../login/login').then(c => c.Login) },
   { path: 'register', loadComponent: () => import('../patient-register/patient-register').then(c => c.PatientRegister) },
   { path: 'patient-register', loadComponent: () => import('../patient-register/patient-register').then(c => c.PatientRegister) },
+  { path: 'admin/dashboard', loadComponent: () => import('../features/admin/admin-dashboard').then(c => c.AdminDashboard) },
+  { path: 'superadmin/dashboard', loadComponent: () => import('../features/superadmin/superadmin-dashboard').then(c => c.SuperAdminDashboard) },
   // Doctor and Appointment routes
   { path: 'doctors', loadComponent: () => import('../features/doctor/doctor-list/doctor-list').then(c => c.DoctorList) },
   { path: 'doctor/:doctorId', loadComponent: () => import('../features/doctor/doctor-list/doctor-list').then(c => c.DoctorList) },

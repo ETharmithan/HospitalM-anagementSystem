@@ -43,5 +43,10 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
             _appDbContext.Departments.Remove(department);
             return _appDbContext.SaveChangesAsync();
         }
+
+        public async Task<int> CountAsync()
+        {
+            return await _appDbContext.Departments.CountAsync();
+        }
     }
 }

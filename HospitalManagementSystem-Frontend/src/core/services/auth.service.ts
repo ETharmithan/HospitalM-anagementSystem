@@ -7,6 +7,7 @@ export interface User {
   patientId: string;
   email: string;
   name: string;
+  token: string;
   role: string;
   imageUrl?: string;
 }
@@ -41,6 +42,10 @@ export class AuthService {
     this.isLoggedInSignal.set(true);
   }
 
+  getToken(): string | null {
+    return this.currentUserSubject.value?.token ?? null;
+  }
+
   logout(): void {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
@@ -64,6 +69,7 @@ export class AuthService {
       email: userData.emailAddress,
       name: `${userData.firstName} ${userData.lastName}`,
       role: 'Patient',
+      token: userData.token ?? '',
       imageUrl: userData.imageUrl
     };
     this.login(user);

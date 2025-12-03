@@ -15,6 +15,7 @@ namespace HospitalManagementSystem.Domain.IRepository
         Task<DoctorAppointment> CreateAsync(DoctorAppointment doctorAppointment);
         Task<DoctorAppointment> UpdateAsync(DoctorAppointment doctorAppointment);
         Task<bool> DeleteAsync(Guid id);
+        Task<int> CountAsync();
 
     }
 }
