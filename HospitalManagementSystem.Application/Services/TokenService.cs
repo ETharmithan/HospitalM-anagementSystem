@@ -21,8 +21,12 @@ namespace HospitalManagementSystem.Application.Services
         {
             //if (patient == null) throw new ArgumentNullException(nameof(patient));
 
-            var tokenKey = configuration["TokenKey"] ?? throw new Exception("Token key not found in configuration");
-
+            // Support both string format (Development) and object format (Production)
+            var tokenKey = configuration["TokenKey:Key"] ?? configuration["TokenKey"]
+                ?? throw new Exception("Token key not found in configuration");
+            
+            var issuer = configuration["TokenKey:Issuer"] ?? "HospitalManagementSystem";
+            var audience = configuration["TokenKey:Audience"] ?? "HospitalManagementSystemClient";
 
             if (tokenKey.Length < 64) throw new Exception("Token key must be at least 64 characters long");
 
@@ -34,13 +38,14 @@ namespace HospitalManagementSystem.Application.Services
                     new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                     new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                     new Claim(ClaimTypes.Role, user.Role ?? string.Empty)
-
                 };
 
             var creds = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha512Signature);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
+                Issuer = issuer,
+                Audience = audience,
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = creds
             };

@@ -1,0 +1,121 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Find a Doctor</h1>
+      <p class="text-gray-600 dark:text-gray-400">Book an appointment with our expert doctors</p>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Search Bar -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Search Doctors
+          </label>
+          <input
+            type="text"
+            [value]="searchQuery()"
+            (input)="onSearchChange($any($event.target).value)"
+            placeholder="Search by name, specialty, or qualification..."
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+
+        <!-- Department Filter -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Department
+          </label>
+          <select
+            [value]="selectedDepartment()"
+            (change)="onDepartmentChange($any($event.target).value)"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          >
+            <option value="all">All Departments</option>
+            @for (dept of departments(); track dept.departmentId) {
+              <option [value]="dept.departmentId">{{ dept.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    }
+
+    <!-- No Results -->
+    @else if (filteredDoctors().length === 0 && !isLoading()) {
+      <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <p class="text-gray-600 dark:text-gray-400 text-lg">No doctors found matching your criteria.</p>
+      </div>
+    }
+
+    <!-- Doctors Grid -->
+    @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (doctor of filteredDoctors(); track doctor.doctorId) {
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6">
+            <!-- Doctor Avatar -->
+            <div class="flex items-center mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                {{ doctor.name.charAt(0) }}
+              </div>
+              <div class="ml-4 flex-1">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ doctor.name }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ doctor.qualification }}</p>
+              </div>
+            </div>
+
+            <!-- Doctor Info -->
+            <div class="space-y-2 mb-4">
+              @if (doctor.departmentName) {
+                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <span class="material-symbols-outlined text-lg mr-2">local_hospital</span>
+                  <span>{{ doctor.departmentName }}</span>
+                </div>
+              }
+              <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <span class="material-symbols-outlined text-lg mr-2">phone</span>
+                <span>{{ doctor.phone }}</span>
+              </div>
+              <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <span class="material-symbols-outlined text-lg mr-2">email</span>
+                <span>{{ doctor.email }}</span>
+              </div>
+              <div class="flex items-center text-sm">
+                <span class="px-2 py-1 rounded-full text-xs font-medium"
+                      [class.bg-green-100]="doctor.status === 'Active'"
+                      [class.text-green-800]="doctor.status === 'Active'"
+                      [class.bg-gray-100]="doctor.status !== 'Active'"
+                      [class.text-gray-800]="doctor.status !== 'Active'">
+                  {{ doctor.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2 mt-4">
+              <button
+                (click)="bookAppointment(doctor.doctorId)"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                Book Appointment
+              </button>
+              <button
+                (click)="viewDoctorDetails(doctor.doctorId)"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                View Details
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+

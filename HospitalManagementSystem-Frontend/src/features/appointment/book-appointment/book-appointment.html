@@ -1,0 +1,139 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <button
+        (click)="router.navigate(['/doctors'])"
+        class="text-blue-600 hover:text-blue-700 dark:text-blue-400 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back to Doctors
+      </button>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Book Appointment</h1>
+      <p class="text-gray-600 dark:text-gray-400">Schedule an appointment with the doctor</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    }
+
+    <!-- Doctor Info and Booking Form -->
+    @if (doctor(); as doc) {
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Doctor Info Card -->
+        <div class="lg:col-span-1">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sticky top-4">
+            <div class="flex flex-col items-center text-center">
+              <div class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-3xl font-bold mb-4">
+                {{ doc.name.charAt(0) }}
+              </div>
+              <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">{{ doc.name }}</h2>
+              <p class="text-gray-600 dark:text-gray-400 mb-1">{{ doc.qualification }}</p>
+              @if (doc.departmentName) {
+                <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">{{ doc.departmentName }}</p>
+              }
+              <div class="w-full border-t border-gray-200 dark:border-gray-700 my-4"></div>
+              <div class="w-full space-y-2 text-sm">
+                <div class="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span class="material-symbols-outlined text-lg">phone</span>
+                  <span>{{ doc.phone }}</span>
+                </div>
+                <div class="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span class="material-symbols-outlined text-lg">email</span>
+                  <span>{{ doc.email }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="lg:col-span-2 space-y-6">
+          <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+            <!-- Calendar Picker -->
+            <app-calendar-picker
+              [selectedDate]="selectedDate()"
+              [disabledDates]="getDisabledDates()"
+              [availableDates]="availableDates"
+              [fullyBookedDates]="fullyBookedDates"
+              [minDate]="minDate"
+              [maxDate]="maxDate"
+              (dateSelected)="onDateSelected($event)">
+            </app-calendar-picker>
+
+            <!-- Time Slot Picker -->
+            @if (selectedDate()) {
+              <div class="mt-6">
+                @if (isLoadingAvailability()) {
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                    <div class="flex justify-center items-center py-8">
+                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    </div>
+                  </div>
+                } @else {
+                  <app-time-slot-picker
+                    [timeSlots]="availableTimeSlots()"
+                    [selectedTime]="appointmentTime?.value"
+                    [appointmentDuration]="30"
+                    (timeSelected)="onTimeSelected($event)">
+                  </app-time-slot-picker>
+                }
+              </div>
+            } @else {
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center text-gray-500 dark:text-gray-400">
+                <p>Please select a date to see available time slots</p>
+              </div>
+            }
+
+            <!-- Reason for Visit -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-6">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Reason for Visit <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                formControlName="reason"
+                rows="4"
+                placeholder="Please describe the reason for your visit..."
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              ></textarea>
+              @if (reason?.invalid && reason?.touched) {
+                <p class="mt-1 text-sm text-red-600">
+                  @if (reason?.errors?.['required']) {
+                    Reason is required
+                  } @else if (reason?.errors?.['minlength']) {
+                    Reason must be at least 10 characters
+                  }
+                </p>
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex gap-4 mt-6">
+              <button
+                type="button"
+                (click)="router.navigate(['/doctors'])"
+                class="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 font-medium">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                [disabled]="isSubmitting() || appointmentForm.invalid || !selectedDate()"
+                class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (isSubmitting()) {
+                  <span class="flex items-center justify-center gap-2">
+                    <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                    Booking...
+                  </span>
+                } @else {
+                  Book Appointment
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+  </div>
+</div>
