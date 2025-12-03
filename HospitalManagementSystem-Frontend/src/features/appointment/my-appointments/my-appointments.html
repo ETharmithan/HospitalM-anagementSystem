@@ -1,0 +1,95 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Appointments</h1>
+      <p class="text-gray-600 dark:text-gray-400">View and manage your scheduled appointments</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    }
+
+    <!-- No Appointments -->
+    @else if (appointments().length === 0 && !isLoading()) {
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
+        <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">event_busy</span>
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">No Appointments</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">You don't have any appointments scheduled yet.</p>
+        <a
+          routerLink="/doctors"
+          class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+          Book an Appointment
+        </a>
+      </div>
+    }
+
+    <!-- Appointments List -->
+    @else {
+      <div class="space-y-4">
+        @for (appointment of appointments(); track appointment.appointmentId) {
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <!-- Doctor Info -->
+              <div class="flex items-center gap-4 flex-1">
+                @if (getDoctor(appointment.doctorId); as doctor) {
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                    {{ doctor.name.charAt(0) }}
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ doctor.name }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ doctor.qualification }}</p>
+                    @if (doctor.departmentName) {
+                      <p class="text-xs text-gray-500 dark:text-gray-500">{{ doctor.departmentName }}</p>
+                    }
+                  </div>
+                } @else {
+                  <div class="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-gray-500">person</span>
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Loading...</h3>
+                  </div>
+                }
+              </div>
+
+              <!-- Appointment Details -->
+              <div class="flex flex-col md:flex-row md:items-center gap-4 flex-1">
+                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span class="material-symbols-outlined">calendar_today</span>
+                  <span>{{ formatDate(appointment.appointmentDate) }}</span>
+                </div>
+                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span class="material-symbols-outlined">schedule</span>
+                  <span>{{ formatTime(appointment.appointmentTime) }}</span>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-medium {{ getStatusColor(appointment.appointmentStatus) }}">
+                  {{ appointment.appointmentStatus }}
+                </span>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex gap-2">
+                @if (isUpcoming(appointment.appointmentDate, appointment.appointmentTime) && appointment.appointmentStatus.toLowerCase() !== 'cancelled') {
+                  <button
+                    (click)="cancelAppointment(appointment.appointmentId)"
+                    class="px-4 py-2 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 font-medium">
+                    Cancel
+                  </button>
+                }
+                <button
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                  View Details
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+

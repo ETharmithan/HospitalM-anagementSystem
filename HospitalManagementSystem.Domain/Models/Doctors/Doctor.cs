@@ -20,6 +20,8 @@ namespace HospitalManagementSystem.Domain.Models.Doctors
         public required string Qualification { get; set; }
         public required string LicenseNumber { get; set; }
         public required string Status { get; set; }
+        public int AppointmentDurationMinutes { get; set; } = 30; // Default 30 minutes per appointment
+        public int BreakTimeMinutes { get; set; } = 0; // Break time between appointments (optional)
 
 
         public Guid? DepartmentId { get; set; }
@@ -31,6 +33,7 @@ namespace HospitalManagementSystem.Domain.Models.Doctors
         public ICollection<DoctorPatientRecords> DoctorPatientRecords { get; set; } = new List<DoctorPatientRecords>();
         public ICollection<DoctorSalary> DoctorSalaries { get; set; } = new List<DoctorSalary>();
         public ICollection<DoctorSchedule> DoctorSchedules { get; set; } = new List<DoctorSchedule>();
+        public ICollection<DoctorAvailability> DoctorAvailabilities { get; set; } = new List<DoctorAvailability>();
 
     }
 }

@@ -19,6 +19,7 @@ namespace HospitalManagementSystem.Infrastructure.Data
         public DbSet<DoctorPatientRecords> DoctorPatientRecords { get; set; } = null!;
         public DbSet<DoctorSalary> DoctorSalaries { get; set; } = null!;
         public DbSet<DoctorSchedule> DoctorSchedules { get; set; } = null!;
+        public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; } = null!;
 
         // --- Patient Sets (Initialized to avoid warnings) ---
         public DbSet<User> Users { get; set; } = default!;
@@ -73,9 +74,20 @@ namespace HospitalManagementSystem.Infrastructure.Data
             .HasForeignKey(doctor => doctor.DoctorId)
             .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Doctor>()
+            .HasMany(doctor => doctor.DoctorAvailabilities)
+            .WithOne(doctor => doctor.Doctor)
+            .HasForeignKey(doctor => doctor.DoctorId)
+            .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<DoctorSalary>()
             .Property(ds => ds.MonthlySalary)
             .HasColumnType("decimal(18,2)");
+
+            // Index for faster availability queries
+            modelBuilder.Entity<DoctorAvailability>()
+            .HasIndex(da => new { da.DoctorId, da.Date })
+            .IsUnique();
 
         }
     }

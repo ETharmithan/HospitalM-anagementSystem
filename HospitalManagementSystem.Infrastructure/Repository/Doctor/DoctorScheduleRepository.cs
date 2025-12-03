@@ -29,6 +29,14 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
             return await _appDbContext.DoctorSchedules.Include(x => x.Doctor).FirstOrDefaultAsync(x => x.ScheduleId == id);
         }
 
+        public async Task<IEnumerable<DoctorSchedule>> GetByDoctorIdAsync(Guid doctorId)
+        {
+            return await _appDbContext.DoctorSchedules
+                .Include(x => x.Doctor)
+                .Where(x => x.DoctorId == doctorId)
+                .ToListAsync();
+        }
+
         public async Task<DoctorSchedule> CreateAsync(DoctorSchedule doctorSchedule)
         {
             _appDbContext.DoctorSchedules.Add(doctorSchedule);

@@ -1,106 +1,235 @@
-<div class="home-container">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
   <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <div class="hero-text">
-        <h1>Welcome to MyBrand Hospital</h1>
-        <p>Your trusted healthcare partner for comprehensive medical services</p>
-        <div class="hero-actions" *ngIf="!isLoggedIn">
-          <button class="btn btn-primary" (click)="onLogin()">Sign In</button>
-          <button class="btn btn-secondary" (click)="onRegister()">Register</button>
+  <section class="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white overflow-hidden">
+    <div class="absolute inset-0 bg-black/20"></div>
+    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 0 0, rgba(255,255,255,0.12), transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,255,255,0.12), transparent 55%);"></div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Hero Content -->
+        <div class="text-center lg:text-left">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            Your Health, Our Priority
+          </h1>
+          <p class="text-xl sm:text-2xl mb-8 text-blue-100 leading-relaxed">
+            Experience world-class healthcare with our expert medical professionals. Book appointments, manage your health records, and get the care you deserve.
+          </p>
+          
+          @if (!isLoggedIn()) {
+            <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <button
+                (click)="onBookAppointment()"
+                class="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                Book Appointment
+              </button>
+              <button
+                (click)="onLogin()"
+                class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-lg hover:bg-white/10 transition-all duration-200">
+                Sign In
+              </button>
+            </div>
+          } @else {
+            <div class="space-y-6">
+              <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                <h3 class="text-2xl font-semibold mb-2">Welcome back, {{ currentUser()?.displayName || 'User' }}!</h3>
+                <p class="text-blue-100">You are logged in as {{ currentUser()?.role || 'User' }}</p>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <button
+                  (click)="onBookAppointment()"
+                  class="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                  Book Appointment
+                </button>
+                <button
+                  (click)="onDashboard()"
+                  class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-lg hover:bg-white/10 transition-all duration-200">
+                  Go to Dashboard
+                </button>
+              </div>
+            </div>
+          }
         </div>
-        <div class="hero-actions" *ngIf="isLoggedIn">
-          <div class="welcome-message">
-            <h3>Welcome back, {{ currentUser?.name || 'User' }}!</h3>
-            <p>You are logged in as {{ currentUser?.role || 'User' }}</p>
-          </div>
-          <div class="user-actions">
-            <button class="btn btn-primary" (click)="onDashboard()">Go to Dashboard</button>
-            <button class="btn btn-outline" (click)="onLogout()">Logout</button>
+
+        <!-- Hero Image/Illustration -->
+        <div class="hidden lg:block">
+          <div class="relative">
+            <div class="absolute inset-0 bg-white/10 rounded-3xl blur-3xl transform rotate-6"></div>
+            <div class="relative bg-white/10 backdrop-blur-md rounded-3xl p-12 border border-white/20">
+              <div class="text-center">
+                <span class="material-symbols-outlined text-9xl text-white/80 mb-4">local_hospital</span>
+                <div class="grid grid-cols-3 gap-4 mt-8">
+                  <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                    <div class="text-3xl font-bold">{{ isLoading() ? '...' : doctorCount() }}+</div>
+                    <div class="text-sm text-blue-100">Doctors</div>
+                  </div>
+                  <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                    <div class="text-3xl font-bold">24/7</div>
+                    <div class="text-sm text-blue-100">Support</div>
+                  </div>
+                  <div class="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                    <div class="text-3xl font-bold">100%</div>
+                    <div class="text-sm text-blue-100">Care</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="hero-image">
-        <div class="hero-placeholder">
-          <span class="hero-icon">🏥</span>
+    </div>
+  </section>
+
+  <!-- Quick Actions Section -->
+  <section class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Quick Actions</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <button
+          (click)="onFindDoctors()"
+          class="group bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 hover:shadow-lg transition-all duration-200 text-left border border-blue-100 dark:border-blue-800">
+          <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-white text-2xl">search</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Find Doctors</h3>
+          <p class="text-gray-600 dark:text-gray-400">Browse our expert medical professionals</p>
+        </button>
+
+        <button
+          (click)="onBookAppointment()"
+          class="group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-6 hover:shadow-lg transition-all duration-200 text-left border border-green-100 dark:border-green-800">
+          <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-white text-2xl">calendar_month</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Book Appointment</h3>
+          <p class="text-gray-600 dark:text-gray-400">Schedule your visit online</p>
+        </button>
+
+        @if (isLoggedIn()) {
+          <a
+            routerLink="/my-appointments"
+            class="group bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 hover:shadow-lg transition-all duration-200 text-left border border-purple-100 dark:border-purple-800">
+            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-white text-2xl">event</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">My Appointments</h3>
+            <p class="text-gray-600 dark:text-gray-400">View and manage your bookings</p>
+          </a>
+        } @else {
+          <button
+            (click)="onRegister()"
+            class="group bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 hover:shadow-lg transition-all duration-200 text-left border border-purple-100 dark:border-purple-800">
+            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-white text-2xl">person_add</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Register</h3>
+            <p class="text-gray-600 dark:text-gray-400">Create your account today</p>
+          </button>
+        }
+
+        <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl p-6 border border-orange-100 dark:border-orange-800">
+          <div class="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-white text-2xl">emergency</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Emergency</h3>
+          <p class="text-gray-600 dark:text-gray-400">Call 911 for emergencies</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Features Section -->
-  <section class="features">
-    <div class="container">
-      <h2>Our Services</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">👨‍⚕️</div>
-          <h3>Expert Doctors</h3>
-          <p>Experienced medical professionals dedicated to your health</p>
+  <section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Our Services</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          Comprehensive healthcare services designed to meet all your medical needs
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-200">
+          <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl">stethoscope</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Expert Doctors</h3>
+          <p class="text-gray-600 dark:text-gray-400">Experienced medical professionals dedicated to your health and wellbeing</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">📅</div>
-          <h3>Easy Appointments</h3>
-          <p>Book appointments online with just a few clicks</p>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-200">
+          <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-3xl">calendar_today</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Easy Appointments</h3>
+          <p class="text-gray-600 dark:text-gray-400">Book appointments online with just a few clicks, anytime, anywhere</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">🏥</div>
-          <h3>Modern Facilities</h3>
-          <p>State-of-the-art medical equipment and facilities</p>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-200">
+          <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-3xl">local_hospital</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Modern Facilities</h3>
+          <p class="text-gray-600 dark:text-gray-400">State-of-the-art medical equipment and world-class facilities</p>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon">💊</div>
-          <h3>Pharmacy Services</h3>
-          <p>Complete pharmacy services with prescription management</p>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-200">
+          <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-orange-600 dark:text-orange-400 text-3xl">medication</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Pharmacy Services</h3>
+          <p class="text-gray-600 dark:text-gray-400">Complete pharmacy services with prescription management</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- About Section -->
-  <section class="about">
-    <div class="container">
-      <div class="about-content">
-        <div class="about-text">
-          <h2>About MyBrand Hospital</h2>
-          <p>For over 20 years, MyBrand Hospital has been providing exceptional healthcare services to our community. We combine cutting-edge medical technology with compassionate care to ensure the best possible outcomes for our patients.</p>
-          <p>Our team of dedicated healthcare professionals is committed to providing personalized care tailored to your unique needs. From routine check-ups to complex procedures, we're here to support your health journey every step of the way.</p>
+  <!-- Stats Section -->
+  <section class="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div>
+          <div class="text-5xl font-bold mb-2">{{ isLoading() ? '...' : doctorCount() }}+</div>
+          <div class="text-xl text-blue-100">Expert Doctors</div>
         </div>
-        <div class="about-stats">
-          <div class="stat">
-            <h3>20+</h3>
-            <p>Years of Service</p>
-          </div>
-          <div class="stat">
-            <h3>50+</h3>
-            <p>Expert Doctors</p>
-          </div>
-          <div class="stat">
-            <h3>1000+</h3>
-            <p>Happy Patients</p>
-          </div>
+        <div>
+          <div class="text-5xl font-bold mb-2">20+</div>
+          <div class="text-xl text-blue-100">Years of Service</div>
+        </div>
+        <div>
+          <div class="text-5xl font-bold mb-2">1000+</div>
+          <div class="text-xl text-blue-100">Happy Patients</div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Ready to Get Started?</h2>
+      <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+        Join thousands of satisfied patients who trust us with their healthcare needs
+      </p>
+      @if (!isLoggedIn()) {
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            (click)="onRegister()"
+            class="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold text-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+            Create Account
+          </button>
+          <button
+            (click)="onBookAppointment()"
+            class="px-8 py-4 bg-transparent border-2 border-blue-600 text-blue-600 dark:text-blue-400 rounded-lg font-semibold text-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200">
+            Book Appointment
+          </button>
+        </div>
+      } @else {
+        <button
+          (click)="onBookAppointment()"
+          class="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold text-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+          Book Your Appointment Now
+        </button>
+      }
     </div>
   </section>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
