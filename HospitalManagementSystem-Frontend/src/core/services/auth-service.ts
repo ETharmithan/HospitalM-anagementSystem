@@ -71,10 +71,18 @@ export class AuthService {
     const userJson = localStorage.getItem('currentUser');
     return userJson ? JSON.parse(userJson) : null;
   }
-
   getToken(): string | null {
-    return localStorage.getItem('token');
-  }
+      const userJson = localStorage.getItem('currentUser');
+      if (!userJson) return null;
+
+      const user1 = JSON.parse(userJson);
+      return user1.token || null;
+      }
+
+
+  // getToken(): string | null {
+  //   return localStorage.getItem('token');
+  // }
 
   getRefreshToken(): string | null {
     return localStorage.getItem('refreshToken');
