@@ -57,7 +57,17 @@ export class Home implements OnInit {
   }
 
   onDashboard(): void {
-    if (this.currentUser()?.role === 'Patient') {
+    const role = this.currentUser()?.role?.toLowerCase();
+    if (role === 'superadmin') {
+      this.router.navigate(['/superadmin/dashboard']);
+      return;
+    }
+    if (role === 'admin') {
+      this.router.navigate(['/admin/dashboard']);
+      return;
+    }
+
+    if (role === 'patient') {
       this.router.navigate(['/my-appointments']);
     } else {
       this.router.navigate(['/doctors']);

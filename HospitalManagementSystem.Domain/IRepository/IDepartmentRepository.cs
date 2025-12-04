@@ -14,6 +14,7 @@ namespace HospitalManagementSystem.Domain.IRepository
         Task<Department> CreateAsync(Department department);
         Task UpdateAsync(Department department);
         Task DeleteAsync(Department department);
+        Task<int> CountAsync();
 
     }
 }

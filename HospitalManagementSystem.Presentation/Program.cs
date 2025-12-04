@@ -38,6 +38,8 @@ namespace HospitalManagementSystem.Presentation
             builder.Services.AddScoped<IDoctorLeaveRepository, DoctorLeaveRepository>();
             builder.Services.AddScoped<IDoctorAvailabilityRepository, DoctorAvailabilityRepository>();
             builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
+            builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+
 
 
 
@@ -101,6 +103,8 @@ namespace HospitalManagementSystem.Presentation
 
             var app = builder.Build();
 
+            SeedAdminUser(app);
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -133,6 +137,41 @@ namespace HospitalManagementSystem.Presentation
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static void SeedAdminUser(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+
+            const string adminEmail = "superadmin@example.com";
+            const string adminName = "SuperAdmin";
+            const string adminPassword = "Admin@1234";
+
+            if (dbContext.Users.Any(u => u.Email == adminEmail))
+            {
+                return;
+            }
+
+            using var hmac = new System.Security.Cryptography.HMACSHA512();
+            var passwordBytes = System.Text.Encoding.UTF8.GetBytes(adminPassword);
+            var hash = hmac.ComputeHash(passwordBytes);
+            var salt = hmac.Key;
+
+            var adminUser = new HospitalManagementSystem.Domain.Models.User
+            {
+                UserId = Guid.NewGuid(),
+                Username = adminName,
+                Email = adminEmail,
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                Role = "SuperAdmin",
+                ImageUrl = "",
+            };
+
+            dbContext.Users.Add(adminUser);
+            dbContext.SaveChanges();
         }
     }
 }
