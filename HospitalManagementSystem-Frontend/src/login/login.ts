@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ToastService } from '../core/services/toast-service';
 import { AccountService } from '../core/services/account-service';
 import { AuthService } from '../core/services/auth.service';
+import { getRoleDashboardRoute } from '../core/utils/role-utils';
 
 @Component({
   selector: 'app-login',
@@ -82,7 +83,8 @@ export class Login implements OnInit {
           email: userResponse.email,
           name: userResponse.displayName || userResponse.name || 'User',
           role: userResponse.role || 'User',
-          imageUrl: userResponse.imageUrl || ''
+          imageUrl: userResponse.imageUrl || '',
+          token: userResponse.token || userResponse.Token || ''
         };
 
         // Login using AuthService
@@ -91,8 +93,9 @@ export class Login implements OnInit {
         // Show success message
         this.toastService.success('Login successful! Welcome back.');
         
-        // Navigate to home page
-        this.router.navigate(['/']);
+        // Navigate to role-based landing page
+        const landingRoute = getRoleDashboardRoute(user.role);
+        this.router.navigate([landingRoute]);
       },
       error: (error: any) => {
         this.isLoading = false;

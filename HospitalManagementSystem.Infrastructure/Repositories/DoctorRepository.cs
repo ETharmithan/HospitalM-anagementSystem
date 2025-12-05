@@ -67,5 +67,10 @@ namespace HospitalManagementSystem.Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
             return existingDoctor;
         }
+
+        public async Task<int> CountAsync()
+        {
+            return await _dbSet.CountAsync();
+        }
     }
 }

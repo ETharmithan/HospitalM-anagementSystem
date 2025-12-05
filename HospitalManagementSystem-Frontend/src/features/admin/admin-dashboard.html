@@ -1,0 +1,51 @@
+<div class="min-h-screen bg-slate-50 text-slate-900">
+  <div class="max-w-6xl mx-auto py-10 px-4 space-y-8">
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <p class="text-sm uppercase tracking-wide text-slate-500">Welcome back, Admin</p>
+        <h1 class="text-3xl font-bold">Hospital Management Overview</h1>
+      </div>
+      <span class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm">Hospital scope</span>
+    </header>
+
+    <ng-container *ngIf="isLoading()">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div *ngFor="let _ of [1,2,3,4,5]" class="h-32 rounded-2xl bg-white animate-pulse"></div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!isLoading()">
+      <ng-container *ngIf="overview(); else errorBlock">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <p class="text-sm text-slate-500">Total Users</p>
+            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalUsers }} </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <p class="text-sm text-slate-500">Total Doctors</p>
+            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalDoctors }} </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <p class="text-sm text-slate-500">Patients</p>
+            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalPatients }} </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <p class="text-sm text-slate-500">Appointments</p>
+            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalAppointments }} </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-white shadow">
+            <p class="text-sm text-slate-500">Departments</p>
+            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalDepartments }} </p>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #errorBlock>
+      <div class="rounded-2xl bg-red-50 border border-red-200 p-6">
+        <p class="text-red-700 font-semibold">{{ errorMessage() }}</p>
+        <p class="text-sm text-red-500">Please refresh or check the server logs.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
