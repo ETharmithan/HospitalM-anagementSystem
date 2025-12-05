@@ -12,6 +12,8 @@ namespace HospitalManagementSystem.Infrastructure.Data
 {
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
+        public DbSet<Hospital> Hospitals { get; set; } = null!;
+        public DbSet<HospitalAdmin> HospitalAdmins { get; set; } = null!;
         public DbSet<Department> Departments { get; set; } = null!;
         public DbSet<Doctor> Doctors { get; set; } = null!;
         public DbSet<DoctorAppointment> DoctorAppointments { get; set; } = null!;
@@ -35,6 +37,24 @@ namespace HospitalManagementSystem.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Hospital>()
+                .HasMany(h => h.Departments)
+                .WithOne(d => d.Hospital)
+                .HasForeignKey(d => d.HospitalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Hospital>()
+                .HasMany(h => h.HospitalAdmins)
+                .WithOne(ha => ha.Hospital)
+                .HasForeignKey(ha => ha.HospitalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HospitalAdmin>()
+                .HasOne(ha => ha.User)
+                .WithMany()
+                .HasForeignKey(ha => ha.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Department>()
             .HasMany(d => d.Doctors)
