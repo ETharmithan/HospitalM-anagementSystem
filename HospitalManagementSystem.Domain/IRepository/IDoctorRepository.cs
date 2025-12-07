@@ -14,6 +14,7 @@ namespace HospitalManagementSystem.Domain.IRepository
         Task<IEnumerable<Doctor>> GetAllAsync();
         Task<Doctor?> GetByIdAsync(Guid id);
         Task<Doctor> GetByNameAsync(string doctorName);
+        Task<Doctor?> GetByEmailAsync(string email);
         Task<Doctor> CreateAsync(Doctor doctor);
         Task<Doctor?> UpdateAsync(Doctor doctor);
         Task<bool> DeleteAsync(Guid id);

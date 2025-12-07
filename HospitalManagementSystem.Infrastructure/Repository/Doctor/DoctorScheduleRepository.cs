@@ -21,18 +21,25 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
 
         public async Task<IEnumerable<DoctorSchedule>> GetAllAsync()
         {
-            return await _appDbContext.DoctorSchedules.Include(x => x.Doctor).ToListAsync();
+            return await _appDbContext.DoctorSchedules
+                .Include(x => x.Doctor)
+                .Include(x => x.Hospital)
+                .ToListAsync();
         }
 
         public async Task<DoctorSchedule?> GetByIdAsync(Guid id)
         {
-            return await _appDbContext.DoctorSchedules.Include(x => x.Doctor).FirstOrDefaultAsync(x => x.ScheduleId == id);
+            return await _appDbContext.DoctorSchedules
+                .Include(x => x.Doctor)
+                .Include(x => x.Hospital)
+                .FirstOrDefaultAsync(x => x.ScheduleId == id);
         }
 
         public async Task<IEnumerable<DoctorSchedule>> GetByDoctorIdAsync(Guid doctorId)
         {
             return await _appDbContext.DoctorSchedules
                 .Include(x => x.Doctor)
+                .Include(x => x.Hospital)
                 .Where(x => x.DoctorId == doctorId)
                 .ToListAsync();
         }

@@ -54,6 +54,11 @@ namespace HospitalManagementSystem.Infrastructure.Repositories
             return await _dbSet.FirstOrDefaultAsync(d => d.Name.ToLower() == doctorName.ToLower());
         }
 
+        public async Task<Doctor?> GetByEmailAsync(string email)
+        {
+            return await _dbSet.FirstOrDefaultAsync(d => d.Email.ToLower() == email.ToLower());
+        }
+
         // public async Task<IEnumerable<Doctor>> GetAllDoctorsAsync()
         // {
         //     return await _dbSet.ToListAsync();

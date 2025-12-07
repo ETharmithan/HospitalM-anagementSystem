@@ -64,9 +64,9 @@
     </button>
     <button 
       class="tab-btn" 
-      [class.active]="activeTab() === 'hospitals'"
-      (click)="setActiveTab('hospitals')">
-      Available Hospitals
+      [class.active]="activeTab() === 'availability'"
+      (click)="setActiveTab('availability')">
+      My Availability
     </button>
   </div>
 
@@ -105,6 +105,9 @@
                 </div>
               </div>
               <div class="appointment-actions">
+                <button class="btn btn-info btn-sm" (click)="viewPatientProfile(apt)">
+                  View Profile
+                </button>
                 @if (apt.appointmentStatus === 'Scheduled' || apt.appointmentStatus === 'Pending') {
                   <button class="btn btn-primary btn-sm" (click)="openPrescriptionModal(apt)">
                     Add Prescription
@@ -154,6 +157,9 @@
                 </div>
               </div>
               <div class="appointment-actions">
+                <button class="btn btn-info btn-sm" (click)="viewPatientProfile(apt)">
+                  View Profile
+                </button>
                 @if (apt.appointmentStatus !== 'Cancelled') {
                   <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt)">
                     Cancel
@@ -201,6 +207,9 @@
                   </td>
                   <td>
                     <div class="table-actions">
+                      <button class="btn btn-info btn-xs" (click)="viewPatientProfile(apt)">
+                        Profile
+                      </button>
                       @if (apt.appointmentStatus === 'Scheduled' || apt.appointmentStatus === 'Pending') {
                         <button class="btn btn-primary btn-xs" (click)="openPrescriptionModal(apt)">
                           Prescription
@@ -220,16 +229,169 @@
     </div>
   }
 
-  <!-- Available Hospitals -->
-  @if (!isLoading() && activeTab() === 'hospitals') {
-    <div class="hospitals-section">
-      <h2>Available Hospitals in System</h2>
-      <p class="section-description">View all hospitals where you can provide services</p>
-      <div class="coming-soon">
-        <span class="icon">🏥</span>
-        <p>Hospital listing coming soon...</p>
-        <a routerLink="/hospitals" class="btn btn-primary">View All Hospitals</a>
+  <!-- My Availability -->
+  @if (!isLoading() && activeTab() === 'availability') {
+    <div class="availability-section">
+      <div class="section-header">
+        <div>
+          <h2>My Availability Schedule</h2>
+          <p class="section-description">Manage your available time slots</p>
+        </div>
+        <button class="btn btn-primary" (click)="openScheduleModal()">
+          + Add Schedule
+        </button>
       </div>
+
+      <!-- Filter Controls -->
+      <div class="schedule-filters">
+        <div class="filter-row">
+          <!-- View Mode Tabs -->
+          <div class="view-mode-tabs">
+            <button 
+              class="view-tab" 
+              [class.active]="scheduleViewMode() === 'byHospital'"
+              (click)="setScheduleViewMode('byHospital')">
+              🏥 By Hospital
+            </button>
+            <button 
+              class="view-tab" 
+              [class.active]="scheduleViewMode() === 'byDate'"
+              (click)="setScheduleViewMode('byDate')">
+              📅 By Date
+            </button>
+            <button 
+              class="view-tab" 
+              [class.active]="scheduleViewMode() === 'byPeriod'"
+              (click)="setScheduleViewMode('byPeriod')">
+              📆 By Period
+            </button>
+          </div>
+
+          <!-- Hospital Filter -->
+          <div class="filter-group">
+            <label>Hospital:</label>
+            <select 
+              [value]="scheduleFilterHospital()" 
+              (change)="setScheduleFilterHospital($any($event.target).value)"
+              class="filter-select">
+              <option value="all">All Hospitals</option>
+              @for (hospital of hospitals(); track hospital.hospitalId) {
+                <option [value]="hospital.hospitalId">{{ hospital.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Date Range Filter (shown for byPeriod mode) -->
+        @if (scheduleViewMode() === 'byPeriod') {
+          <div class="filter-row date-filters">
+            <div class="filter-group">
+              <label>From:</label>
+              <input 
+                type="date" 
+                [value]="scheduleFilterStartDate()"
+                (change)="scheduleFilterStartDate.set($any($event.target).value)"
+                class="filter-input">
+            </div>
+            <div class="filter-group">
+              <label>To:</label>
+              <input 
+                type="date" 
+                [value]="scheduleFilterEndDate()"
+                (change)="scheduleFilterEndDate.set($any($event.target).value)"
+                class="filter-input">
+            </div>
+            <button class="btn btn-secondary btn-sm" (click)="clearScheduleFilters()">
+              Clear Filters
+            </button>
+          </div>
+        }
+
+        <!-- Results Count -->
+        <div class="filter-results">
+          Showing {{ getTotalFilteredCount() }} schedule(s)
+        </div>
+      </div>
+
+      @if (isLoadingSchedules()) {
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Loading schedules...</p>
+        </div>
+      } @else if (schedules().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📅</span>
+          <p>No availability schedules set</p>
+          <p class="empty-hint">Add your available time slots for each hospital</p>
+        </div>
+      } @else if (getTotalFilteredCount() === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🔍</span>
+          <p>No schedules match your filters</p>
+          <button class="btn btn-secondary" (click)="clearScheduleFilters()">Clear Filters</button>
+        </div>
+      } @else {
+        <!-- View by Hospital -->
+        @if (scheduleViewMode() === 'byHospital') {
+          <div class="schedules-container">
+            @for (group of getFilteredHospitalSchedules(); track group.hospitalName) {
+              <div class="hospital-schedule-card">
+                <div class="hospital-header">
+                  <span class="hospital-icon">🏥</span>
+                  <h3>{{ group.hospitalName }}</h3>
+                  <span class="schedule-count">{{ group.schedules.length }} slot(s)</span>
+                </div>
+                <div class="schedule-list">
+                  @for (schedule of group.schedules; track schedule.scheduleId) {
+                    <div class="schedule-item">
+                      <div class="schedule-date">
+                        <span class="date-text">{{ formatScheduleDate(schedule.scheduleDate) }}</span>
+                      </div>
+                      <div class="schedule-time">
+                        <span class="time-range">{{ schedule.startTime }} - {{ schedule.endTime }}</span>
+                      </div>
+                      <div class="schedule-actions">
+                        <button class="btn btn-danger btn-xs" (click)="deleteSchedule(schedule)">
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- View by Date -->
+        @if (scheduleViewMode() === 'byDate' || scheduleViewMode() === 'byPeriod') {
+          <div class="schedules-by-date">
+            @for (schedule of getSchedulesByDateSorted(); track schedule.scheduleId) {
+              <div class="schedule-date-card">
+                <div class="date-badge">
+                  <span class="day">{{ schedule.scheduleDate | date:'dd' }}</span>
+                  <span class="month">{{ schedule.scheduleDate | date:'MMM' }}</span>
+                  <span class="year">{{ schedule.scheduleDate | date:'yyyy' }}</span>
+                </div>
+                <div class="schedule-info">
+                  <div class="schedule-hospital">
+                    <span class="hospital-icon-sm">🏥</span>
+                    {{ schedule.hospitalName }}
+                  </div>
+                  <div class="schedule-time-lg">
+                    {{ schedule.startTime }} - {{ schedule.endTime }}
+                  </div>
+                </div>
+                <div class="schedule-actions">
+                  <button class="btn btn-danger btn-xs" (click)="deleteSchedule(schedule)">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
     </div>
   }
 
@@ -278,6 +440,231 @@
             [disabled]="isSubmittingPrescription()">
             {{ isSubmittingPrescription() ? 'Saving...' : 'Save Prescription' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Schedule Modal -->
+  @if (showScheduleModal()) {
+    <div class="modal-overlay" (click)="closeScheduleModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Add Availability Schedule</h3>
+          <button class="close-btn" (click)="closeScheduleModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="hospital">Hospital *</label>
+            <select 
+              id="hospital" 
+              [(ngModel)]="scheduleForm.hospitalId"
+              class="form-control">
+              <option value="">Select a hospital</option>
+              @for (hospital of hospitals(); track hospital.hospitalId) {
+                <option [value]="hospital.hospitalId">{{ hospital.name }} - {{ hospital.city }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="scheduleDate">Date *</label>
+            <input 
+              type="date" 
+              id="scheduleDate" 
+              [(ngModel)]="scheduleForm.scheduleDate"
+              class="form-control">
+          </div>
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="startTime">Start Time *</label>
+              <input 
+                type="time" 
+                id="startTime" 
+                [(ngModel)]="scheduleForm.startTime"
+                class="form-control">
+            </div>
+            <div class="form-group half">
+              <label for="endTime">End Time *</label>
+              <input 
+                type="time" 
+                id="endTime" 
+                [(ngModel)]="scheduleForm.endTime"
+                class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeScheduleModal()">Cancel</button>
+          <button 
+            class="btn btn-primary" 
+            (click)="submitSchedule()"
+            [disabled]="isSubmittingSchedule()">
+            {{ isSubmittingSchedule() ? 'Adding...' : 'Add Schedule' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Patient Medical Profile Modal -->
+  @if (medicalProfileModal().isOpen) {
+    <div class="modal-overlay" (click)="closeMedicalProfileModal()">
+      <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Patient Medical Profile</h3>
+          <button class="close-btn" (click)="closeMedicalProfileModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          @if (medicalProfileModal().isLoading) {
+            <div class="loading-container">
+              <div class="spinner"></div>
+              <p>Loading patient profile...</p>
+            </div>
+          } @else if (medicalProfileModal().profile) {
+            @let profile = medicalProfileModal().profile!;
+            
+            <!-- Patient Basic Info -->
+            <div class="profile-section">
+              <h4>👤 Basic Information</h4>
+              <div class="profile-grid">
+                <div class="profile-item">
+                  <span class="label">Name</span>
+                  <span class="value">{{ profile.fullName }}</span>
+                </div>
+                <div class="profile-item">
+                  <span class="label">Age</span>
+                  <span class="value">{{ profile.age }} years</span>
+                </div>
+                <div class="profile-item">
+                  <span class="label">Gender</span>
+                  <span class="value">{{ profile.gender }}</span>
+                </div>
+                <div class="profile-item">
+                  <span class="label">Date of Birth</span>
+                  <span class="value">{{ formatProfileDate(profile.dateOfBirth) }}</span>
+                </div>
+                <div class="profile-item">
+                  <span class="label">Email</span>
+                  <span class="value">{{ profile.email || 'N/A' }}</span>
+                </div>
+                <div class="profile-item">
+                  <span class="label">Phone</span>
+                  <span class="value">{{ profile.phone || 'N/A' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Medical Info -->
+            <div class="profile-section">
+              <h4>🩺 Medical Information</h4>
+              <div class="profile-grid">
+                <div class="profile-item">
+                  <span class="label">Blood Type</span>
+                  <span class="value highlight">{{ profile.bloodType || 'N/A' }}</span>
+                </div>
+                <div class="profile-item full-width">
+                  <span class="label">Allergies</span>
+                  <span class="value warning">{{ profile.allergies || 'None reported' }}</span>
+                </div>
+                <div class="profile-item full-width">
+                  <span class="label">Chronic Conditions</span>
+                  <span class="value">{{ profile.chronicConditions || 'None reported' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Medical History -->
+            <div class="profile-section">
+              <h4>📋 Medical History</h4>
+              <div class="profile-grid">
+                <div class="profile-item full-width">
+                  <span class="label">Past Illnesses</span>
+                  <span class="value">{{ profile.pastIllnesses || 'None reported' }}</span>
+                </div>
+                <div class="profile-item full-width">
+                  <span class="label">Surgeries</span>
+                  <span class="value">{{ profile.surgeries || 'None reported' }}</span>
+                </div>
+                <div class="profile-item full-width">
+                  <span class="label">Notes</span>
+                  <span class="value">{{ profile.medicalHistoryNotes || 'No notes' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Emergency Contact -->
+            <div class="profile-section">
+              <h4>🚨 Emergency Contact</h4>
+              <div class="profile-grid">
+                <div class="profile-item">
+                  <span class="label">Name</span>
+                  <span class="value">{{ profile.emergencyContactName || 'N/A' }}</span>
+                </div>
+                <div class="profile-item">
+                  <span class="label">Phone</span>
+                  <span class="value">{{ profile.emergencyContactPhone || 'N/A' }}</span>
+                </div>
+                <div class="profile-item">
+                  <span class="label">Relationship</span>
+                  <span class="value">{{ profile.emergencyContactRelationship || 'N/A' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Past Prescriptions -->
+            <div class="profile-section">
+              <h4>💊 Past Prescriptions ({{ profile.prescriptions.length }})</h4>
+              @if (profile.prescriptions.length === 0) {
+                <p class="empty-text">No past prescriptions</p>
+              } @else {
+                <div class="prescriptions-list">
+                  @for (rx of profile.prescriptions; track rx.recordId) {
+                    <div class="prescription-item">
+                      <div class="rx-header">
+                        <span class="rx-date">{{ formatProfileDate(rx.visitDate) }}</span>
+                        <span class="rx-doctor">Dr. {{ rx.doctorName }}</span>
+                      </div>
+                      <div class="rx-body">
+                        <div class="rx-field">
+                          <strong>Diagnosis:</strong> {{ rx.diagnosis }}
+                        </div>
+                        <div class="rx-field">
+                          <strong>Prescription:</strong> {{ rx.prescription }}
+                        </div>
+                        @if (rx.notes) {
+                          <div class="rx-field">
+                            <strong>Notes:</strong> {{ rx.notes }}
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Past Appointments -->
+            <div class="profile-section">
+              <h4>📅 Past Appointments ({{ profile.pastAppointments.length }})</h4>
+              @if (profile.pastAppointments.length === 0) {
+                <p class="empty-text">No past appointments</p>
+              } @else {
+                <div class="appointments-history">
+                  @for (apt of profile.pastAppointments; track apt.appointmentId) {
+                    <div class="apt-history-item">
+                      <span class="apt-date">{{ formatProfileDate(apt.appointmentDate) }} at {{ apt.appointmentTime }}</span>
+                      <span class="apt-doctor">Dr. {{ apt.doctorName }}</span>
+                      <span class="apt-hospital">{{ apt.hospitalName }}</span>
+                      <span class="status-badge" [ngClass]="getStatusClass(apt.status)">{{ apt.status }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeMedicalProfileModal()">Close</button>
         </div>
       </div>
     </div>

@@ -1,15 +1,17 @@
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);
   padding: 0;
 }
 
 /* Header */
 .dashboard-header {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
   padding: 1.5rem 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .header-content {
@@ -137,7 +139,7 @@
 .hospitals-section h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: white;
   margin-bottom: 1.5rem;
 }
 
@@ -148,7 +150,7 @@
   align-items: center;
   justify-content: center;
   padding: 4rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .spinner {
@@ -474,8 +476,310 @@
 }
 
 .section-description {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 1.5rem;
+}
+
+/* Availability Section */
+.availability-section {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 0.25rem 0;
+}
+
+.empty-hint {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+.schedules-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.hospital-schedule-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.hospital-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-bottom: 1px solid #e0e7ff;
+}
+
+.hospital-icon {
+  font-size: 1.5rem;
+}
+
+.hospital-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.schedule-list {
+  padding: 0.5rem 0;
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.2s;
+}
+
+.schedule-item:last-child {
+  border-bottom: none;
+}
+
+.schedule-item:hover {
+  background: #f9fafb;
+}
+
+.schedule-date {
+  min-width: 150px;
+}
+
+.date-text {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.schedule-time {
+  flex: 1;
+}
+
+.time-range {
+  font-size: 0.9rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.schedule-actions {
+  margin-left: auto;
+}
+
+/* Schedule Filters */
+.schedule-filters {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.view-mode-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.view-tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s;
+}
+
+.view-tab:hover {
+  color: white;
+}
+
+.view-tab.active {
+  background: white;
+  color: #1e40af;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.filter-select,
+.filter-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+  min-width: 150px;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.date-filters {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.filter-results {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.schedule-count {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+/* Schedules by Date View */
+.schedules-by-date {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.schedule-date-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.schedule-date-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  min-width: 70px;
+}
+
+.date-badge .day {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.date-badge .month {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+.date-badge .year {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.schedule-info {
+  flex: 1;
+}
+
+.schedule-hospital {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.hospital-icon-sm {
+  font-size: 1rem;
+}
+
+.schedule-time-lg {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* Form Row for time inputs */
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-group.half {
+  flex: 1;
+}
+
+/* Select styling */
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+input[type="time"].form-control {
+  padding: 0.75rem;
 }
 
 /* Responsive */
@@ -504,5 +808,258 @@
   .appointment-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .schedules-container {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .schedule-date {
+    min-width: auto;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .availability-section {
+    padding: 1rem;
+  }
+}
+
+/* Medical Profile Modal */
+.modal-large {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.profile-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.profile-section h4 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.profile-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.profile-item .label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.profile-item .value {
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.profile-item .value.highlight {
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.profile-item .value.warning {
+  color: #d97706;
+  font-weight: 500;
+}
+
+.empty-text {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Prescriptions List in Profile */
+.prescriptions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.prescription-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 4px solid #2563eb;
+}
+
+.rx-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rx-date {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.rx-doctor {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.rx-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rx-field {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.rx-field strong {
+  color: #1f2937;
+}
+
+/* Appointments History */
+.appointments-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.apt-history-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.apt-date {
+  font-weight: 500;
+  color: #1f2937;
+  min-width: 180px;
+}
+
+.apt-doctor {
+  color: #2563eb;
+}
+
+.apt-hospital {
+  color: #6b7280;
+  flex: 1;
+}
+
+/* Info Button */
+.btn-info {
+  background: #0ea5e9;
+  color: white;
+  border: none;
+}
+
+.btn-info:hover {
+  background: #0284c7;
+}
+
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .apt-history-item {
+    flex-wrap: wrap;
+  }
+
+  .apt-date {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .view-mode-tabs {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .view-tab {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-select,
+  .filter-input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .schedule-date-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .date-badge {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .date-badge .day,
+  .date-badge .month,
+  .date-badge .year {
+    font-size: 1rem;
+  }
+
+  .schedule-info {
+    text-align: center;
   }
 }

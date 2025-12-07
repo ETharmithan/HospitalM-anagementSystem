@@ -20,6 +20,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
         private readonly IPatientRepository _patientRepository;
         private readonly IDoctorRepository _doctorRepository;
         private readonly IHospitalRepository _hospitalRepository;
+        private readonly INotificationService _notificationService;
 
         public DoctorAppointmentService(
             IDoctorAppointmentRepository doctorAppointmentRepository,
@@ -27,7 +28,8 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             IEmailService emailService,
             IPatientRepository patientRepository,
             IDoctorRepository doctorRepository,
-            IHospitalRepository hospitalRepository)
+            IHospitalRepository hospitalRepository,
+            INotificationService notificationService)
         {
             _doctorAppointmentRepository = doctorAppointmentRepository;
             _availabilityRepository = availabilityRepository;
@@ -35,6 +37,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             _patientRepository = patientRepository;
             _doctorRepository = doctorRepository;
             _hospitalRepository = hospitalRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<DoctorAppointmentResponseDto>> GetAllAsync()
@@ -93,6 +96,9 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             // Send booking confirmation email (fire and forget)
             _ = SendBookingConfirmationEmailAsync(entity);
 
+            // Create in-app notification (fire and forget)
+            _ = CreateBookingNotificationAsync(entity);
+
             return MapToResponseDto(entity);
         }
 
@@ -139,6 +145,9 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
 
             // Send cancellation email (fire and forget)
             _ = SendBookingCancellationEmailAsync(entity, cancellationReason);
+
+            // Create cancellation notification (fire and forget)
+            _ = CreateCancellationNotificationAsync(entity);
 
             return true;
         }
@@ -236,7 +245,10 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 DurationMinutes = a.DurationMinutes,
                 PatientId = a.PatientId,
                 DoctorId = a.DoctorId,
-                HospitalId = a.HospitalId
+                HospitalId = a.HospitalId,
+                DoctorName = a.Doctor?.Name,
+                PatientName = a.Patient != null ? $"{a.Patient.FirstName} {a.Patient.LastName}" : null,
+                HospitalName = a.Hospital?.Name
             };
         }
 
@@ -358,6 +370,54 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             catch
             {
                 return null;
+            }
+        }
+
+        private async Task CreateBookingNotificationAsync(DoctorAppointment appointment)
+        {
+            try
+            {
+                var doctor = await _doctorRepository.GetByIdAsync(appointment.DoctorId);
+                string hospitalName = "Hospital";
+                
+                if (appointment.HospitalId.HasValue)
+                {
+                    var hospital = await _hospitalRepository.GetByIdAsync(appointment.HospitalId.Value);
+                    hospitalName = hospital?.Name ?? "Hospital";
+                }
+
+                await _notificationService.CreateBookingNotificationAsync(
+                    appointment.PatientId,
+                    doctor?.Name ?? "Doctor",
+                    appointment.AppointmentDate,
+                    appointment.AppointmentTime,
+                    hospitalName,
+                    appointment.AppointmentId.ToString()
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create booking notification: {ex.Message}");
+            }
+        }
+
+        private async Task CreateCancellationNotificationAsync(DoctorAppointment appointment)
+        {
+            try
+            {
+                var doctor = await _doctorRepository.GetByIdAsync(appointment.DoctorId);
+
+                await _notificationService.CreateBookingCancellationNotificationAsync(
+                    appointment.PatientId,
+                    doctor?.Name ?? "Doctor",
+                    appointment.AppointmentDate,
+                    appointment.AppointmentTime,
+                    appointment.AppointmentId.ToString()
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create cancellation notification: {ex.Message}");
             }
         }
     }

@@ -12,6 +12,8 @@ namespace HospitalManagementSystem.Application.IServices.DoctorIServices
     {
         Task<IEnumerable<DoctorPatientRecordsResponseDto>> GetAllAsync();
         Task<DoctorPatientRecordsResponseDto?> GetByIdAsync(Guid id);
+        Task<IEnumerable<DoctorPatientRecordsResponseDto>> GetByPatientIdAsync(Guid patientId);
+        Task<IEnumerable<DoctorPatientRecordsResponseDto>> GetByDoctorIdAsync(Guid doctorId);
         Task<DoctorPatientRecordsResponseDto> CreateAsync(DoctorPatientRecordsRequestDto doctorPatientRecordsRequestDto);
         Task<DoctorPatientRecordsResponseDto?> UpdateAsync(Guid id, DoctorPatientRecordsRequestDto doctorPatientRecordsRequestDto);
         Task<bool> DeleteAsync(Guid id);

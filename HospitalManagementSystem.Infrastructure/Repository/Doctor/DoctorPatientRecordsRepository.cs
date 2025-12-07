@@ -26,7 +26,27 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
 
         public async Task<DoctorPatientRecords?> GetByIdAsync(Guid id)
         {
-            return await _appDbContext.DoctorPatientRecords.FindAsync(id);
+            return await _appDbContext.DoctorPatientRecords
+                .Include(r => r.Doctor)
+                .FirstOrDefaultAsync(r => r.TreatmentId == id);
+        }
+
+        public async Task<IEnumerable<DoctorPatientRecords>> GetByPatientIdAsync(Guid patientId)
+        {
+            return await _appDbContext.DoctorPatientRecords
+                .Include(r => r.Doctor)
+                .Where(r => r.PatientId == patientId)
+                .OrderByDescending(r => r.VisitDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<DoctorPatientRecords>> GetByDoctorIdAsync(Guid doctorId)
+        {
+            return await _appDbContext.DoctorPatientRecords
+                .Include(r => r.Doctor)
+                .Where(r => r.DoctorId == doctorId)
+                .OrderByDescending(r => r.VisitDate)
+                .ToListAsync();
         }
 
         public async Task<DoctorPatientRecords> CreateAsync(DoctorPatientRecords doctorPatientRecords)

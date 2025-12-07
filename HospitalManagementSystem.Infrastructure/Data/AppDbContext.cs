@@ -23,6 +23,9 @@ namespace HospitalManagementSystem.Infrastructure.Data
         public DbSet<DoctorSchedule> DoctorSchedules { get; set; } = null!;
         public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; } = null!;
 
+        // --- Notifications ---
+        public DbSet<Notification> Notifications { get; set; } = null!;
+
         // --- Patient Sets (Initialized to avoid warnings) ---
         public DbSet<User> Users { get; set; } = default!;
         public DbSet<Patient> Patients { get; set; } = default!;
@@ -93,6 +96,12 @@ namespace HospitalManagementSystem.Infrastructure.Data
             .WithOne(doctor => doctor.Doctor)
             .HasForeignKey(doctor => doctor.DoctorId)
             .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DoctorSchedule>()
+            .HasOne(ds => ds.Hospital)
+            .WithMany()
+            .HasForeignKey(ds => ds.HospitalId)
+            .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Doctor>()
             .HasMany(doctor => doctor.DoctorAvailabilities)

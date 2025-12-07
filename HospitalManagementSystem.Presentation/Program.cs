@@ -6,6 +6,7 @@ using HospitalManagementSystem.Application.Services.DoctorServices;
 using HospitalManagementSystem.Domain.IRepository;
 using HospitalManagementSystem.Infrastructure.Data;
 using HospitalManagementSystem.Infrastructure.Repositories;
+using HospitalManagementSystem.Infrastructure.Repository;
 using HospitalManagementSystem.Infrastructure.Repository.Doctor;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -35,11 +36,16 @@ namespace HospitalManagementSystem.Presentation
             builder.Services.AddScoped<IDoctorAppointmentRepository, DoctorAppointmentRepository>();
             builder.Services.AddScoped<IDoctorAppointmentService, DoctorAppointmentService>();
             builder.Services.AddScoped<IDoctorScheduleRepository, DoctorScheduleRepository>();
+            builder.Services.AddScoped<IDoctorScheduleService, DoctorScheduleService>();
+            builder.Services.AddScoped<IDoctorPatientRecordsRepository, DoctorPatientRecordsRepository>();
+            builder.Services.AddScoped<IDoctorPatientRecordsService, DoctorPatientRecordsService>();
             builder.Services.AddScoped<IDoctorLeaveRepository, DoctorLeaveRepository>();
             builder.Services.AddScoped<IDoctorAvailabilityRepository, DoctorAvailabilityRepository>();
             builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
             builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
             
             // Hospital Management Services
             builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
@@ -113,6 +119,7 @@ namespace HospitalManagementSystem.Presentation
             SeedPatientUser(app);
             SeedHospitalsWithAdmins(app);
             SeedAdditionalPatients(app);
+            SeedDoctorSchedules(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -616,6 +623,65 @@ namespace HospitalManagementSystem.Presentation
                 dbContext.Patients.Add(patient);
             }
 
+            dbContext.SaveChanges();
+        }
+
+        private static void SeedDoctorSchedules(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            // Check if schedules already exist
+            if (dbContext.DoctorSchedules.Any())
+            {
+                return;
+            }
+
+            // Get all doctors and hospitals
+            var doctors = dbContext.Doctors.ToList();
+            var hospitals = dbContext.Hospitals.ToList();
+
+            if (!doctors.Any() || !hospitals.Any())
+            {
+                return;
+            }
+
+            var schedules = new List<HospitalManagementSystem.Domain.Models.Doctors.DoctorSchedule>();
+            var random = new Random();
+
+            // Create schedules for each doctor - assign to ONE hospital per day (no conflicts)
+            foreach (var doctor in doctors)
+            {
+                // Add availability for the next 14 days (weekdays only)
+                for (int i = 1; i <= 14; i++)
+                {
+                    var scheduleDate = DateTime.Today.AddDays(i);
+                    
+                    // Skip weekends
+                    if (scheduleDate.DayOfWeek == DayOfWeek.Saturday || 
+                        scheduleDate.DayOfWeek == DayOfWeek.Sunday)
+                    {
+                        continue;
+                    }
+
+                    // Assign to a random hospital for this day (doctor can only be at one hospital per day)
+                    var hospital = hospitals[random.Next(hospitals.Count)];
+
+                    schedules.Add(new HospitalManagementSystem.Domain.Models.Doctors.DoctorSchedule
+                    {
+                        ScheduleId = Guid.NewGuid(),
+                        ScheduleDate = scheduleDate,
+                        DayOfWeek = scheduleDate.DayOfWeek.ToString(),
+                        IsRecurring = false,
+                        StartTime = "09:00",
+                        EndTime = "17:00",
+                        DoctorId = doctor.DoctorId,
+                        HospitalId = hospital.HospitalId
+                    });
+                }
+            }
+
+            dbContext.DoctorSchedules.AddRange(schedules);
             dbContext.SaveChanges();
         }
     }
