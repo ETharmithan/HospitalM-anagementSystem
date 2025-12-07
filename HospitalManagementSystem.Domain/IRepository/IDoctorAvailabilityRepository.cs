@@ -11,7 +11,9 @@ namespace HospitalManagementSystem.Domain.IRepository
         Task<DoctorAvailability?> GetByIdAsync(Guid id);
         Task<IEnumerable<DoctorAvailability>> GetByDoctorIdAsync(Guid doctorId);
         Task<DoctorAvailability?> GetByDoctorIdAndDateAsync(Guid doctorId, DateTime date);
+        Task<DoctorAvailability?> GetByDoctorAndDateAsync(Guid doctorId, DateTime date, Guid? hospitalId = null);
         Task<IEnumerable<DoctorAvailability>> GetByDoctorIdAndDateRangeAsync(Guid doctorId, DateTime startDate, DateTime endDate);
+        Task<IEnumerable<DoctorAvailability>> GetByDoctorAndHospitalAsync(Guid doctorId, Guid hospitalId);
         Task<DoctorAvailability> CreateAsync(DoctorAvailability doctorAvailability);
         Task<DoctorAvailability> UpdateAsync(DoctorAvailability doctorAvailability);
         Task<bool> DeleteAsync(Guid id);

@@ -39,6 +39,7 @@ namespace HospitalManagementSystem.Presentation
             builder.Services.AddScoped<IDoctorAvailabilityRepository, DoctorAvailabilityRepository>();
             builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
             builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             
             // Hospital Management Services
             builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
@@ -110,6 +111,8 @@ namespace HospitalManagementSystem.Presentation
             SeedAdminUser(app);
             SeedDoctorUser(app);
             SeedPatientUser(app);
+            SeedHospitalsWithAdmins(app);
+            SeedAdditionalPatients(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -174,6 +177,7 @@ namespace HospitalManagementSystem.Presentation
                 PasswordSalt = salt,
                 Role = "SuperAdmin",
                 ImageUrl = "",
+                IsEmailVerified = true // Pre-verified for seeded users
             };
 
             dbContext.Users.Add(adminUser);
@@ -247,7 +251,8 @@ namespace HospitalManagementSystem.Presentation
                 PasswordHash = hash,
                 PasswordSalt = salt,
                 Role = "Doctor",
-                ImageUrl = ""
+                ImageUrl = "",
+                IsEmailVerified = true // Pre-verified for seeded users
             };
 
             dbContext.Users.Add(doctorUser);
@@ -302,7 +307,8 @@ namespace HospitalManagementSystem.Presentation
                 PasswordHash = hash,
                 PasswordSalt = salt,
                 Role = "Patient",
-                ImageUrl = ""
+                ImageUrl = "",
+                IsEmailVerified = true // Pre-verified for seeded users
             };
 
             dbContext.Users.Add(patientUser);
@@ -365,6 +371,251 @@ namespace HospitalManagementSystem.Presentation
             };
 
             dbContext.Patients.Add(patient);
+            dbContext.SaveChanges();
+        }
+
+        private static void SeedHospitalsWithAdmins(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            // Hospital 1: City General Hospital
+            var hospital1Email = "admin@citygeneralhospital.com";
+            if (!dbContext.Users.Any(u => u.Email == hospital1Email))
+            {
+                var hospital1Id = Guid.NewGuid();
+                var admin1UserId = Guid.NewGuid();
+
+                // Create Hospital 1
+                var hospital1 = new HospitalManagementSystem.Domain.Models.Hospital
+                {
+                    HospitalId = hospital1Id,
+                    Name = "City General Hospital",
+                    Address = "456 Medical Center Drive",
+                    City = "Colombo",
+                    State = "Western",
+                    Country = "Sri Lanka",
+                    PostalCode = "00100",
+                    PhoneNumber = "+94112345678",
+                    Email = "info@citygeneralhospital.com",
+                    Website = "https://citygeneralhospital.lk",
+                    Description = "A leading multi-specialty hospital providing comprehensive healthcare services.",
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                dbContext.Hospitals.Add(hospital1);
+
+                // Create Admin User for Hospital 1
+                using var hmac1 = new System.Security.Cryptography.HMACSHA512();
+                var admin1User = new HospitalManagementSystem.Domain.Models.User
+                {
+                    UserId = admin1UserId,
+                    Username = "City General Admin",
+                    Email = hospital1Email,
+                    PasswordHash = hmac1.ComputeHash(System.Text.Encoding.UTF8.GetBytes("Admin@1234")),
+                    PasswordSalt = hmac1.Key,
+                    Role = "Admin",
+                    ImageUrl = "",
+                    IsEmailVerified = true
+                };
+                dbContext.Users.Add(admin1User);
+
+                // Create HospitalAdmin relationship
+                var hospitalAdmin1 = new HospitalManagementSystem.Domain.Models.HospitalAdmin
+                {
+                    HospitalAdminId = Guid.NewGuid(),
+                    HospitalId = hospital1Id,
+                    UserId = admin1UserId
+                };
+                dbContext.HospitalAdmins.Add(hospitalAdmin1);
+
+                // Add departments to Hospital 1
+                dbContext.Departments.Add(new HospitalManagementSystem.Domain.Models.Doctors.Department
+                {
+                    DepartmentId = Guid.NewGuid(),
+                    Name = "Cardiology",
+                    HospitalId = hospital1Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+                dbContext.Departments.Add(new HospitalManagementSystem.Domain.Models.Doctors.Department
+                {
+                    DepartmentId = Guid.NewGuid(),
+                    Name = "Neurology",
+                    HospitalId = hospital1Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+
+                dbContext.SaveChanges();
+            }
+
+            // Hospital 2: Wellness Medical Center
+            var hospital2Email = "admin@wellnessmedical.com";
+            if (!dbContext.Users.Any(u => u.Email == hospital2Email))
+            {
+                var hospital2Id = Guid.NewGuid();
+                var admin2UserId = Guid.NewGuid();
+
+                // Create Hospital 2
+                var hospital2 = new HospitalManagementSystem.Domain.Models.Hospital
+                {
+                    HospitalId = hospital2Id,
+                    Name = "Wellness Medical Center",
+                    Address = "789 Healthcare Boulevard",
+                    City = "Kandy",
+                    State = "Central",
+                    Country = "Sri Lanka",
+                    PostalCode = "20000",
+                    PhoneNumber = "+94812345678",
+                    Email = "info@wellnessmedical.com",
+                    Website = "https://wellnessmedical.lk",
+                    Description = "Your trusted partner in health and wellness.",
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                dbContext.Hospitals.Add(hospital2);
+
+                // Create Admin User for Hospital 2
+                using var hmac2 = new System.Security.Cryptography.HMACSHA512();
+                var admin2User = new HospitalManagementSystem.Domain.Models.User
+                {
+                    UserId = admin2UserId,
+                    Username = "Wellness Admin",
+                    Email = hospital2Email,
+                    PasswordHash = hmac2.ComputeHash(System.Text.Encoding.UTF8.GetBytes("Admin@1234")),
+                    PasswordSalt = hmac2.Key,
+                    Role = "Admin",
+                    ImageUrl = "",
+                    IsEmailVerified = true
+                };
+                dbContext.Users.Add(admin2User);
+
+                // Create HospitalAdmin relationship
+                var hospitalAdmin2 = new HospitalManagementSystem.Domain.Models.HospitalAdmin
+                {
+                    HospitalAdminId = Guid.NewGuid(),
+                    HospitalId = hospital2Id,
+                    UserId = admin2UserId
+                };
+                dbContext.HospitalAdmins.Add(hospitalAdmin2);
+
+                // Add departments to Hospital 2
+                dbContext.Departments.Add(new HospitalManagementSystem.Domain.Models.Doctors.Department
+                {
+                    DepartmentId = Guid.NewGuid(),
+                    Name = "Orthopedics",
+                    HospitalId = hospital2Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+                dbContext.Departments.Add(new HospitalManagementSystem.Domain.Models.Doctors.Department
+                {
+                    DepartmentId = Guid.NewGuid(),
+                    Name = "Pediatrics",
+                    HospitalId = hospital2Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+
+                dbContext.SaveChanges();
+            }
+        }
+
+        private static void SeedAdditionalPatients(WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var patients = new[]
+            {
+                new { Email = "patient2@example.com", FirstName = "Michael", LastName = "Johnson", Gender = "Male", DOB = new DateTime(1985, 3, 20) },
+                new { Email = "patient3@example.com", FirstName = "Sarah", LastName = "Williams", Gender = "Female", DOB = new DateTime(1992, 8, 10) }
+            };
+
+            foreach (var p in patients)
+            {
+                if (dbContext.Users.Any(u => u.Email == p.Email))
+                    continue;
+
+                using var hmac = new System.Security.Cryptography.HMACSHA512();
+                var userId = Guid.NewGuid();
+                var patientId = Guid.NewGuid();
+
+                // Create user
+                var user = new HospitalManagementSystem.Domain.Models.User
+                {
+                    UserId = userId,
+                    Username = $"{p.FirstName} {p.LastName}",
+                    Email = p.Email,
+                    PasswordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes("Patient@1234")),
+                    PasswordSalt = hmac.Key,
+                    Role = "Patient",
+                    ImageUrl = "",
+                    IsEmailVerified = true
+                };
+                dbContext.Users.Add(user);
+
+                // Create patient
+                var patient = new HospitalManagementSystem.Domain.Models.Patient.Patient
+                {
+                    PatientId = patientId,
+                    UserId = userId,
+                    FirstName = p.FirstName,
+                    LastName = p.LastName,
+                    DateOfBirth = p.DOB,
+                    Gender = p.Gender,
+                    ImageUrl = "",
+                    ContactInfo = new HospitalManagementSystem.Domain.Models.Patient.Patient_Contact_Information
+                    {
+                        PatientId = patientId,
+                        PhoneNumber = "+94771234567",
+                        EmailAddress = p.Email,
+                        AddressLine1 = "123 Sample Street",
+                        City = "Colombo",
+                        State = "Western",
+                        PostalCode = "00100",
+                        Country = "Sri Lanka",
+                        Nationality = "Sri Lankan"
+                    },
+                    IdentificationDetails = new HospitalManagementSystem.Domain.Models.Patient.Patient_Identification_Details
+                    {
+                        PatientId = patientId,
+                        NIC = $"{p.DOB.Year % 100}0{patientId.ToString().Substring(0, 7)}V"
+                    },
+                    MedicalHistory = new HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_History
+                    {
+                        PatientId = patientId,
+                        PastIllnesses = "None",
+                        Surgeries = "None",
+                        MedicalHistoryNotes = "No significant medical history"
+                    },
+                    MedicalRelatedInfo = new HospitalManagementSystem.Domain.Models.Patient.Patient_Medical_Related_Info
+                    {
+                        PatientId = patientId,
+                        BloodType = p.Gender == "Male" ? "A+" : "B+",
+                        Allergies = "None",
+                        ChronicConditions = "None"
+                    },
+                    EmergencyContact = new HospitalManagementSystem.Domain.Models.Patient.Patient_Emergency_Contact
+                    {
+                        Id = Guid.NewGuid(),
+                        PatientId = patientId,
+                        ContactName = "Emergency Contact",
+                        ContactEmail = "emergency@example.com",
+                        ContactPhone = "+94771234568",
+                        RelationshipToPatient = "Family"
+                    }
+                };
+                dbContext.Patients.Add(patient);
+            }
+
             dbContext.SaveChanges();
         }
     }
