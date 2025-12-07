@@ -7,6 +7,7 @@ import { PatientService } from '../../../core/services/patient-service';
 import { AccountService } from '../../../core/services/account-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { Appointment, Doctor } from '../../../types/doctor';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface PatientStats {
   totalAppointments: number;
@@ -29,6 +30,7 @@ export class PatientDashboard implements OnInit {
   accountService = inject(AccountService); // public for template access
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   // Getter for user display name
   get userName(): string {
@@ -199,6 +201,7 @@ export class PatientDashboard implements OnInit {
   onLogout(): void {
     this.accountService.logout();
     this.router.navigate(['/login']);
+    this.authService.logout();
   }
 
   navigateToBooking(): void {
