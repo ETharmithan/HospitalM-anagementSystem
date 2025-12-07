@@ -25,8 +25,9 @@ namespace HospitalManagementSystem.Application.DTOs.DoctorDto.Request_Dto
         [Required]
         [DataType(DataType.DateTime)]
         public DateTime CreatedDate { get; set; }
-
-
+        
+        // Duration in minutes (default 30)
+        public int DurationMinutes { get; set; } = 30;
 
         //ForeignKey
         [Required(ErrorMessage = "PatientId is required")]
@@ -34,6 +35,9 @@ namespace HospitalManagementSystem.Application.DTOs.DoctorDto.Request_Dto
 
         [Required(ErrorMessage = "DoctorId is required")]
         public Guid DoctorId { get; set; }
+        
+        // Optional: Hospital where appointment takes place
+        public Guid? HospitalId { get; set; }
 
     }
 }

@@ -112,6 +112,11 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
+                // Verify hospital exists
+                var hospital = await _hospitalService.GetHospitalByIdAsync(hospitalId);
+                if (hospital == null)
+                    return NotFound(new { message = "Hospital not found" });
+
                 // Verify the user exists and has Admin role
                 var user = await _userRepository.GetByIdAsync(adminDto.UserId);
                 if (user == null)
@@ -121,12 +126,14 @@ namespace HospitalManagementSystem.Presentation.Controllers
                     return BadRequest(new { message = "User must have Admin role" });
 
                 // Check if user is already admin for this hospital
-                var existingAdmin = await _hospitalService.GetHospitalByIdAsync(hospitalId);
-                if (existingAdmin?.HospitalAdmins.Any(ha => ha.UserId == adminDto.UserId) == true)
+                if (hospital.HospitalAdmins?.Any(ha => ha.UserId == adminDto.UserId) == true)
                     return BadRequest(new { message = "User is already an admin for this hospital" });
 
-                // Create hospital admin assignment
-                // Note: You'll need to implement this in your service/repository layer
+                // Assign hospital admin
+                var result = await _hospitalService.AssignHospitalAdminAsync(hospitalId, adminDto.UserId);
+                if (!result)
+                    return BadRequest(new { message = "Failed to assign admin to hospital" });
+
                 return Ok(new { message = "Hospital admin assigned successfully" });
             }
             catch (Exception ex)
@@ -140,8 +147,10 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
-                // Remove hospital admin assignment
-                // Note: You'll need to implement this in your service/repository layer
+                var result = await _hospitalService.RemoveHospitalAdminAsync(hospitalId, userId);
+                if (!result)
+                    return NotFound(new { message = "Hospital admin assignment not found" });
+
                 return Ok(new { message = "Hospital admin removed successfully" });
             }
             catch (Exception ex)

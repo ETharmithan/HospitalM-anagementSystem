@@ -86,5 +86,56 @@ namespace HospitalManagementSystem.Infrastructure.Repositories
                 .Where(d => d.HospitalId == hospitalId && d.IsActive)
                 .ToListAsync();
         }
+
+        public async Task<Hospital> GetByIdAsync(Guid id)
+        {
+            return await _context.Hospitals
+                .Include(h => h.HospitalAdmins)
+                .ThenInclude(ha => ha.User)
+                .FirstOrDefaultAsync(h => h.HospitalId == id);
+        }
+
+        public async Task<bool> AssignHospitalAdminAsync(Guid hospitalId, Guid userId)
+        {
+            // Check if already assigned
+            var existing = await _context.HospitalAdmins
+                .FirstOrDefaultAsync(ha => ha.HospitalId == hospitalId && ha.UserId == userId);
+            
+            if (existing != null)
+                return false; // Already assigned
+
+            var hospitalAdmin = new HospitalAdmin
+            {
+                HospitalAdminId = Guid.NewGuid(),
+                HospitalId = hospitalId,
+                UserId = userId,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.HospitalAdmins.Add(hospitalAdmin);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveHospitalAdminAsync(Guid hospitalId, Guid userId)
+        {
+            var hospitalAdmin = await _context.HospitalAdmins
+                .FirstOrDefaultAsync(ha => ha.HospitalId == hospitalId && ha.UserId == userId);
+            
+            if (hospitalAdmin == null)
+                return false;
+
+            _context.HospitalAdmins.Remove(hospitalAdmin);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> IsUserHospitalAdminAsync(Guid hospitalId, Guid userId)
+        {
+            return await _context.HospitalAdmins
+                .AnyAsync(ha => ha.HospitalId == hospitalId && ha.UserId == userId && ha.IsActive);
+        }
     }
 }
