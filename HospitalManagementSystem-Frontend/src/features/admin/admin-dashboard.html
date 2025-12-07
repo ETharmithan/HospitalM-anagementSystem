@@ -1,51 +1,417 @@
-<div class="min-h-screen bg-slate-50 text-slate-900">
-  <div class="max-w-6xl mx-auto py-10 px-4 space-y-8">
-    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <p class="text-sm uppercase tracking-wide text-slate-500">Welcome back, Admin</p>
-        <h1 class="text-3xl font-bold">Hospital Management Overview</h1>
+<div class="admin-dashboard">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">🏥</span>
+        <span class="logo-text">Hospital Admin</span>
       </div>
-      <span class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 font-semibold text-sm">Hospital scope</span>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab() === 'overview'" (click)="setActiveTab('overview')">
+        <span class="nav-icon">📊</span>
+        <span>Overview</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'doctors'" (click)="setActiveTab('doctors')">
+        <span class="nav-icon">👨‍⚕️</span>
+        <span>Doctors</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'departments'" (click)="setActiveTab('departments')">
+        <span class="nav-icon">🏢</span>
+        <span>Departments</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'appointments'" (click)="setActiveTab('appointments')">
+        <span class="nav-icon">📅</span>
+        <span>Appointments</span>
+      </button>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ currentUser()?.displayName?.charAt(0) || 'A' }}</div>
+        <div class="user-details">
+          <span class="user-name">{{ currentUser()?.displayName || 'Admin' }}</span>
+          <span class="user-role">Hospital Admin</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <span>🚪</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="content-header">
+      <div class="header-left">
+        <h1 class="page-title">
+          @switch (activeTab()) {
+            @case ('overview') { Dashboard Overview }
+            @case ('doctors') { Doctor Management }
+            @case ('departments') { Department Management }
+            @case ('appointments') { Appointments }
+          }
+        </h1>
+        <p class="page-subtitle">Manage your hospital operations efficiently</p>
+      </div>
+      <div class="header-right">
+        @if (activeTab() === 'doctors') {
+          <button class="btn btn-primary" (click)="openCreateDoctorModal()">
+            <span>+</span> Add Doctor
+          </button>
+        }
+        @if (activeTab() === 'departments') {
+          <button class="btn btn-primary" (click)="openCreateDepartmentModal()">
+            <span>+</span> Add Department
+          </button>
+        }
+      </div>
     </header>
 
-    <ng-container *ngIf="isLoading()">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let _ of [1,2,3,4,5]" class="h-32 rounded-2xl bg-white animate-pulse"></div>
-      </div>
-    </ng-container>
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- Overview Tab -->
+      @if (activeTab() === 'overview') {
+        @if (isLoading()) {
+          <div class="loading-grid">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+        } @else if (errorMessage()) {
+          <div class="error-card">
+            <span class="error-icon">⚠️</span>
+            <h3>Error Loading Data</h3>
+            <p>{{ errorMessage() }}</p>
+          </div>
+        } @else {
+          <div class="stats-grid">
+            <div class="stat-card stat-users">
+              <div class="stat-icon">👥</div>
+              <div class="stat-info">
+                <span class="stat-value">{{ overview()?.totalUsers || 0 }}</span>
+                <span class="stat-label">Total Users</span>
+              </div>
+            </div>
+            <div class="stat-card stat-doctors">
+              <div class="stat-icon">👨‍⚕️</div>
+              <div class="stat-info">
+                <span class="stat-value">{{ overview()?.totalDoctors || 0 }}</span>
+                <span class="stat-label">Doctors</span>
+              </div>
+            </div>
+            <div class="stat-card stat-patients">
+              <div class="stat-icon">🏃</div>
+              <div class="stat-info">
+                <span class="stat-value">{{ overview()?.totalPatients || 0 }}</span>
+                <span class="stat-label">Patients</span>
+              </div>
+            </div>
+            <div class="stat-card stat-appointments">
+              <div class="stat-icon">📅</div>
+              <div class="stat-info">
+                <span class="stat-value">{{ overview()?.totalAppointments || 0 }}</span>
+                <span class="stat-label">Appointments</span>
+              </div>
+            </div>
+            <div class="stat-card stat-departments">
+              <div class="stat-icon">🏢</div>
+              <div class="stat-info">
+                <span class="stat-value">{{ overview()?.totalDepartments || 0 }}</span>
+                <span class="stat-label">Departments</span>
+              </div>
+            </div>
+          </div>
 
-    <ng-container *ngIf="!isLoading()">
-      <ng-container *ngIf="overview(); else errorBlock">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="p-4 rounded-2xl bg-white shadow">
-            <p class="text-sm text-slate-500">Total Users</p>
-            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalUsers }} </p>
+          <!-- Quick Actions -->
+          <div class="section">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="quick-actions">
+              <button class="action-card" (click)="setActiveTab('doctors'); openCreateDoctorModal()">
+                <span class="action-icon">👨‍⚕️</span>
+                <span class="action-text">Add New Doctor</span>
+              </button>
+              <button class="action-card" (click)="setActiveTab('departments'); openCreateDepartmentModal()">
+                <span class="action-icon">🏢</span>
+                <span class="action-text">Add Department</span>
+              </button>
+              <button class="action-card" (click)="setActiveTab('appointments')">
+                <span class="action-icon">📅</span>
+                <span class="action-text">View Appointments</span>
+              </button>
+            </div>
           </div>
-          <div class="p-4 rounded-2xl bg-white shadow">
-            <p class="text-sm text-slate-500">Total Doctors</p>
-            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalDoctors }} </p>
+        }
+      }
+
+      <!-- Doctors Tab -->
+      @if (activeTab() === 'doctors') {
+        @if (isLoadingDoctors()) {
+          <div class="loading-spinner">Loading doctors...</div>
+        } @else if (doctors().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">👨‍⚕️</span>
+            <h3>No Doctors Yet</h3>
+            <p>Add your first doctor to get started</p>
+            <button class="btn btn-primary" (click)="openCreateDoctorModal()">Add Doctor</button>
           </div>
-          <div class="p-4 rounded-2xl bg-white shadow">
-            <p class="text-sm text-slate-500">Patients</p>
-            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalPatients }} </p>
+        } @else {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Doctor</th>
+                  <th>Specialization</th>
+                  <th>Department</th>
+                  <th>Contact</th>
+                  <th>Fee</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (doctor of doctors(); track doctor.doctorId) {
+                  <tr>
+                    <td>
+                      <div class="doctor-info">
+                        <div class="doctor-avatar">{{ doctor.firstName.charAt(0) }}{{ doctor.lastName.charAt(0) }}</div>
+                        <div>
+                          <div class="doctor-name">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</div>
+                          <div class="doctor-qualification">{{ doctor.qualification || 'N/A' }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ doctor.specialization || 'General' }}</td>
+                    <td>{{ doctor.departmentName || 'Unassigned' }}</td>
+                    <td>
+                      <div class="contact-info">
+                        <div>{{ doctor.email }}</div>
+                        <div class="phone">{{ doctor.phoneNumber || 'N/A' }}</div>
+                      </div>
+                    </td>
+                    <td>{{ doctor.consultationFee ? ('$' + doctor.consultationFee) : 'N/A' }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn-icon" title="Manage Schedule" (click)="openScheduleModal(doctor)">📅</button>
+                        <button class="btn-icon" title="Edit" (click)="openEditDoctorModal(doctor)">✏️</button>
+                        <button class="btn-icon btn-danger" title="Delete" (click)="deleteDoctor(doctor)">🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
-          <div class="p-4 rounded-2xl bg-white shadow">
-            <p class="text-sm text-slate-500">Appointments</p>
-            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalAppointments }} </p>
+        }
+      }
+
+      <!-- Departments Tab -->
+      @if (activeTab() === 'departments') {
+        @if (isLoadingDepartments()) {
+          <div class="loading-spinner">Loading departments...</div>
+        } @else if (departments().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">🏢</span>
+            <h3>No Departments Yet</h3>
+            <p>Add your first department to organize your hospital</p>
+            <button class="btn btn-primary" (click)="openCreateDepartmentModal()">Add Department</button>
           </div>
-          <div class="p-4 rounded-2xl bg-white shadow">
-            <p class="text-sm text-slate-500">Departments</p>
-            <p class="text-3xl font-bold text-slate-900">{{ overview()?.totalDepartments }} </p>
+        } @else {
+          <div class="departments-grid">
+            @for (department of departments(); track department.departmentId) {
+              <div class="department-card">
+                <div class="department-header">
+                  <h3 class="department-name">{{ department.name }}</h3>
+                  <span class="department-status" [class.active]="department.isActive">
+                    {{ department.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+                <p class="department-description">{{ department.description || 'No description available' }}</p>
+                <div class="department-actions">
+                  <button class="btn btn-sm btn-outline" (click)="openEditDepartmentModal(department)">Edit</button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteDepartment(department)">Delete</button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- Appointments Tab -->
+      @if (activeTab() === 'appointments') {
+        <div class="coming-soon">
+          <span class="coming-soon-icon">📅</span>
+          <h3>Appointments Management</h3>
+          <p>View and manage all hospital appointments here. This feature shows appointments for all doctors in your hospital.</p>
+        </div>
+      }
+    </div>
+  </main>
+</div>
+
+<!-- Doctor Modal -->
+@if (showDoctorModal()) {
+  <div class="modal-overlay" (click)="closeDoctorModal()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingDoctor() ? 'Edit Doctor' : 'Add New Doctor' }}</h2>
+        <button class="close-btn" (click)="closeDoctorModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" [(ngModel)]="doctorForm.firstName" placeholder="First name">
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" [(ngModel)]="doctorForm.lastName" placeholder="Last name">
           </div>
         </div>
-      </ng-container>
-    </ng-container>
-
-    <ng-template #errorBlock>
-      <div class="rounded-2xl bg-red-50 border border-red-200 p-6">
-        <p class="text-red-700 font-semibold">{{ errorMessage() }}</p>
-        <p class="text-sm text-red-500">Please refresh or check the server logs.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="doctorForm.email" placeholder="doctor@hospital.com">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" [(ngModel)]="doctorForm.phoneNumber" placeholder="+1 234 567 8900">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Department *</label>
+            <select [(ngModel)]="doctorForm.departmentId">
+              <option value="">-- Select Department --</option>
+              @for (dept of departments(); track dept.departmentId) {
+                <option [value]="dept.departmentId">{{ dept.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Specialization</label>
+            <input type="text" [(ngModel)]="doctorForm.specialization" placeholder="e.g., Cardiology">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Qualification</label>
+            <input type="text" [(ngModel)]="doctorForm.qualification" placeholder="e.g., MD, MBBS">
+          </div>
+          <div class="form-group">
+            <label>Experience (years)</label>
+            <input type="number" [(ngModel)]="doctorForm.experience" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Consultation Fee ($)</label>
+          <input type="number" [(ngModel)]="doctorForm.consultationFee" min="0" step="0.01">
+        </div>
       </div>
-    </ng-template>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeDoctorModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveDoctor()" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Saving...' : (editingDoctor() ? 'Update Doctor' : 'Add Doctor') }}
+        </button>
+      </div>
+    </div>
   </div>
-</div>
+}
+
+<!-- Department Modal -->
+@if (showDepartmentModal()) {
+  <div class="modal-overlay" (click)="closeDepartmentModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingDepartment() ? 'Edit Department' : 'Add New Department' }}</h2>
+        <button class="close-btn" (click)="closeDepartmentModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Department Name *</label>
+          <input type="text" [(ngModel)]="departmentForm.name" placeholder="e.g., Cardiology">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="departmentForm.description" placeholder="Brief description of the department..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeDepartmentModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveDepartment()" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Saving...' : (editingDepartment() ? 'Update' : 'Create Department') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Schedule Modal -->
+@if (showScheduleModal()) {
+  <div class="modal-overlay" (click)="closeScheduleModal()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Manage Schedule - Dr. {{ selectedDoctorForSchedule()?.firstName }} {{ selectedDoctorForSchedule()?.lastName }}</h2>
+        <button class="close-btn" (click)="closeScheduleModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <!-- Add New Schedule -->
+        <div class="schedule-form">
+          <h3>Add New Schedule</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Day of Week</label>
+              <select [(ngModel)]="scheduleForm.dayOfWeek">
+                @for (day of daysOfWeek; track day.value) {
+                  <option [value]="day.value">{{ day.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Start Time</label>
+              <input type="time" [(ngModel)]="scheduleForm.startTime">
+            </div>
+            <div class="form-group">
+              <label>End Time</label>
+              <input type="time" [(ngModel)]="scheduleForm.endTime">
+            </div>
+            <div class="form-group">
+              <label>Max Patients</label>
+              <input type="number" [(ngModel)]="scheduleForm.maxPatients" min="1">
+            </div>
+          </div>
+          <button class="btn btn-primary" (click)="addSchedule()" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Adding...' : 'Add Schedule' }}
+          </button>
+        </div>
+
+        <!-- Existing Schedules -->
+        <div class="existing-schedules">
+          <h3>Current Schedules</h3>
+          @if (isLoadingSchedules()) {
+            <div class="loading-spinner">Loading schedules...</div>
+          } @else if (schedules().length === 0) {
+            <p class="no-schedules">No schedules set for this doctor yet.</p>
+          } @else {
+            <div class="schedule-list">
+              @for (schedule of schedules(); track schedule.scheduleId) {
+                <div class="schedule-item">
+                  <div class="schedule-day">{{ getDayName(schedule.dayOfWeek) }}</div>
+                  <div class="schedule-time">{{ schedule.startTime }} - {{ schedule.endTime }}</div>
+                  <div class="schedule-patients">Max: {{ schedule.maxPatients }} patients</div>
+                  <button class="btn-icon btn-danger" (click)="deleteSchedule(schedule)">🗑️</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeScheduleModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}
