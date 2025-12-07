@@ -51,6 +51,13 @@ namespace HospitalManagementSystem.Presentation
             builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
             builder.Services.AddScoped<IHospitalService, HospitalService>();
 
+            // Chat Services
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
+            builder.Services.AddScoped<IChatService, ChatService>();
+
+            // SignalR
+            builder.Services.AddSignalR();
+
 
 
 
@@ -141,6 +148,7 @@ namespace HospitalManagementSystem.Presentation
             app.UseCors(policy =>
                 policy.AllowAnyHeader()
                   .AllowAnyMethod()
+                  .AllowCredentials() // Required for SignalR
                   .WithOrigins("http://localhost:4200", "https://localhost:4200")); // Replace with your Angular app's URL
 
             app.UseAuthentication();
@@ -151,6 +159,9 @@ namespace HospitalManagementSystem.Presentation
 
 
             app.MapControllers();
+
+            // Map SignalR Hub
+            app.MapHub<HospitalManagementSystem.Presentation.Hubs.ChatHub>("/hubs/chat");
 
             app.Run();
         }

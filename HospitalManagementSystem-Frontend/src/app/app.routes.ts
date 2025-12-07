@@ -54,5 +54,12 @@ export const routes: Routes = [
   // Hospitals listing (public)
   { path: 'hospitals', loadComponent: () => import('../features/hospital/hospital-list/hospital-list').then(c => c.HospitalList) },
   
+  // Chat
+  { 
+    path: 'chat', 
+    loadComponent: () => import('../features/chat/chat').then(c => c.ChatComponent),
+    canActivate: [authGuard]
+  },
+
   { path: '**', redirectTo: 'home' } // Catch-all route
 ];

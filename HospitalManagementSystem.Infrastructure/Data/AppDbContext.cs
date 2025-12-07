@@ -1,6 +1,7 @@
 ﻿using HospitalManagementSystem.Domain.Models.Doctors;
 using HospitalManagementSystem.Domain.Models;
 using HospitalManagementSystem.Domain.Models.Patient;
+using HospitalManagementSystem.Domain.Models.Chat;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,12 @@ namespace HospitalManagementSystem.Infrastructure.Data
         public DbSet<Patient_Medical_Related_Info> PatientMedicalRelatedInfo { get; set; } = default!;
         public DbSet<Patient_Emergency_Contact> PatientEmergencyContact { get; set; } = default!;
         public DbSet<Patient_Login_Info> PatientLoginInfo { get; set; } = default!;
+
+        // --- Chat Sets ---
+        public DbSet<ChatSession> ChatSessions { get; set; } = null!;
+        public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
+        public DbSet<ChatRequest> ChatRequests { get; set; } = null!;
+        public DbSet<DoctorChatAvailability> DoctorChatAvailabilities { get; set; } = null!;
 
        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -117,6 +124,47 @@ namespace HospitalManagementSystem.Infrastructure.Data
             modelBuilder.Entity<DoctorAvailability>()
             .HasIndex(da => new { da.DoctorId, da.Date })
             .IsUnique();
+
+            // --- Chat Configurations ---
+            modelBuilder.Entity<ChatSession>()
+                .HasMany(cs => cs.Messages)
+                .WithOne(cm => cm.Session)
+                .HasForeignKey(cm => cm.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChatSession>()
+                .HasOne(cs => cs.Patient)
+                .WithMany()
+                .HasForeignKey(cs => cs.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChatSession>()
+                .HasOne(cs => cs.Doctor)
+                .WithMany()
+                .HasForeignKey(cs => cs.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChatRequest>()
+                .HasOne(cr => cr.Patient)
+                .WithMany()
+                .HasForeignKey(cr => cr.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ChatRequest>()
+                .HasOne(cr => cr.Doctor)
+                .WithMany()
+                .HasForeignKey(cr => cr.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DoctorChatAvailability>()
+                .HasOne(dca => dca.Doctor)
+                .WithMany()
+                .HasForeignKey(dca => dca.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DoctorChatAvailability>()
+                .HasIndex(dca => dca.DoctorId)
+                .IsUnique();
 
         }
     }

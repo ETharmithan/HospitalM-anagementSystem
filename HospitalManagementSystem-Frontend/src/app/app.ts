@@ -33,8 +33,18 @@ export class App {
   private navRoutes = ['/', '/home', '/doctors', '/hospitals', '/login', '/register', '/patient-register', '/about', '/services', '/contact'];
   
   showNav = computed(() => {
-    const route = this.currentRoute();
-    return this.navRoutes.some(r => route === r || route.startsWith('/doctor/') && !route.includes('dashboard'));
+    const url = this.currentRoute();
+    const [path] = url.split('?'); // Ignore query params
+
+    // Check exact matches
+    if (this.navRoutes.includes(path)) return true;
+
+    // Check /doctor/:id (but not dashboard)
+    if (path.startsWith('/doctor/') && !path.includes('dashboard')) {
+      return true;
+    }
+
+    return false;
   });
 
   constructor() {
