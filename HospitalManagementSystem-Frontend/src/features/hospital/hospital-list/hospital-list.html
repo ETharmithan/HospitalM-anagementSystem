@@ -1,0 +1,115 @@
+<div class="hospital-list-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <button class="back-btn" (click)="goBack()">
+        ← Back
+      </button>
+      <h1>Hospitals Directory</h1>
+      <p class="subtitle">Find hospitals in our network</p>
+    </div>
+  </header>
+
+  <!-- Search and Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        placeholder="Search hospitals by name, address..."
+        class="search-input"
+      />
+    </div>
+    <div class="filter-group">
+      <select 
+        [(ngModel)]="selectedCity"
+        (change)="onCityChange()"
+        class="filter-select">
+        <option value="">All Cities</option>
+        @for (city of cities(); track city) {
+          <option [value]="city">{{ city }}</option>
+        }
+      </select>
+      @if (searchTerm || selectedCity) {
+        <button class="clear-btn" (click)="clearFilters()">
+          Clear Filters
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div class="results-info">
+    <span>{{ filteredHospitals().length }} hospital(s) found</span>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading hospitals...</p>
+    </div>
+  }
+
+  <!-- Hospital List -->
+  @if (!isLoading()) {
+    @if (filteredHospitals().length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">🏥</span>
+        <h3>No Hospitals Found</h3>
+        <p>Try adjusting your search criteria</p>
+        @if (searchTerm || selectedCity) {
+          <button class="btn btn-primary" (click)="clearFilters()">
+            Clear Filters
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="hospitals-grid">
+        @for (hospital of filteredHospitals(); track hospital.hospitalId) {
+          <div class="hospital-card">
+            <div class="hospital-header">
+              <div class="hospital-icon">🏥</div>
+              <div class="hospital-title">
+                <h3>{{ hospital.name }}</h3>
+                <span class="status-badge active">Active</span>
+              </div>
+            </div>
+            
+            <div class="hospital-details">
+              <div class="detail-item">
+                <span class="detail-icon">📍</span>
+                <span>{{ hospital.address }}, {{ hospital.city }}, {{ hospital.state }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">📞</span>
+                <span>{{ hospital.phoneNumber }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">✉️</span>
+                <span>{{ hospital.email }}</span>
+              </div>
+              @if (hospital.website) {
+                <div class="detail-item">
+                  <span class="detail-icon">🌐</span>
+                  <a [href]="hospital.website" target="_blank">{{ hospital.website }}</a>
+                </div>
+              }
+            </div>
+
+            @if (hospital.description) {
+              <p class="hospital-description">{{ hospital.description }}</p>
+            }
+
+            <div class="hospital-actions">
+              <button class="btn btn-primary" (click)="viewHospitalDoctors(hospital.hospitalId)">
+                View Doctors
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

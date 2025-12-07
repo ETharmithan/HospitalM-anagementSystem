@@ -1,0 +1,285 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1>Doctor Dashboard</h1>
+      <div class="header-actions">
+        <span class="welcome-text">Welcome, Dr. {{ userName }}</span>
+        <button class="btn btn-outline" (click)="onLogout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon today">📅</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ todayAppointments().length }}</span>
+        <span class="stat-label">Today's Appointments</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon pending">⏳</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ pendingAppointments() }}</span>
+        <span class="stat-label">Pending</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon completed">✅</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ completedAppointments() }}</span>
+        <span class="stat-label">Completed</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon total">📊</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalAppointments() }}</span>
+        <span class="stat-label">Total Appointments</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'today'"
+      (click)="setActiveTab('today')">
+      Today's Appointments
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'upcoming'"
+      (click)="setActiveTab('upcoming')">
+      Upcoming
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'all'"
+      (click)="setActiveTab('all')">
+      All Appointments
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'hospitals'"
+      (click)="setActiveTab('hospitals')">
+      Available Hospitals
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading appointments...</p>
+    </div>
+  }
+
+  <!-- Today's Appointments -->
+  @if (!isLoading() && activeTab() === 'today') {
+    <div class="appointments-section">
+      <h2>Today's Appointments</h2>
+      @if (todayAppointments().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📭</span>
+          <p>No appointments scheduled for today</p>
+        </div>
+      } @else {
+        <div class="appointments-list">
+          @for (apt of todayAppointments(); track apt.appointmentId) {
+            <div class="appointment-card">
+              <div class="appointment-time">
+                <span class="time">{{ apt.appointmentTime }}</span>
+              </div>
+              <div class="appointment-details">
+                <div class="patient-info">
+                  <strong>Patient ID:</strong> {{ apt.patientId }}
+                </div>
+                <div class="appointment-status">
+                  <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
+                    {{ apt.appointmentStatus }}
+                  </span>
+                </div>
+              </div>
+              <div class="appointment-actions">
+                @if (apt.appointmentStatus === 'Scheduled' || apt.appointmentStatus === 'Pending') {
+                  <button class="btn btn-primary btn-sm" (click)="openPrescriptionModal(apt)">
+                    Add Prescription
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt)">
+                    Cancel
+                  </button>
+                }
+                @if (apt.appointmentStatus === 'Completed') {
+                  <button class="btn btn-secondary btn-sm" (click)="openPrescriptionModal(apt)">
+                    View/Edit Prescription
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Upcoming Appointments -->
+  @if (!isLoading() && activeTab() === 'upcoming') {
+    <div class="appointments-section">
+      <h2>Upcoming Appointments</h2>
+      @if (upcomingAppointments().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📅</span>
+          <p>No upcoming appointments</p>
+        </div>
+      } @else {
+        <div class="appointments-list">
+          @for (apt of upcomingAppointments(); track apt.appointmentId) {
+            <div class="appointment-card">
+              <div class="appointment-date">
+                <span class="date">{{ formatDate(apt.appointmentDate) }}</span>
+                <span class="time">{{ apt.appointmentTime }}</span>
+              </div>
+              <div class="appointment-details">
+                <div class="patient-info">
+                  <strong>Patient ID:</strong> {{ apt.patientId }}
+                </div>
+                <div class="appointment-status">
+                  <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
+                    {{ apt.appointmentStatus }}
+                  </span>
+                </div>
+              </div>
+              <div class="appointment-actions">
+                @if (apt.appointmentStatus !== 'Cancelled') {
+                  <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt)">
+                    Cancel
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- All Appointments -->
+  @if (!isLoading() && activeTab() === 'all') {
+    <div class="appointments-section">
+      <h2>All Appointments</h2>
+      @if (appointments().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">📋</span>
+          <p>No appointments found</p>
+        </div>
+      } @else {
+        <div class="appointments-table-container">
+          <table class="appointments-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Patient ID</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (apt of appointments(); track apt.appointmentId) {
+                <tr>
+                  <td>{{ formatDate(apt.appointmentDate) }}</td>
+                  <td>{{ apt.appointmentTime }}</td>
+                  <td>{{ apt.patientId }}</td>
+                  <td>
+                    <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
+                      {{ apt.appointmentStatus }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="table-actions">
+                      @if (apt.appointmentStatus === 'Scheduled' || apt.appointmentStatus === 'Pending') {
+                        <button class="btn btn-primary btn-xs" (click)="openPrescriptionModal(apt)">
+                          Prescription
+                        </button>
+                        <button class="btn btn-danger btn-xs" (click)="cancelAppointment(apt)">
+                          Cancel
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Available Hospitals -->
+  @if (!isLoading() && activeTab() === 'hospitals') {
+    <div class="hospitals-section">
+      <h2>Available Hospitals in System</h2>
+      <p class="section-description">View all hospitals where you can provide services</p>
+      <div class="coming-soon">
+        <span class="icon">🏥</span>
+        <p>Hospital listing coming soon...</p>
+        <a routerLink="/hospitals" class="btn btn-primary">View All Hospitals</a>
+      </div>
+    </div>
+  }
+
+  <!-- Prescription Modal -->
+  @if (showPrescriptionModal()) {
+    <div class="modal-overlay" (click)="closePrescriptionModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Prescription for Appointment</h3>
+          <button class="close-btn" (click)="closePrescriptionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="diagnosis">Diagnosis *</label>
+            <textarea 
+              id="diagnosis" 
+              [(ngModel)]="prescriptionForm.diagnosis"
+              rows="3"
+              placeholder="Enter diagnosis..."
+              class="form-control"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="prescription">Prescription *</label>
+            <textarea 
+              id="prescription" 
+              [(ngModel)]="prescriptionForm.prescription"
+              rows="4"
+              placeholder="Enter prescription details..."
+              class="form-control"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="notes">Additional Notes</label>
+            <textarea 
+              id="notes" 
+              [(ngModel)]="prescriptionForm.notes"
+              rows="2"
+              placeholder="Any additional notes..."
+              class="form-control"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closePrescriptionModal()">Cancel</button>
+          <button 
+            class="btn btn-primary" 
+            (click)="submitPrescription()"
+            [disabled]="isSubmittingPrescription()">
+            {{ isSubmittingPrescription() ? 'Saving...' : 'Save Prescription' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
