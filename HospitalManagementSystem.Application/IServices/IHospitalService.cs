@@ -12,5 +12,9 @@ namespace HospitalManagementSystem.Application.IServices
         Task<HospitalResponseDto?> UpdateHospitalAsync(Guid hospitalId, HospitalRequestDto hospitalDto);
         Task<bool> DeleteHospitalAsync(Guid hospitalId);
         Task<List<DepartmentResponseDto>> GetHospitalDepartmentsAsync(Guid hospitalId);
+        
+        // Hospital Admin Management
+        Task<bool> AssignHospitalAdminAsync(Guid hospitalId, Guid userId);
+        Task<bool> RemoveHospitalAdminAsync(Guid hospitalId, Guid userId);
     }
 }

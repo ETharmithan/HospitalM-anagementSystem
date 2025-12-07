@@ -227,12 +227,26 @@ export class PatientRegister implements OnInit {
         
     // Register user account
     this.accountService.register(registerData).subscribe({
-      next: (userResponse: any) => {
+      next: (response: any) => {
         // Don't set isLoading = false here - patient creation will handle it
+        
+        // Check if email verification is required
+        if (response.requiresVerification) {
+          this.isLoading = false;
+          this.toastService.success(response.message || 'Registration successful! Please verify your email.');
+          
+          // Navigate to verify-email page
+          this.router.navigate(['/verify-email'], { 
+            queryParams: { email: registerData.email },
+            state: { email: registerData.email }
+          });
+          return;
+        }
         
         this.toastService.success('User account created successfully!');
         
         // Call success callback with user response to continue with patient creation
+        const userResponse = response.user || response;
         onSuccess(userResponse);
       },
       error: (error: any) => {

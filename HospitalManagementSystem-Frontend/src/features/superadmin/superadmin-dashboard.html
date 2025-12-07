@@ -1,51 +1,370 @@
-<div class="min-h-screen bg-slate-900 text-white">
-  <div class="max-w-6xl mx-auto py-10 px-4 space-y-8">
-    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div>
-        <p class="text-sm uppercase tracking-wide text-emerald-300">Super Admin Control</p>
-        <h1 class="text-3xl font-bold">Global Healthcare Overview</h1>
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <span class="badge">Super Admin</span>
+        <h1>System Administration</h1>
       </div>
-      <span class="px-4 py-2 rounded-full bg-white/10 text-white font-semibold text-sm">Full access</span>
-    </header>
-
-    <ng-container *ngIf="isLoading()">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let _ of [1,2,3,4,5]" class="h-32 rounded-2xl bg-white/5 animate-pulse"></div>
+      <div class="header-right">
+        <span class="welcome-text">Welcome, {{ userName }}</span>
+        <button class="btn btn-outline" (click)="onLogout()">Logout</button>
       </div>
-    </ng-container>
+    </div>
+  </header>
 
-    <ng-container *ngIf="!isLoading()">
-      <ng-container *ngIf="overview(); else errorBlock">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="p-4 rounded-2xl bg-white/10 border border-white/10">
-            <p class="text-sm text-emerald-200">Total Users</p>
-            <p class="text-3xl font-bold text-white">{{ overview()?.totalUsers }}</p>
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'overview'"
+      (click)="switchTab('overview')">
+      📊 Overview
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'hospitals'"
+      (click)="switchTab('hospitals')">
+      🏥 Hospitals
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'admins'"
+      (click)="switchTab('admins')">
+      👤 Admins
+    </button>
+  </nav>
+
+  <!-- Content Area -->
+  <main class="dashboard-content">
+    
+    <!-- Overview Tab -->
+    @if (activeTab() === 'overview') {
+      <div class="stats-grid">
+        @if (isLoading()) {
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="stat-card skeleton"></div>
+          }
+        } @else {
+          <div class="stat-card">
+            <div class="stat-icon hospitals">🏥</div>
+            <div class="stat-info">
+              <span class="stat-value">{{ hospitals().length }}</span>
+              <span class="stat-label">Hospitals</span>
+            </div>
           </div>
-          <div class="p-4 rounded-2xl bg-white/10 border border-white/10">
-            <p class="text-sm text-emerald-200">Total Doctors</p>
-            <p class="text-3xl font-bold text-white">{{ overview()?.totalDoctors }}</p>
+          <div class="stat-card">
+            <div class="stat-icon users">👥</div>
+            <div class="stat-info">
+              <span class="stat-value">{{ overview()?.totalUsers || 0 }}</span>
+              <span class="stat-label">Total Users</span>
+            </div>
           </div>
-          <div class="p-4 rounded-2xl bg-white/10 border border-white/10">
-            <p class="text-sm text-emerald-200">Patients</p>
-            <p class="text-3xl font-bold text-white">{{ overview()?.totalPatients }}</p>
+          <div class="stat-card">
+            <div class="stat-icon doctors">👨‍⚕️</div>
+            <div class="stat-info">
+              <span class="stat-value">{{ overview()?.totalDoctors || 0 }}</span>
+              <span class="stat-label">Doctors</span>
+            </div>
           </div>
-          <div class="p-4 rounded-2xl bg-white/10 border border-white/10">
-            <p class="text-sm text-emerald-200">Appointments</p>
-            <p class="text-3xl font-bold text-white">{{ overview()?.totalAppointments }}</p>
+          <div class="stat-card">
+            <div class="stat-icon patients">🧑‍🤝‍🧑</div>
+            <div class="stat-info">
+              <span class="stat-value">{{ overview()?.totalPatients || 0 }}</span>
+              <span class="stat-label">Patients</span>
+            </div>
           </div>
-          <div class="p-4 rounded-2xl bg-white/10 border border-white/10">
-            <p class="text-sm text-emerald-200">Departments</p>
-            <p class="text-3xl font-bold text-white">{{ overview()?.totalDepartments }}</p>
+          <div class="stat-card">
+            <div class="stat-icon appointments">📅</div>
+            <div class="stat-info">
+              <span class="stat-value">{{ overview()?.totalAppointments || 0 }}</span>
+              <span class="stat-label">Appointments</span>
+            </div>
           </div>
+        }
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+          <button class="action-btn" (click)="openCreateHospitalModal()">
+            <span class="action-icon">🏥</span>
+            <span>Add Hospital</span>
+          </button>
+          <button class="action-btn" (click)="openCreateAdminModal()">
+            <span class="action-icon">👤</span>
+            <span>Add Admin</span>
+          </button>
+          <button class="action-btn" (click)="switchTab('hospitals')">
+            <span class="action-icon">📋</span>
+            <span>Manage Hospitals</span>
+          </button>
         </div>
-      </ng-container>
-    </ng-container>
-
-    <ng-template #errorBlock>
-      <div class="rounded-2xl bg-red-700/20 border border-red-500 p-6">
-        <p class="text-red-200 font-semibold">{{ errorMessage() }}</p>
-        <p class="text-sm text-red-100">Refresh to retry.</p>
       </div>
-    </ng-template>
-  </div>
+    }
+
+    <!-- Hospitals Tab -->
+    @if (activeTab() === 'hospitals') {
+      <div class="section-header">
+        <h2>Hospital Management</h2>
+        <button class="btn btn-primary" (click)="openCreateHospitalModal()">
+          + Add Hospital
+        </button>
+      </div>
+
+      @if (isLoadingHospitals()) {
+        <div class="loading-spinner">Loading hospitals...</div>
+      } @else if (hospitals().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🏥</span>
+          <h3>No Hospitals Yet</h3>
+          <p>Create your first hospital to get started</p>
+          <button class="btn btn-primary" (click)="openCreateHospitalModal()">Add Hospital</button>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>City</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Admins</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (hospital of hospitals(); track hospital.hospitalId) {
+                <tr>
+                  <td class="hospital-name">
+                    <strong>{{ hospital.name }}</strong>
+                    @if (hospital.address) {
+                      <small>{{ hospital.address }}</small>
+                    }
+                  </td>
+                  <td>{{ hospital.city || '-' }}</td>
+                  <td>{{ hospital.phoneNumber || '-' }}</td>
+                  <td>{{ hospital.email || '-' }}</td>
+                  <td>
+                    <span class="admin-count">{{ hospital.hospitalAdmins?.length || 0 }}</span>
+                  </td>
+                  <td class="actions">
+                    <button class="btn-icon" title="Edit" (click)="openEditHospitalModal(hospital)">✏️</button>
+                    <button class="btn-icon" title="Assign Admin" (click)="openAssignAdminModal(hospital)">👤</button>
+                    <button class="btn-icon danger" title="Delete" (click)="deleteHospital(hospital)">🗑️</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- Admins Tab -->
+    @if (activeTab() === 'admins') {
+      <div class="section-header">
+        <h2>Admin Management</h2>
+        <button class="btn btn-primary" (click)="openCreateAdminModal()">
+          + Add Admin
+        </button>
+      </div>
+
+      @if (isLoadingAdmins()) {
+        <div class="loading-spinner">Loading admins...</div>
+      } @else if (admins().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">👤</span>
+          <h3>No Admins Yet</h3>
+          <p>Create admin accounts to manage hospitals</p>
+          <button class="btn btn-primary" (click)="openCreateAdminModal()">Add Admin</button>
+        </div>
+      } @else {
+        <div class="cards-grid">
+          @for (admin of admins(); track admin.userId) {
+            <div class="admin-card">
+              <div class="admin-avatar">{{ admin.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
+              <div class="admin-info">
+                <h3>{{ admin.username }}</h3>
+                <p>{{ admin.email }}</p>
+                <span class="role-badge">{{ admin.role }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </main>
+
+  <!-- Hospital Modal -->
+  @if (showHospitalModal()) {
+    <div class="modal-overlay" (click)="closeHospitalModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editingHospital() ? 'Edit Hospital' : 'Add New Hospital' }}</h2>
+          <button class="close-btn" (click)="closeHospitalModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Hospital Name *</label>
+            <input type="text" [(ngModel)]="hospitalForm.name" placeholder="Enter hospital name">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Address *</label>
+              <input type="text" [(ngModel)]="hospitalForm.address" placeholder="Street address">
+            </div>
+            <div class="form-group">
+              <label>City *</label>
+              <input type="text" [(ngModel)]="hospitalForm.city" placeholder="City">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>State/Province *</label>
+              <input type="text" [(ngModel)]="hospitalForm.state" placeholder="State">
+            </div>
+            <div class="form-group">
+              <label>Country *</label>
+              <input type="text" [(ngModel)]="hospitalForm.country" placeholder="Country">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Postal Code *</label>
+              <input type="text" [(ngModel)]="hospitalForm.postalCode" placeholder="Postal code">
+            </div>
+            <div class="form-group">
+              <label>Phone *</label>
+              <input type="tel" [(ngModel)]="hospitalForm.phoneNumber" placeholder="Phone number">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="hospitalForm.email" placeholder="Email address">
+          </div>
+          <div class="form-group">
+            <label>Website</label>
+            <input type="url" [(ngModel)]="hospitalForm.website" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea [(ngModel)]="hospitalForm.description" placeholder="Brief description..." rows="3"></textarea>
+          </div>
+          
+          <!-- Admin section for new hospital -->
+          @if (!editingHospital()) {
+            <div class="admin-section">
+              <h3>Hospital Admin (Required)</h3>
+              <p class="form-hint">Create an admin account to manage this hospital</p>
+              <div class="form-group">
+                <label>Admin Name *</label>
+                <input type="text" [(ngModel)]="hospitalAdminForm.displayName" placeholder="Enter admin full name">
+              </div>
+              <div class="form-group">
+                <label>Admin Email *</label>
+                <input type="email" [(ngModel)]="hospitalAdminForm.email" placeholder="admin@example.com">
+              </div>
+              <div class="form-group">
+                <label>Admin Password *</label>
+                <input type="password" [(ngModel)]="hospitalAdminForm.password" placeholder="Minimum 8 characters">
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeHospitalModal()">Cancel</button>
+          <button class="btn btn-primary" (click)="saveHospital()" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editingHospital() ? 'Update' : 'Create Hospital & Admin') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Admin Modal -->
+  @if (showAdminModal()) {
+    <div class="modal-overlay" (click)="closeAdminModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Create New Admin</h2>
+          <button class="close-btn" (click)="closeAdminModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Select Hospital *</label>
+            @if (isLoadingHospitals()) {
+              <select disabled>
+                <option>Loading hospitals...</option>
+              </select>
+            } @else if (hospitals().length === 0) {
+              <select disabled>
+                <option>No hospitals available. Create a hospital first.</option>
+              </select>
+            } @else {
+              <select [(ngModel)]="adminForm.hospitalId">
+                <option value="">-- Select a Hospital --</option>
+                @for (hospital of hospitals(); track hospital.hospitalId) {
+                  <option [value]="hospital.hospitalId">{{ hospital.name }}</option>
+                }
+              </select>
+            }
+          </div>
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" [(ngModel)]="adminForm.displayName" placeholder="Enter full name">
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="adminForm.email" placeholder="admin@example.com">
+          </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" [(ngModel)]="adminForm.password" placeholder="Minimum 8 characters">
+          </div>
+          <p class="form-hint">The admin will be assigned to the selected hospital and will receive an email to verify their account.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeAdminModal()">Cancel</button>
+          <button class="btn btn-primary" (click)="createAdmin()" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Creating...' : 'Create Admin' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Assign Admin Modal -->
+  @if (showAssignAdminModal()) {
+    <div class="modal-overlay" (click)="closeAssignAdminModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Assign Admin to {{ selectedHospitalForAdmin()?.name }}</h2>
+          <button class="close-btn" (click)="closeAssignAdminModal()">×</button>
+        </div>
+        <div class="modal-body">
+          @if (admins().length === 0) {
+            <p class="empty-message">No admins available. Create an admin first.</p>
+          } @else {
+            <div class="admin-list">
+              @for (admin of admins(); track admin.userId) {
+                <div class="admin-list-item" (click)="assignAdminToHospital(admin)">
+                  <div class="admin-avatar small">{{ admin.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
+                  <div class="admin-details">
+                    <strong>{{ admin.username }}</strong>
+                    <span>{{ admin.email }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeAssignAdminModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

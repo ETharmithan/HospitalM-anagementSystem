@@ -29,7 +29,6 @@ namespace HospitalManagementSystem.Application.DTOs.HospitalDto.Request_Dto
         public required string PostalCode { get; set; }
 
         [Required]
-        [Phone]
         [StringLength(20)]
         public required string PhoneNumber { get; set; }
 
@@ -38,7 +37,6 @@ namespace HospitalManagementSystem.Application.DTOs.HospitalDto.Request_Dto
         [StringLength(200)]
         public required string Email { get; set; }
 
-        [Url]
         [StringLength(500)]
         public string? Website { get; set; }
 

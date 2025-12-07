@@ -88,6 +88,16 @@ namespace HospitalManagementSystem.Application.Services
             }).ToList();
         }
 
+        public async Task<bool> AssignHospitalAdminAsync(Guid hospitalId, Guid userId)
+        {
+            return await _hospitalRepository.AssignHospitalAdminAsync(hospitalId, userId);
+        }
+
+        public async Task<bool> RemoveHospitalAdminAsync(Guid hospitalId, Guid userId)
+        {
+            return await _hospitalRepository.RemoveHospitalAdminAsync(hospitalId, userId);
+        }
+
         private HospitalResponseDto MapToHospitalResponseDto(Hospital hospital)
         {
             return new HospitalResponseDto
@@ -106,7 +116,7 @@ namespace HospitalManagementSystem.Application.Services
                 IsActive = hospital.IsActive,
                 CreatedAt = hospital.CreatedAt,
                 UpdatedAt = hospital.UpdatedAt,
-                HospitalAdmins = hospital.HospitalAdmins.Select(ha => new HospitalAdminResponseDto
+                HospitalAdmins = hospital.HospitalAdmins?.Select(ha => new HospitalAdminResponseDto
                 {
                     HospitalAdminId = ha.HospitalAdminId,
                     HospitalId = ha.HospitalId,
@@ -116,7 +126,7 @@ namespace HospitalManagementSystem.Application.Services
                     IsActive = ha.IsActive,
                     CreatedAt = ha.CreatedAt,
                     UpdatedAt = ha.UpdatedAt
-                }).ToList()
+                }).ToList() ?? new List<HospitalAdminResponseDto>()
             };
         }
     }
