@@ -7,7 +7,9 @@ namespace HospitalManagementSystem.Application.IServices
     public interface IHospitalService
     {
         Task<List<HospitalResponseDto>> GetAllHospitalsAsync();
+        Task<List<HospitalResponseDto>> GetAllAsync();
         Task<HospitalResponseDto?> GetHospitalByIdAsync(Guid hospitalId);
+        Task<HospitalResponseDto?> GetByIdAsync(Guid hospitalId);
         Task<HospitalResponseDto> CreateHospitalAsync(HospitalRequestDto hospitalDto);
         Task<HospitalResponseDto?> UpdateHospitalAsync(Guid hospitalId, HospitalRequestDto hospitalDto);
         Task<bool> DeleteHospitalAsync(Guid hospitalId);

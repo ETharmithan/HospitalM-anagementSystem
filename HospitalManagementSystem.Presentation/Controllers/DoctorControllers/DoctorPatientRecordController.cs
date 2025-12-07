@@ -30,6 +30,22 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
             return Ok(result);
         }
 
+        // Get all prescriptions for a specific patient (doctor can view patient's history)
+        [HttpGet("patient/{patientId:guid}")]
+        public async Task<IActionResult> GetByPatientId(Guid patientId)
+        {
+            var result = await _doctorPatientRecordsService.GetByPatientIdAsync(patientId);
+            return Ok(result);
+        }
+
+        // Get all prescriptions created by a specific doctor
+        [HttpGet("doctor/{doctorId:guid}")]
+        public async Task<IActionResult> GetByDoctorId(Guid doctorId)
+        {
+            var result = await _doctorPatientRecordsService.GetByDoctorIdAsync(doctorId);
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(DoctorPatientRecordsRequestDto doctorPatientRecordsRequestDto)
         {
