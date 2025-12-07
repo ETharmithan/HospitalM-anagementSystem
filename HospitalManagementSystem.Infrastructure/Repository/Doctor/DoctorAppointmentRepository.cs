@@ -21,24 +21,40 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
 
         public async Task<IEnumerable<DoctorAppointment>> GetAllAsync()
         {
-            return await _appDbContext.DoctorAppointments.ToListAsync();
+            return await _appDbContext.DoctorAppointments
+                .Include(x => x.Doctor)
+                .Include(x => x.Patient)
+                .Include(x => x.Hospital)
+                .ToListAsync();
         }
 
         public async Task<DoctorAppointment?> GetByIdAsync(Guid id)
         {
-            return await _appDbContext.DoctorAppointments.FindAsync(id);
+            return await _appDbContext.DoctorAppointments
+                .Include(x => x.Doctor)
+                .Include(x => x.Patient)
+                .Include(x => x.Hospital)
+                .FirstOrDefaultAsync(x => x.AppointmentId == id);
         }
 
         public async Task<IEnumerable<DoctorAppointment>> GetByDoctorIdAsync(Guid doctorId)
         {
             return await _appDbContext.DoctorAppointments
+                .Include(x => x.Doctor)
+                .Include(x => x.Patient)
+                .Include(x => x.Hospital)
                 .Where(x => x.DoctorId == doctorId)
+                .OrderByDescending(x => x.AppointmentDate)
+                .ThenBy(x => x.AppointmentTime)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<DoctorAppointment>> GetByPatientIdAsync(Guid patientId)
         {
             return await _appDbContext.DoctorAppointments
+                .Include(x => x.Doctor)
+                .Include(x => x.Patient)
+                .Include(x => x.Hospital)
                 .Where(x => x.PatientId == patientId)
                 .OrderByDescending(x => x.AppointmentDate)
                 .ThenBy(x => x.AppointmentTime)

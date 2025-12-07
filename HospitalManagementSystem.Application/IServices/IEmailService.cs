@@ -18,8 +18,25 @@ namespace HospitalManagementSystem.Application.IServices
         Task<bool> SendPaymentConfirmationAsync(PaymentEmailDto payment);
         Task<bool> SendPaymentReceiptAsync(PaymentEmailDto payment);
         
+        // Prescription Notifications
+        Task<bool> SendPrescriptionEmailAsync(PrescriptionEmailDto prescription);
+        
         // Generic Email
         Task<bool> SendEmailAsync(string toEmail, string subject, string body);
+    }
+
+    public class PrescriptionEmailDto
+    {
+        public string PatientEmail { get; set; } = string.Empty;
+        public string PatientName { get; set; } = string.Empty;
+        public string DoctorName { get; set; } = string.Empty;
+        public string DoctorSpecialization { get; set; } = string.Empty;
+        public string HospitalName { get; set; } = string.Empty;
+        public DateTime VisitDate { get; set; }
+        public string Diagnosis { get; set; } = string.Empty;
+        public string Prescription { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+        public string AppointmentId { get; set; } = string.Empty;
     }
 
     public class BookingEmailDto

@@ -12,8 +12,8 @@ namespace HospitalManagementSystem.Application.IServices.DoctorIServices
     {
         Task<IEnumerable<DoctorScheduleResponseDto>> GetAllAsync();
         Task<DoctorScheduleResponseDto?> GetByIdAsync(Guid id);
+        Task<IEnumerable<DoctorScheduleResponseDto>> GetByDoctorIdAsync(Guid doctorId);
         Task<DoctorScheduleResponseDto> CreateAsync(DoctorScheduleRequestDto doctorScheduleRequestDto);
         Task<bool> DeleteAsync(Guid id);
-
     }
 }

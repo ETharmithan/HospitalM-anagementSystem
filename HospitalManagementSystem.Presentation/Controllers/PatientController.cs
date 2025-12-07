@@ -1,9 +1,13 @@
 using HospitalManagementSystem.Application.DTOs;
+using HospitalManagementSystem.Application.DTOs.PatientDto;
 using HospitalManagementSystem.Application.IServices;
+using HospitalManagementSystem.Application.IServices.DoctorIServices;
+using HospitalManagementSystem.Domain.IRepository;
 using HospitalManagementSystem.Domain.Models;
 using HospitalManagementSystem.Domain.Models.Patient;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +20,12 @@ namespace HospitalManagementSystem.Presentation.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class PatientController(IPatientRepository patientRepository, IImageUploadService imageUploadService, HospitalManagementSystem.Infrastructure.Data.AppDbContext dbContext) : ControllerBase
+    public class PatientController(
+        IPatientRepository patientRepository, 
+        IImageUploadService imageUploadService, 
+        HospitalManagementSystem.Infrastructure.Data.AppDbContext dbContext,
+        IDoctorPatientRecordsService prescriptionService,
+        IDoctorAppointmentService appointmentService) : ControllerBase
     {
         /// <summary>
         /// Get all patients
@@ -361,6 +370,105 @@ namespace HospitalManagementSystem.Presentation.Controllers
                     stackTrace = ex.StackTrace
                 };
                 return StatusCode(500, errorDetails);
+            }
+        }
+
+        /// <summary>
+        /// Get patient's complete medical profile (for doctors to view)
+        /// Includes: basic info, medical history, allergies, past prescriptions, past appointments
+        /// </summary>
+        [HttpGet("{patientId}/medical-profile")]
+        public async Task<ActionResult<PatientMedicalProfileDto>> GetPatientMedicalProfile(Guid patientId)
+        {
+            try
+            {
+                var patient = await patientRepository.GetPatientWithDetailsAsync(patientId);
+                if (patient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                // Get prescriptions
+                var prescriptions = await prescriptionService.GetByPatientIdAsync(patientId);
+                
+                // Get past appointments
+                var appointments = await appointmentService.GetByPatientIdAsync(patientId);
+
+                var profile = new PatientMedicalProfileDto
+                {
+                    PatientId = patient.PatientId,
+                    FirstName = patient.FirstName,
+                    LastName = patient.LastName,
+                    DateOfBirth = patient.DateOfBirth,
+                    Gender = patient.Gender,
+                    ImageUrl = patient.ImageUrl,
+
+                    // Contact Info
+                    Email = patient.ContactInfo?.EmailAddress,
+                    Phone = patient.ContactInfo?.PhoneNumber,
+                    Address = patient.ContactInfo != null 
+                        ? $"{patient.ContactInfo.AddressLine1}, {patient.ContactInfo.City}, {patient.ContactInfo.State}" 
+                        : null,
+
+                    // Medical Info
+                    BloodType = patient.MedicalRelatedInfo?.BloodType,
+                    Allergies = patient.MedicalRelatedInfo?.Allergies,
+                    ChronicConditions = patient.MedicalRelatedInfo?.ChronicConditions,
+
+                    // Medical History
+                    PastIllnesses = patient.MedicalHistory?.PastIllnesses,
+                    Surgeries = patient.MedicalHistory?.Surgeries,
+                    MedicalHistoryNotes = patient.MedicalHistory?.MedicalHistoryNotes,
+
+                    // Emergency Contact
+                    EmergencyContactName = patient.EmergencyContact?.ContactName,
+                    EmergencyContactPhone = patient.EmergencyContact?.ContactPhone,
+                    EmergencyContactRelationship = patient.EmergencyContact?.RelationshipToPatient,
+
+                    // Prescriptions
+                    Prescriptions = prescriptions.Select(p => new PrescriptionSummaryDto
+                    {
+                        RecordId = p.RecordId,
+                        Diagnosis = p.Diagnosis,
+                        Prescription = p.Prescription,
+                        Notes = p.Notes,
+                        VisitDate = p.VisitDate,
+                        DoctorName = p.DoctorName,
+                        DoctorId = p.DoctorId
+                    }).ToList(),
+
+                    // Past Appointments
+                    PastAppointments = appointments.Select(a => new AppointmentSummaryDto
+                    {
+                        AppointmentId = a.AppointmentId,
+                        AppointmentDate = a.AppointmentDate,
+                        AppointmentTime = a.AppointmentTime,
+                        Status = a.AppointmentStatus,
+                        DoctorName = a.DoctorName,
+                        HospitalName = a.HospitalName
+                    }).ToList()
+                };
+
+                return Ok(profile);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching patient medical profile", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get patient's prescriptions only
+        /// </summary>
+        [HttpGet("{patientId}/prescriptions")]
+        public async Task<ActionResult> GetPatientPrescriptions(Guid patientId)
+        {
+            try
+            {
+                var prescriptions = await prescriptionService.GetByPatientIdAsync(patientId);
+                return Ok(prescriptions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while fetching prescriptions", error = ex.Message });
             }
         }
     }

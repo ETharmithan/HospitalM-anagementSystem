@@ -22,10 +22,20 @@ namespace HospitalManagementSystem.Application.Services
             return hospitals.Select(MapToHospitalResponseDto).ToList();
         }
 
+        public async Task<List<HospitalResponseDto>> GetAllAsync()
+        {
+            return await GetAllHospitalsAsync();
+        }
+
         public async Task<HospitalResponseDto?> GetHospitalByIdAsync(Guid hospitalId)
         {
             var hospital = await _hospitalRepository.GetHospitalByIdAsync(hospitalId);
             return hospital != null ? MapToHospitalResponseDto(hospital) : null;
+        }
+
+        public async Task<HospitalResponseDto?> GetByIdAsync(Guid hospitalId)
+        {
+            return await GetHospitalByIdAsync(hospitalId);
         }
 
         public async Task<HospitalResponseDto> CreateHospitalAsync(HospitalRequestDto hospitalDto)

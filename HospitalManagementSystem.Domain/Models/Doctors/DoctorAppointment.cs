@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HospitalManagementSystem.Domain.Models.Patient;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -28,7 +29,9 @@ namespace HospitalManagementSystem.Domain.Models.Doctors
         // Hospital where the appointment takes place
         public Guid? HospitalId { get; set; }
 
+        // Navigation properties
         public Doctor Doctor { get; set; } = null!;
-
+        public Patient.Patient? Patient { get; set; }
+        public Hospital? Hospital { get; set; }
     }
 }

@@ -108,6 +108,15 @@ namespace HospitalManagementSystem.Application.Services
             return await SendEmailAsync(payment.PatientEmail, subject, body);
         }
 
+        // ==================== PRESCRIPTION EMAILS ====================
+
+        public async Task<bool> SendPrescriptionEmailAsync(PrescriptionEmailDto prescription)
+        {
+            var subject = $"Your Prescription from Dr. {prescription.DoctorName}";
+            var body = GetPrescriptionTemplate(prescription);
+            return await SendEmailAsync(prescription.PatientEmail, subject, body);
+        }
+
         // ==================== EMAIL TEMPLATES ====================
 
         private string GetOtpEmailTemplate(string otp, string userName)
@@ -505,6 +514,73 @@ namespace HospitalManagementSystem.Application.Services
                 <p>© 2024 Hospital Management System. All rights reserved.</p>
                 <p style='font-size: 10px;'>This is a computer-generated receipt and does not require a signature.</p>
             </div>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
+        private string GetPrescriptionTemplate(PrescriptionEmailDto prescription)
+        {
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+        .prescription-box {{ background: white; border-radius: 10px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid #667eea; }}
+        .section-title {{ color: #667eea; font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }}
+        .section-content {{ background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; white-space: pre-wrap; }}
+        .doctor-info {{ background: #e8f4fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 12px; }}
+        .warning {{ background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-top: 20px; }}
+        .rx-symbol {{ font-size: 48px; margin-bottom: 10px; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <div class='rx-symbol'>℞</div>
+            <h1>Medical Prescription</h1>
+            <p>From {prescription.HospitalName}</p>
+        </div>
+        <div class='content'>
+            <h2>Hello {prescription.PatientName}!</h2>
+            <p>Your prescription from your recent visit has been prepared. Please find the details below:</p>
+            
+            <div class='doctor-info'>
+                <p><strong>👨‍⚕️ Doctor:</strong> Dr. {prescription.DoctorName}</p>
+                <p><strong>🏥 Hospital:</strong> {prescription.HospitalName}</p>
+                <p><strong>📅 Visit Date:</strong> {prescription.VisitDate:dddd, MMMM dd, yyyy}</p>
+            </div>
+            
+            <div class='prescription-box'>
+                <div class='section-title'>📋 Diagnosis</div>
+                <div class='section-content'>{prescription.Diagnosis}</div>
+                
+                <div class='section-title'>💊 Prescription</div>
+                <div class='section-content'>{prescription.Prescription}</div>
+                
+                {(string.IsNullOrEmpty(prescription.Notes) ? "" : $@"<div class='section-title'>📝 Additional Notes</div>
+                <div class='section-content'>{prescription.Notes}</div>")}
+            </div>
+            
+            <div class='warning'>
+                <strong>⚠️ Important:</strong>
+                <ul style='margin: 10px 0; padding-left: 20px;'>
+                    <li>Take medications as prescribed by your doctor</li>
+                    <li>Complete the full course of medication</li>
+                    <li>Contact your doctor if you experience any side effects</li>
+                    <li>Keep this prescription for your records</li>
+                </ul>
+            </div>
+        </div>
+        <div class='footer'>
+            <p>© 2024 Hospital Management System. All rights reserved.</p>
+            <p>This is an automated message. For medical queries, please contact your doctor.</p>
         </div>
     </div>
 </body>
