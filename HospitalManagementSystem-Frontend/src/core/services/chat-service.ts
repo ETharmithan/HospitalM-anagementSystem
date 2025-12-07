@@ -351,6 +351,12 @@ export class ChatService {
 
   // Doctor availability via SignalR
   async setChatAvailability(isAvailableForChat: boolean, isAvailableForVideo: boolean, statusMessage?: string): Promise<void> {
+    const user = this.accountService.currentUser();
+    if (user?.role !== 'Doctor') {
+      console.warn('Only doctors can set chat availability');
+      return;
+    }
+
     if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
       await this.hubConnection.invoke('SetChatAvailability', isAvailableForChat, isAvailableForVideo, statusMessage);
       this.myChatAvailability.set({ isAvailableForChat, isAvailableForVideo, statusMessage });
@@ -477,11 +483,19 @@ export class ChatService {
     return this.http.get<DoctorChatAvailability[]>(`${this.baseUrl}/available-doctors`);
   }
 
+  getAllDoctors(): Observable<DoctorChatAvailability[]> {
+    return this.http.get<DoctorChatAvailability[]>(`${this.baseUrl}/doctors`);
+  }
+
   loadAvailableDoctors(): void {
-    this.getAvailableDoctors().subscribe({
+    this.getAllDoctors().subscribe({
       next: (doctors) => this.availableDoctors.set(doctors),
-      error: (err) => console.error('Failed to load available doctors:', err)
+      error: (err) => console.error('Failed to load doctors:', err)
     });
+  }
+
+  createDirectSession(doctorId: string): Observable<ChatSession> {
+    return this.http.post<ChatSession>(`${this.baseUrl}/sessions/direct`, { doctorId });
   }
 
   getDoctorAvailability(doctorId: string): Observable<DoctorChatAvailability> {

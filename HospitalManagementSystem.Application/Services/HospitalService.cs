@@ -133,6 +133,7 @@ namespace HospitalManagementSystem.Application.Services
                     UserId = ha.UserId,
                     UserName = ha.User?.Username,
                     UserEmail = ha.User?.Email,
+                    ProfileImage = ha.ProfileImage,
                     IsActive = ha.IsActive,
                     CreatedAt = ha.CreatedAt,
                     UpdatedAt = ha.UpdatedAt

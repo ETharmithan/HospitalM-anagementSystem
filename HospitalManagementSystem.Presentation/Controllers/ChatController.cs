@@ -46,6 +46,66 @@ namespace HospitalManagementSystem.Presentation.Controllers
         }
 
         /// <summary>
+        /// Create a direct chat session (without request)
+        /// </summary>
+        [HttpPost("sessions/direct")]
+        public async Task<IActionResult> CreateDirectSession([FromBody] CreateDirectSessionDto dto)
+        {
+            try
+            {
+                var userId = GetUserId();
+                if (userId == null) return Unauthorized();
+
+                var userRole = GetUserRole();
+                Guid patientId;
+                Guid doctorId;
+
+                // Determine patient and doctor IDs based on user role
+                if (userRole == "Patient")
+                {
+                    patientId = Guid.Parse(userId);
+                    doctorId = dto.DoctorId;
+                }
+                else if (userRole == "Doctor")
+                {
+                    doctorId = Guid.Parse(userId);
+                    patientId = dto.DoctorId; // In this case, DoctorId field contains PatientId
+                }
+                else
+                {
+                    return BadRequest("Only patients and doctors can create chat sessions");
+                }
+
+                // Check if session already exists
+                var existingSessions = await _chatService.GetSessionsByUserIdAsync(patientId, "Patient");
+                var existingSession = existingSessions.FirstOrDefault(s => s.DoctorId == doctorId);
+                
+                if (existingSession != null)
+                {
+                    return Ok(existingSession);
+                }
+
+                // Create new session
+                var session = await _chatService.CreateSessionAsync(
+                    patientId,
+                    doctorId,
+                    null,
+                    "Text"
+                );
+
+                if (session == null) return BadRequest("Failed to create session");
+                return Ok(session);
+            }
+            catch (Exception ex)
+            {
+                // Log the error for debugging
+                Console.WriteLine($"Error creating direct session: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { error = ex.Message, details = ex.InnerException?.Message });
+            }
+        }
+
+        /// <summary>
         /// End a chat session
         /// </summary>
         [HttpPost("sessions/{sessionId}/end")]
@@ -178,6 +238,16 @@ namespace HospitalManagementSystem.Presentation.Controllers
         }
 
         /// <summary>
+        /// Get all doctors with their availability status
+        /// </summary>
+        [HttpGet("doctors")]
+        public async Task<IActionResult> GetAllDoctors()
+        {
+            var doctors = await _chatService.GetAllDoctorsWithAvailabilityAsync();
+            return Ok(doctors);
+        }
+
+        /// <summary>
         /// Get a specific doctor's availability
         /// </summary>
         [HttpGet("availability/{doctorId}")]
@@ -222,6 +292,11 @@ namespace HospitalManagementSystem.Presentation.Controllers
     }
 
     // ==================== DTOs ====================
+
+    public class CreateDirectSessionDto
+    {
+        public Guid DoctorId { get; set; }
+    }
 
     public class CreateChatRequestDto
     {

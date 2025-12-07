@@ -237,6 +237,48 @@ namespace HospitalManagementSystem.Infrastructure.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<DoctorChatAvailability>> GetAllDoctorsWithAvailabilityAsync()
+        {
+            // Get all doctors
+            var allDoctors = await _context.Doctors
+                .Include(d => d.Department)
+                .ToListAsync();
+
+            // Get existing availabilities
+            var availabilities = await _context.DoctorChatAvailabilities
+                .Include(a => a.Doctor)
+                    .ThenInclude(d => d.Department)
+                .ToListAsync();
+
+            var availabilityDict = availabilities.ToDictionary(a => a.DoctorId);
+
+            // Create availability records for doctors that don't have one
+            var result = new List<DoctorChatAvailability>();
+            foreach (var doctor in allDoctors)
+            {
+                if (availabilityDict.TryGetValue(doctor.DoctorId, out var availability))
+                {
+                    result.Add(availability);
+                }
+                else
+                {
+                    // Create a default offline availability for doctors without a record
+                    result.Add(new DoctorChatAvailability
+                    {
+                        DoctorId = doctor.DoctorId,
+                        Doctor = doctor,
+                        IsAvailableForChat = false,
+                        IsAvailableForVideo = false,
+                        Status = "Offline",
+                        LastOnlineAt = DateTime.UtcNow,
+                        MaxConcurrentChats = 5
+                    });
+                }
+            }
+
+            return result;
+        }
+
         public async Task<bool> UpdateDoctorConnectionIdAsync(Guid doctorId, string connectionId)
         {
             var availability = await _context.DoctorChatAvailabilities

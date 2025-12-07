@@ -301,6 +301,12 @@ namespace HospitalManagementSystem.Application.Services
             return availabilities.Select(MapAvailabilityToDto).ToList();
         }
 
+        public async Task<List<DoctorChatAvailabilityDto>> GetAllDoctorsWithAvailabilityAsync()
+        {
+            var availabilities = await _chatRepository.GetAllDoctorsWithAvailabilityAsync();
+            return availabilities.Select(MapAvailabilityToDto).ToList();
+        }
+
         // ==================== MAPPING HELPERS ====================
 
         private ChatMessageDto MapMessageToDto(ChatMessage message)
@@ -349,7 +355,7 @@ namespace HospitalManagementSystem.Application.Services
                 DoctorId = availability.DoctorId,
                 DoctorName = availability.Doctor?.Name ?? "Unknown",
                 Specialization = availability.Doctor?.Department?.Name,
-                ProfileImage = null, // Doctor model doesn't have ProfileImage
+                ProfileImage = availability.Doctor?.ProfileImage,
                 IsAvailableForChat = availability.IsAvailableForChat,
                 IsAvailableForVideo = availability.IsAvailableForVideo,
                 Status = availability.Status,

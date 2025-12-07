@@ -90,8 +90,8 @@ export class DoctorScheduleService {
       timeout(10000),
       catchError(error => {
         console.error('Error creating schedule:', error);
-        const message = error.error?.message || 'Failed to create schedule.';
-        return throwError(() => new Error(message));
+        // Pass the original error through so the component can extract the message
+        return throwError(() => error);
       })
     );
   }

@@ -9,5 +9,8 @@ namespace HospitalManagementSystem.Application.DTOs.HospitalDto.Request_Dto
 
         [Required]
         public Guid UserId { get; set; }
+
+        [MaxLength(500)]
+        public string? ProfileImage { get; set; }
     }
 }

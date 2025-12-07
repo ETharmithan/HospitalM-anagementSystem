@@ -52,7 +52,8 @@
 
 .availability-toggles {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .toggle-label {
@@ -60,17 +61,37 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  transition: all 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toggle-label:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.toggle-label.active {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
 }
 
 .toggle-label input {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 
+.toggle-icon {
+  font-size: 1rem;
+}
+
 .toggle-text {
-  opacity: 0.9;
+  opacity: 0.95;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .btn-icon {
@@ -243,29 +264,32 @@
   padding: 1rem;
 }
 
-.back-link {
-  background: none;
-  border: none;
-  color: #2563eb;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  padding: 0;
-}
-
-.back-link:hover {
-  text-decoration: underline;
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
 }
 
 .doctor-card {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
   background: white;
   border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
+}
+
+.doctor-card.available {
+  border-color: #10b981;
+}
+
+.doctor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .doctor-avatar {
@@ -273,20 +297,21 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: white;
   font-size: 1.5rem;
   font-weight: 600;
   flex-shrink: 0;
-  overflow: hidden;
+  margin: 0 auto;
 }
 
 .doctor-avatar img {
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   object-fit: cover;
 }
 
@@ -300,32 +325,69 @@
   border: 2px solid white;
 }
 
+.status-dot.online {
+  background: #10b981;
+}
+
+.status-dot.offline {
+  background: #6b7280;
+}
+
 .doctor-info {
   flex: 1;
+  text-align: center;
 }
 
 .doctor-name {
   font-weight: 600;
-  color: #1f2937;
+  font-size: 1.05rem;
+  color: #1e293b;
   margin-bottom: 0.25rem;
 }
 
 .doctor-specialty {
-  color: #6b7280;
   font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.availability-status {
+  margin: 0.5rem 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.online {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.offline {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
 .doctor-status-msg {
-  color: #9ca3af;
   font-size: 0.8rem;
+  color: #3b82f6;
+  margin-top: 0.5rem;
   font-style: italic;
-  margin-top: 0.25rem;
+  padding: 0.5rem;
+  background: #eff6ff;
+  border-radius: 8px;
 }
 
 .doctor-actions {
   display: flex;
-  flex-direction: column;
   gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
 }
 
 /* Chat View */

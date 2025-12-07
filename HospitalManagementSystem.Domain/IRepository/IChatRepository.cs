@@ -33,6 +33,7 @@ namespace HospitalManagementSystem.Domain.IRepository
         Task<DoctorChatAvailability?> GetDoctorAvailabilityAsync(Guid doctorId);
         Task<DoctorChatAvailability> CreateOrUpdateAvailabilityAsync(DoctorChatAvailability availability);
         Task<List<DoctorChatAvailability>> GetAvailableDoctorsAsync();
+        Task<List<DoctorChatAvailability>> GetAllDoctorsWithAvailabilityAsync();
         Task<bool> UpdateDoctorConnectionIdAsync(Guid doctorId, string connectionId);
         Task<bool> SetDoctorOfflineAsync(Guid doctorId);
     }

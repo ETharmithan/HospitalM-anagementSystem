@@ -240,7 +240,18 @@ namespace HospitalManagementSystem.Presentation.Hubs
         public async Task SetChatAvailability(bool isAvailableForChat, bool isAvailableForVideo, string? statusMessage)
         {
             var doctorId = GetUserId();
-            if (string.IsNullOrEmpty(doctorId) || GetUserRole() != "Doctor") return;
+            var userRole = GetUserRole();
+            
+            if (string.IsNullOrEmpty(doctorId))
+            {
+                throw new HubException("User not authenticated");
+            }
+            
+            if (userRole != "Doctor")
+            {
+                // Silently ignore for non-doctors instead of throwing error
+                return;
+            }
 
             await _chatService.SetDoctorAvailabilityAsync(
                 Guid.Parse(doctorId),

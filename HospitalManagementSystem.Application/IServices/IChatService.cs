@@ -32,6 +32,7 @@ namespace HospitalManagementSystem.Application.IServices
         Task<bool> SetDoctorOfflineAsync(string doctorId);
         Task<DoctorChatAvailabilityDto?> GetDoctorAvailabilityAsync(Guid doctorId);
         Task<List<DoctorChatAvailabilityDto>> GetAvailableDoctorsAsync();
+        Task<List<DoctorChatAvailabilityDto>> GetAllDoctorsWithAvailabilityAsync();
     }
 
     // DTOs

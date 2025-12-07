@@ -134,12 +134,17 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                         // Same hospital = duplicate entry
                         if (existing.HospitalId == doctorScheduleRequestDto.HospitalId)
                         {
-                            throw new Exception($"You already have a schedule on {doctorScheduleRequestDto.ScheduleDate.Value:MMM dd, yyyy} from {existing.StartTime} to {existing.EndTime} at this hospital.");
+                           throw new Exception($"You already have a schedule on <b>{doctorScheduleRequestDto.ScheduleDate.Value:MMM dd, yyyy}</b> from <b>{existing.StartTime}</b> to <b>{existing.EndTime}</b> at <b>this</b> hospital.");
+
                         }
                         // Different hospital = conflict (doctor can only be at one place)
                         else
                         {
-                            throw new Exception($"Schedule conflict: You already have a schedule on {doctorScheduleRequestDto.ScheduleDate.Value:MMM dd, yyyy} from {existing.StartTime} to {existing.EndTime} at {existing.Hospital?.Name ?? "another hospital"}. A doctor can only be at one hospital at a time.");
+                            throw new Exception(
+                                $"Schedule conflict: You already have a schedule on <b>{doctorScheduleRequestDto.ScheduleDate.Value:MMM dd, yyyy}</b> " +
+                                $"from <b>{existing.StartTime}</b> to <b>{existing.EndTime}</b> at <b>{existing.Hospital?.Name ?? "another hospital"}</b>. " +
+                                "A doctor can only be at one hospital at a time."
+                            );
                         }
                     }
                 }

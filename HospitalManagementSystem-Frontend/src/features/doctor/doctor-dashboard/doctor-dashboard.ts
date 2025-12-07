@@ -285,7 +285,13 @@ export class DoctorDashboard implements OnInit {
         this.loadSchedules();
       },
       error: (error) => {
-        this.toastService.error(error.message || 'Failed to add schedule');
+        // Extract error message from backend response
+        console.log('Full error object:', error);
+        console.log('error.error:', error.error);
+        console.log('error.error.message:', error.error?.message);
+        const errorMessage = error.error?.message || error.message || 'Failed to add schedule';
+        console.log('Extracted error message:', errorMessage);
+        this.toastService.error(errorMessage);
         this.isSubmittingSchedule.set(false);
       }
     });

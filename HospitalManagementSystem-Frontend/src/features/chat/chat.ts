@@ -43,6 +43,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages = computed(() => this.chatService.messages());
   pendingRequests = computed(() => this.chatService.pendingRequests());
   availableDoctors = computed(() => this.chatService.availableDoctors());
+  allDoctors = computed(() => this.chatService.availableDoctors()); // Using same signal for all doctors
   unreadCount = computed(() => this.chatService.unreadCount());
   isConnected = computed(() => this.chatService.isConnected());
   myChatAvailability = computed(() => this.chatService.myChatAvailability());
@@ -260,6 +261,35 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.toastService.success('Chat request sent! Waiting for doctor to accept...');
     } catch (error) {
       this.toastService.error('Failed to send chat request');
+    }
+  }
+
+  async startDirectChat(doctor: any): Promise<void> {
+    try {
+      // Check if session already exists
+      const existingSession = this.sessions().find(
+        s => s.doctorId === doctor.doctorId
+      );
+
+      if (existingSession) {
+        this.openSession(existingSession.sessionId);
+        return;
+      }
+
+      // Create new direct session
+      this.chatService.createDirectSession(doctor.doctorId).subscribe({
+        next: (session) => {
+          this.chatService.loadSessions();
+          this.toastService.success(`Chat started with ${doctor.doctorName}`);
+          setTimeout(() => this.openSession(session.sessionId), 500);
+        },
+        error: (err) => {
+          console.error('Failed to create session:', err);
+          this.toastService.error('Failed to start chat. Please try again.');
+        }
+      });
+    } catch (error) {
+      this.toastService.error('Failed to start chat');
     }
   }
 

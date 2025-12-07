@@ -20,6 +20,7 @@ namespace HospitalManagementSystem.Domain.Models.Doctors
         public required string Qualification { get; set; }
         public required string LicenseNumber { get; set; }
         public required string Status { get; set; }
+        public string? ProfileImage { get; set; } // Profile image URL or path
         public int AppointmentDurationMinutes { get; set; } = 30; // Default 30 minutes per appointment
         public int BreakTimeMinutes { get; set; } = 0; // Break time between appointments (optional)
 

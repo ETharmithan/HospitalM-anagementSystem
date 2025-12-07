@@ -33,6 +33,9 @@ namespace HospitalManagementSystem.Application.DTOs.DoctorDto.Request_Dto
         [MaxLength(50)]
         public string Status { get; set; } = null!;
 
+        [MaxLength(500)]
+        public string? ProfileImage { get; set; }
+
         //ForeignKey
         [Required(ErrorMessage = "DepartmentId is required")]
         public Guid DepartmentId { get; set; }

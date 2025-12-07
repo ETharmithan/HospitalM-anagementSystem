@@ -15,6 +15,7 @@ namespace HospitalManagementSystem.Application.DTOs.DoctorDto.Response_Dto
         public string Qualification { get; set; } = null!;
         public string LicenseNumber { get; set; } = null!;
         public string Status { get; set; } = null!;
+        public string? ProfileImage { get; set; }
         public Guid? DepartmentId { get; set; }
         public string? DepartmentName { get; set; }
 

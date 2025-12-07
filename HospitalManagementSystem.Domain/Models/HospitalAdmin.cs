@@ -13,6 +13,7 @@ namespace HospitalManagementSystem.Domain.Models
         public Guid UserId { get; set; }
         public User User { get; set; } = null!;
         
+        public string? ProfileImage { get; set; } // Profile image URL or path
         public bool IsActive { get; set; } = true;
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

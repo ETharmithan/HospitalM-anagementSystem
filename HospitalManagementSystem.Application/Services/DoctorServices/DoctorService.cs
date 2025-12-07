@@ -33,6 +33,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 Qualification = d.Qualification,
                 LicenseNumber = d.LicenseNumber,
                 Status = d.Status,
+                ProfileImage = d.ProfileImage,
                 DepartmentId = d.DepartmentId,
                 DepartmentName = d.Department?.Name
             });
@@ -52,6 +53,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 Qualification = doctor.Qualification,
                 LicenseNumber = doctor.LicenseNumber,
                 Status = doctor.Status,
+                ProfileImage = doctor.ProfileImage,
                 DepartmentId = doctor.DepartmentId,
                 DepartmentName = doctor.Department?.Name
             };
@@ -68,6 +70,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 Qualification = doctorRequestDto.Qualification,
                 LicenseNumber = doctorRequestDto.LicenseNumber,
                 Status = doctorRequestDto.Status,
+                ProfileImage = doctorRequestDto.ProfileImage,
                 DepartmentId = doctorRequestDto.DepartmentId
             };
 
@@ -82,6 +85,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 Qualification = created.Qualification,
                 LicenseNumber = created.LicenseNumber,
                 Status = created.Status,
+                ProfileImage = created.ProfileImage,
                 DepartmentId = created.DepartmentId,
                 DepartmentName = created.Department?.Name
             };
@@ -98,6 +102,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             existing.Qualification = doctorRequestDto.Qualification;
             existing.LicenseNumber = doctorRequestDto.LicenseNumber;
             existing.Status = doctorRequestDto.Status;
+            existing.ProfileImage = doctorRequestDto.ProfileImage;
             existing.DepartmentId = doctorRequestDto.DepartmentId;
 
             var updated = await _doctorRepository.UpdateAsync(existing);
@@ -111,6 +116,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 Qualification = updated.Qualification,
                 LicenseNumber = updated.LicenseNumber,
                 Status = updated.Status,
+                ProfileImage = updated.ProfileImage,
                 DepartmentId = updated.DepartmentId,
                 DepartmentName = updated.Department?.Name
             };

@@ -21,24 +21,27 @@
       @if (isDoctor) {
         <!-- Doctor availability toggles -->
         <div class="availability-toggles">
-          <label class="toggle-label">
+          <label class="toggle-label" [class.active]="myChatAvailability().isAvailableForChat">
             <input 
               type="checkbox" 
               [checked]="myChatAvailability().isAvailableForChat"
               (change)="toggleChatAvailability()">
-            <span class="toggle-text">💬 Chat</span>
+            <span class="toggle-icon">💬</span>
+            <span class="toggle-text">{{ myChatAvailability().isAvailableForChat ? 'Available for Chat' : 'Chat Unavailable' }}</span>
           </label>
-          <label class="toggle-label">
+          <label class="toggle-label" [class.active]="myChatAvailability().isAvailableForVideo">
             <input 
               type="checkbox" 
               [checked]="myChatAvailability().isAvailableForVideo"
               (change)="toggleVideoAvailability()">
-            <span class="toggle-text">📹 Video</span>
+            <span class="toggle-icon">📹</span>
+            <span class="toggle-text">{{ myChatAvailability().isAvailableForVideo ? 'Available for Video' : 'Video Unavailable' }}</span>
           </label>
         </div>
-      } @else {
-        <button class="btn-icon" (click)="showAvailableDoctors()" title="Find doctors">
-          🔍
+      }
+      @if (activeView() === 'list') {
+        <button class="btn btn-primary btn-sm" (click)="showAvailableDoctors()">
+          ➕ New Chat
         </button>
       }
       <span class="connection-status" [class.connected]="isConnected()">
@@ -122,44 +125,59 @@
     <div class="doctors-list">
       <button class="back-link" (click)="showSessionList()">← Back to Messages</button>
       
-      @if (availableDoctors().length === 0) {
+      @if (allDoctors().length === 0) {
         <div class="empty-state">
           <span class="empty-icon">👨‍⚕️</span>
-          <p>No doctors available for chat right now</p>
-          <p class="empty-hint">Please try again later</p>
+          <p>No doctors found</p>
+          <p class="empty-hint">Please check back later</p>
         </div>
       } @else {
-        @for (doctor of availableDoctors(); track doctor.doctorId) {
-          <div class="doctor-card">
-            <div class="doctor-avatar">
-              @if (doctor.profileImage) {
-                <img [src]="doctor.profileImage" [alt]="doctor.doctorName">
-              } @else {
-                {{ doctor.doctorName.charAt(0).toUpperCase() }}
-              }
-              <span class="status-dot" [style.background-color]="getStatusColor(doctor.status)"></span>
-            </div>
-            <div class="doctor-info">
-              <div class="doctor-name">{{ doctor.doctorName }}</div>
-              <div class="doctor-specialty">{{ doctor.specialization || 'General' }}</div>
-              @if (doctor.statusMessage) {
-                <div class="doctor-status-msg">{{ doctor.statusMessage }}</div>
-              }
-            </div>
-            <div class="doctor-actions">
-              @if (doctor.isAvailableForChat) {
-                <button class="btn btn-primary btn-sm" (click)="requestChat(doctor, 'Text')">
-                  💬 Chat
+        <div class="doctors-grid">
+          @for (doctor of allDoctors(); track doctor.doctorId) {
+            <div class="doctor-card" [class.available]="doctor.isAvailableForChat || doctor.isAvailableForVideo">
+              <div class="doctor-avatar">
+                @if (doctor.profileImage) {
+                  <img [src]="doctor.profileImage" [alt]="doctor.doctorName">
+                } @else {
+                  {{ doctor.doctorName.charAt(0).toUpperCase() }}
+                }
+                @if (doctor.isAvailableForChat || doctor.isAvailableForVideo) {
+                  <span class="status-dot online"></span>
+                } @else {
+                  <span class="status-dot offline"></span>
+                }
+              </div>
+              <div class="doctor-info">
+                <div class="doctor-name">{{ doctor.doctorName }}</div>
+                <div class="doctor-specialty">{{ doctor.specialization || 'General' }}</div>
+                <div class="availability-status">
+                  @if (doctor.isAvailableForChat && doctor.isAvailableForVideo) {
+                    <span class="status-badge online">🟢 Available for Chat & Video</span>
+                  } @else if (doctor.isAvailableForChat) {
+                    <span class="status-badge online">🟢 Available for Chat</span>
+                  } @else if (doctor.isAvailableForVideo) {
+                    <span class="status-badge online">🟢 Available for Video</span>
+                  } @else {
+                    <span class="status-badge offline">⚫ Offline - Leave a message</span>
+                  }
+                </div>
+                @if (doctor.statusMessage) {
+                  <div class="doctor-status-msg">💬 {{ doctor.statusMessage }}</div>
+                }
+              </div>
+              <div class="doctor-actions">
+                <button class="btn btn-primary btn-sm" (click)="startDirectChat(doctor)">
+                  💬 Message
                 </button>
-              }
-              @if (doctor.isAvailableForVideo) {
-                <button class="btn btn-success btn-sm" (click)="requestChat(doctor, 'Video')">
-                  📹 Video
-                </button>
-              }
+                @if (doctor.isAvailableForVideo) {
+                  <button class="btn btn-success btn-sm" (click)="requestChat(doctor, 'Video')">
+                    📹 Video Call
+                  </button>
+                }
+              </div>
             </div>
-          </div>
-        }
+          }
+        </div>
       }
     </div>
   }

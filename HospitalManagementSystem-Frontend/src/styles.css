@@ -1,3 +1,75 @@
 /* You can add global styles to this file, and also import other style files */
  @import "tailwindcss";
 @plugin "daisyui"; 
+
+/* Toast Container Positioning */
+#toast-container {
+  position: fixed;
+  bottom: 120px !important; /* Move up from bottom */
+  right: 30px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Toast Styling */
+#toast-container .alert {
+  min-width: 350px;
+  max-width: 500px;
+  padding: 1.25rem 1.5rem !important;
+  font-size: 1.1rem !important;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideInRight 0.3s ease-out;
+  background: #fffbeb !important; /* Light yellow background */
+  border: 4px solid #dc2626 !important; /* Thick red border */
+  color: #1f2937 !important; /* Dark text for readability */
+}
+
+#toast-container .alert span {
+  font-size: 1.1rem !important;
+  line-height: 1.5;
+  color: #1f2937 !important; /* Dark text */
+}
+
+/* Error toast - red border */
+#toast-container .alert-error {
+  border-color: #dc2626 !important;
+}
+
+/* Success toast - green border */
+#toast-container .alert-success {
+  border-color: #16a34a !important;
+  background: #f0fdf4 !important; /* Light green background */
+}
+
+/* Warning toast - orange border */
+#toast-container .alert-warning {
+  border-color: #ea580c !important;
+  background: #fff7ed !important; /* Light orange background */
+}
+
+/* Info toast - blue border */
+#toast-container .alert-info {
+  border-color: #2563eb !important;
+  background: #eff6ff !important; /* Light blue background */
+}
+
+#toast-container .alert button {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-left: 1rem;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

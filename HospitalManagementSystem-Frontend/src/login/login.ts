@@ -30,7 +30,11 @@ export class Login implements OnInit {
     
     // Check if user is already logged in
     if (this.authService.isLoggedInValue) {
-      this.router.navigate(['/']);
+      const user = this.accountService.currentUser();
+      if (user) {
+        const dashboardRoute = getRoleDashboardRoute(user.role);
+        this.router.navigate([dashboardRoute]);
+      }
     }
   }
 

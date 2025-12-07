@@ -94,6 +94,24 @@ namespace HospitalManagementSystem.Presentation
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero // Remove clock skew tolerance for stricter validation
                     };
+
+                    // Configure SignalR authentication
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            // If the request is for our hub...
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                            {
+                                // Read the token out of the query string
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
 
@@ -286,6 +304,7 @@ namespace HospitalManagementSystem.Presentation
                 Qualification = "MBBS, MD",
                 LicenseNumber = "DOC123456",
                 Status = "Active",
+                ProfileImage = null, // Can be updated later
                 AppointmentDurationMinutes = 30,
                 BreakTimeMinutes = 5,
                 DepartmentId = department.DepartmentId
@@ -444,7 +463,8 @@ namespace HospitalManagementSystem.Presentation
                 {
                     HospitalAdminId = Guid.NewGuid(),
                     HospitalId = hospital1Id,
-                    UserId = admin1UserId
+                    UserId = admin1UserId,
+                    ProfileImage = null // Can be updated later
                 };
                 dbContext.HospitalAdmins.Add(hospitalAdmin1);
 
@@ -518,7 +538,8 @@ namespace HospitalManagementSystem.Presentation
                 {
                     HospitalAdminId = Guid.NewGuid(),
                     HospitalId = hospital2Id,
-                    UserId = admin2UserId
+                    UserId = admin2UserId,
+                    ProfileImage = null // Can be updated later
                 };
                 dbContext.HospitalAdmins.Add(hospitalAdmin2);
 
