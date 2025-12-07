@@ -1,128 +1,176 @@
-<div class="login-container">
-  <div class="login-card">
-    <!-- Header -->
-    <div class="login-header">
-      <div class="logo-section">
-        <div class="logo">
-          <span class="logo-text">MB</span>
+<div class="min-h-screen flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-900">
+  <div
+    class="relative w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden transform transition duration-500 hover:shadow-indigo-500/50"
+  >
+    <div class="p-8 bg-indigo-600 dark:bg-indigo-700 text-white flex flex-col items-start space-y-2">
+      <div class="flex items-center space-x-3">
+        <div
+          class="flex items-center justify-center w-12 h-12 rounded-full bg-white text-indigo-600 font-extrabold text-xl shadow-lg"
+        >
+          MB
         </div>
-        <div class="brand-info">
-          <h1>MyBrand</h1>
-          <p>Hospital Management</p>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">MyBrand</h1>
+          <p class="text-sm opacity-90">Hospital Management</p>
         </div>
       </div>
-      <h2>Welcome Back</h2>
-      <p class="subtitle">Sign in to your account to continue</p>
+      <h2 class="text-3xl font-extrabold pt-4">Welcome Back!</h2>
+      <p class="text-sm opacity-80">Sign in to your account to continue your work.</p>
     </div>
 
-    <!-- Login Form -->
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-      <!-- Email Field -->
-      <div class="form-group">
-        <label for="email">Email Address *</label>
-        <div class="input-wrapper">
-          <input
-            type="email"
-            id="email"
-            formControlName="email"
-            placeholder="Enter your email"
-            class="form-control"
-            [class.is-invalid]="isFieldInvalid('email')"
-            autocomplete="email"
-          />
-          <span class="input-icon">📧</span>
+    <div class="p-8">
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-6">
+        <div class="space-y-2">
+          <label for="email" class="text-sm font-medium text-gray-700 dark:text-gray-300">Email Address <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+              [class.border-red-500]="isFieldInvalid('email')"
+              class="w-full py-3 pl-10 pr-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 dark:bg-gray-700 dark:text-white transition duration-200"
+            />
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+              </svg>
+            </span>
+          </div>
+          <div class="text-sm text-red-500" *ngIf="isFieldInvalid('email')">
+            {{ getFieldError('email') }}
+          </div>
         </div>
-        <div class="error-message" *ngIf="isFieldInvalid('email')">
-          {{ getFieldError('email') }}
-        </div>
-      </div>
 
-      <!-- Password Field -->
-      <div class="form-group">
-        <label for="password">Password *</label>
-        <div class="input-wrapper">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            id="password"
-            formControlName="password"
-            placeholder="Enter your password"
-            class="form-control"
-            [class.is-invalid]="isFieldInvalid('password')"
-            autocomplete="current-password"
-          />
+        <div class="space-y-2">
+          <label for="password" class="text-sm font-medium text-gray-700 dark:text-gray-300">Password <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              [class.border-red-500]="isFieldInvalid('password')"
+              class="w-full py-3 pl-10 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 dark:bg-gray-700 dark:text-white transition duration-200"
+            />
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M5 9V7a5 5 0 0110 0v2h2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2h2zm8 0V7a3 3 0 00-6 0v2h6z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </span>
+            <button
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition duration-150 rounded-full focus:outline-none focus:ring-2 focus:ring-sky-500"
+            >
+              <span class="toggle-icon text-xl">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
+            </button>
+          </div>
+          <div class="text-sm text-red-500" *ngIf="isFieldInvalid('password')">
+            {{ getFieldError('password') }}
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              formControlName="rememberMe"
+              class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:checked:bg-indigo-600"
+            />
+            <span class="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+          </label>
           <button
             type="button"
-            class="password-toggle"
-            (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            (click)="onForgotPassword()"
+            class="text-sm font-medium text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 transition duration-150 hover:underline"
           >
-            <span class="toggle-icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
+            Forgot password?
           </button>
         </div>
-        <div class="error-message" *ngIf="isFieldInvalid('password')">
-          {{ getFieldError('password') }}
+
+        <div>
+          <button
+            type="submit"
+            [disabled]="isLoading || loginForm.invalid"
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 disabled:opacity-50 transition duration-150"
+          >
+            <span *ngIf="!isLoading">Sign In</span>
+            <span *ngIf="isLoading" class="flex items-center space-x-2">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span>Signing in...</span>
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <div class="relative mt-8">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+          <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-3 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium"> OR </span>
         </div>
       </div>
 
-      <!-- Remember Me & Forgot Password -->
-      <div class="form-options">
-        <label class="checkbox-wrapper">
-          <input type="checkbox" formControlName="rememberMe" />
-          <span class="checkmark"></span>
-          Remember me
-        </label>
-        <button type="button" class="forgot-password-link" (click)="onForgotPassword()">
-          Forgot password?
-        </button>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="form-actions">
+      <div class="mt-6 space-y-3">
         <button
-          type="submit"
-          class="btn btn-primary"
-          [disabled]="isLoading || loginForm.invalid"
+          type="button"
+          (click)="onGoogleLogin()"
+          class="w-full flex items-center justify-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150"
         >
-          <span *ngIf="!isLoading">Sign In</span>
-          <span *ngIf="isLoading">
-            <span class="spinner"></span>
-            Signing in...
-          </span>
+          <span class="mr-3 text-xl">🔍</span>
+          Continue with Google
+        </button>
+        <button
+          type="button"
+          (click)="onFacebookLogin()"
+          class="w-full flex items-center justify-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150"
+        >
+          <span class="mr-3 text-xl">📘</span>
+          Continue with Facebook
         </button>
       </div>
-    </form>
 
-    <!-- Divider -->
-    <div class="divider">
-      <span>OR</span>
-    </div>
-
-    <!-- Social Login -->
-    <div class="social-login">
-      <button type="button" class="btn btn-google" (click)="onGoogleLogin()">
-        <span class="social-icon">🔍</span>
-        Continue with Google
-      </button>
-      <button type="button" class="btn btn-facebook" (click)="onFacebookLogin()">
-        <span class="social-icon">📘</span>
-        Continue with Facebook
-      </button>
-    </div>
-
-    <!-- Register Link -->
-    <div class="register-link">
-      <p>Don't have an account?</p>
-      <button type="button" class="btn btn-link" (click)="onRegister()">
-        Register as Patient
-      </button>
+      <div class="mt-8 text-center">
+        <p class="text-sm text-gray-600 dark:text-gray-400 inline">Don't have an account?</p>
+        <button
+          type="button"
+          (click)="onRegister()"
+          class="ml-1 text-sm font-semibold text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-500 transition duration-150 hover:underline"
+        >
+          Register as Patient
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Loading Overlay -->
-<div *ngIf="isLoading" class="loading-overlay">
-  <div class="loading-spinner">
-    <div class="spinner"></div>
-    <p>Signing you in...</p>
+<div *ngIf="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm transition-opacity duration-300">
+  <div class="p-8 bg-white dark:bg-gray-700 rounded-xl shadow-2xl flex flex-col items-center space-y-3">
+    <svg class="animate-spin h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      ></path>
+    </svg>
+    <p class="text-lg font-medium text-gray-700 dark:text-gray-200">Signing you in...</p>
   </div>
 </div>
