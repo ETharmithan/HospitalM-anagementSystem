@@ -36,6 +36,15 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<DoctorAppointment>> GetByPatientIdAsync(Guid patientId)
+        {
+            return await _appDbContext.DoctorAppointments
+                .Where(x => x.PatientId == patientId)
+                .OrderByDescending(x => x.AppointmentDate)
+                .ThenBy(x => x.AppointmentTime)
+                .ToListAsync();
+        }
+
         public async Task<DoctorAppointment> CreateAsync(DoctorAppointment doctorAppointment)
         {
             await _appDbContext.DoctorAppointments.AddAsync(doctorAppointment);

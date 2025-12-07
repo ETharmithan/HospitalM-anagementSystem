@@ -15,10 +15,18 @@ namespace HospitalManagementSystem.Domain.Models.Doctors
         public required string AppointmentTime { get; set; }
         public required string AppointmentStatus { get; set; }
         public required DateTime CreatedDate { get; set; }
-
+        
+        // Duration in minutes for overlap checking
+        public int DurationMinutes { get; set; } = 30;
+        
+        // End time calculated from AppointmentTime + DurationMinutes
+        public string? AppointmentEndTime { get; set; }
 
         public required Guid PatientId { get; set; }
         public required Guid DoctorId { get; set; }
+        
+        // Hospital where the appointment takes place
+        public Guid? HospitalId { get; set; }
 
         public Doctor Doctor { get; set; } = null!;
 

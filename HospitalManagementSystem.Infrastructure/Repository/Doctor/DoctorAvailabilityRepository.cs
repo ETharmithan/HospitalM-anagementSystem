@@ -49,6 +49,34 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
                 .FirstOrDefaultAsync(x => x.DoctorId == doctorId && x.Date.Date == dateOnly);
         }
 
+        public async Task<DoctorAvailability?> GetByDoctorAndDateAsync(Guid doctorId, DateTime date, Guid? hospitalId = null)
+        {
+            var dateOnly = date.Date;
+            var query = _appDbContext.DoctorAvailabilities
+                .Include(x => x.Doctor)
+                .Where(x => x.DoctorId == doctorId && x.Date.Date == dateOnly);
+
+            if (hospitalId.HasValue)
+            {
+                // First try to find hospital-specific availability
+                var hospitalSpecific = await query
+                    .FirstOrDefaultAsync(x => x.HospitalId == hospitalId.Value);
+                if (hospitalSpecific != null) return hospitalSpecific;
+            }
+
+            // Fall back to general availability (no hospital specified)
+            return await query.FirstOrDefaultAsync(x => x.HospitalId == null);
+        }
+
+        public async Task<IEnumerable<DoctorAvailability>> GetByDoctorAndHospitalAsync(Guid doctorId, Guid hospitalId)
+        {
+            return await _appDbContext.DoctorAvailabilities
+                .Include(x => x.Doctor)
+                .Where(x => x.DoctorId == doctorId && x.HospitalId == hospitalId)
+                .OrderBy(x => x.Date)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<DoctorAvailability>> GetByDoctorIdAndDateRangeAsync(Guid doctorId, DateTime startDate, DateTime endDate)
         {
             return await _appDbContext.DoctorAvailabilities

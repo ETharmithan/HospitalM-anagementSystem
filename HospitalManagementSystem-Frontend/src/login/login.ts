@@ -73,18 +73,28 @@ export class Login implements OnInit {
     };
 
     this.accountService.login(loginData).subscribe({
-      next: (userResponse: any) => {
+      next: (response: any) => {
         this.isLoading = false;
+        
+        // Check if email verification is required
+        if (response.requiresVerification) {
+          this.toastService.warning(response.message || 'Please verify your email before logging in.');
+          this.router.navigate(['/verify-email'], { 
+            queryParams: { email: response.email },
+            state: { email: response.email }
+          });
+          return;
+        }
         
         // Convert to AuthService User format
         const user = {
-          userId: userResponse.id || userResponse.userId,
-          patientId: userResponse.patientId || '',
-          email: userResponse.email,
-          name: userResponse.displayName || userResponse.name || 'User',
-          role: userResponse.role || 'User',
-          imageUrl: userResponse.imageUrl || '',
-          token: userResponse.token || userResponse.Token || ''
+          userId: response.id || response.userId,
+          patientId: response.patientId || '',
+          email: response.email,
+          name: response.displayName || response.name || 'User',
+          role: response.role || 'User',
+          imageUrl: response.imageUrl || '',
+          token: response.token || response.Token || ''
         };
 
         // Login using AuthService

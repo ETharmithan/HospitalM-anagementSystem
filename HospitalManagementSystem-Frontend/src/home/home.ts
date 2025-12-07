@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AccountService } from '../core/services/account-service';
 import { DoctorService } from '../core/services/doctor-service';
@@ -16,15 +16,14 @@ export class Home implements OnInit {
   private doctorService = inject(DoctorService);
   router = inject(Router);
 
-  currentUser = signal<User | null>(null);
-  isLoggedIn = signal(false);
+  // Use computed to reactively track user state
+  currentUser = computed(() => this.accountService.currentUser());
+  isLoggedIn = computed(() => this.accountService.currentUser() !== null);
+  
   doctorCount = signal<number>(0);
   isLoading = signal(false);
 
   ngOnInit(): void {
-    const user = this.accountService.currentUser();
-    this.currentUser.set(user);
-    this.isLoggedIn.set(user !== null);
     this.loadDoctorCount();
   }
 
@@ -51,26 +50,27 @@ export class Home implements OnInit {
 
   onLogout(): void {
     this.accountService.logout();
-    this.currentUser.set(null);
-    this.isLoggedIn.set(false);
+    // currentUser and isLoggedIn are computed, they will update automatically
     this.router.navigate(['/home']);
   }
 
   onDashboard(): void {
     const role = this.currentUser()?.role?.toLowerCase();
-    if (role === 'superadmin') {
-      this.router.navigate(['/superadmin/dashboard']);
-      return;
-    }
-    if (role === 'admin') {
-      this.router.navigate(['/admin/dashboard']);
-      return;
-    }
-
-    if (role === 'patient') {
-      this.router.navigate(['/my-appointments']);
-    } else {
-      this.router.navigate(['/doctors']);
+    switch (role) {
+      case 'superadmin':
+        this.router.navigate(['/superadmin/dashboard']);
+        break;
+      case 'admin':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'doctor':
+        this.router.navigate(['/doctor/dashboard']);
+        break;
+      case 'patient':
+        this.router.navigate(['/patient/dashboard']);
+        break;
+      default:
+        this.router.navigate(['/']);
     }
   }
 

@@ -19,11 +19,17 @@ export interface Appointment {
   appointmentId: string;
   appointmentDate: string;
   appointmentTime: string;
+  appointmentEndTime?: string;
   appointmentStatus: string;
   createdDate: string;
+  durationMinutes?: number;
   patientId: string;
   doctorId: string;
+  hospitalId?: string;
   doctor?: Doctor;
+  doctorName?: string;
+  patientName?: string;
+  hospitalName?: string;
 }
 
 export interface CreateAppointmentRequest {
@@ -33,6 +39,8 @@ export interface CreateAppointmentRequest {
   createdDate: string; // ISO date string
   patientId: string;
   doctorId: string;
+  hospitalId?: string;
+  durationMinutes?: number;
 }
 
 export interface AppointmentSlot {
