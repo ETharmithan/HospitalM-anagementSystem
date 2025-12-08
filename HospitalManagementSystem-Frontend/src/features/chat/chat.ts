@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ChatService, ChatSession, ChatMessage, ChatRequest, DoctorChatAvailability, VideoCallInfo } from '../../core/services/chat-service';
 import { AccountService } from '../../core/services/account-service';
 import { ToastService } from '../../core/services/toast-service';
@@ -11,12 +12,13 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './chat.html',
-  styleUrl: './chat.css'
+  styleUrls: ['./chat.css', './chat-theme-green.css']
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private chatService = inject(ChatService);
   private accountService = inject(AccountService);
   private toastService = inject(ToastService);
+  private router = inject(Router);
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   @ViewChild('localVideo') localVideo!: ElementRef<HTMLVideoElement>;
@@ -43,7 +45,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages = computed(() => this.chatService.messages());
   pendingRequests = computed(() => this.chatService.pendingRequests());
   availableDoctors = computed(() => this.chatService.availableDoctors());
-  allDoctors = computed(() => this.chatService.availableDoctors()); // Using same signal for all doctors
+  allDoctors = computed(() => {
+    // Filter out the logged-in doctor from the list
+    const doctors = this.chatService.availableDoctors();
+    if (this.isDoctor) {
+      const currentUser = this.accountService.currentUser();
+      return doctors.filter(d => d.doctorId !== currentUser?.id);
+    }
+    return doctors;
+  });
   unreadCount = computed(() => this.chatService.unreadCount());
   isConnected = computed(() => this.chatService.isConnected());
   myChatAvailability = computed(() => this.chatService.myChatAvailability());
@@ -86,12 +96,27 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   private setupEventListeners(): void {
-    // Message received
+    // New message received
     this.subscriptions.push(
-      this.chatService.onMessageReceived.subscribe(message => {
-        if (this.currentSession()?.sessionId === message.sessionId) {
+      this.chatService.onMessageReceived.subscribe((message: ChatMessage) => {
+        const isCurrentSession = this.currentSession()?.sessionId === message.sessionId;
+        const isMyMessage = message.senderId === this.currentUserId;
+
+        if (isCurrentSession) {
           this.scrollToBottom();
           this.chatService.markMessagesAsRead(message.sessionId);
+        }
+
+        // Show notification if message is from someone else
+        if (!isMyMessage) {
+          // Show toast notification
+          this.toastService.info(`New message from ${message.senderName}`);
+
+          // Play notification sound (optional)
+          this.playNotificationSound();
+
+          // Update unread count
+          this.chatService.loadUnreadCount();
         }
       })
     );
@@ -175,6 +200,24 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   // ==================== NAVIGATION ====================
 
+  backToDashboard(): void {
+    // Navigate to appropriate dashboard based on role using Angular Router
+    const role = this.currentUserRole.toLowerCase();
+    
+    if (role === 'doctor') {
+      this.router.navigate(['/doctor/dashboard']);
+    } else if (role === 'patient') {
+      this.router.navigate(['/patient/dashboard']);
+    } else if (role === 'admin') {
+      this.router.navigate(['/admin/dashboard']);
+    } else if (role === 'superadmin') {
+      this.router.navigate(['/superadmin/dashboard']);
+    } else {
+      // Fallback to home if role is unknown
+      this.router.navigate(['/home']);
+    }
+  }
+
   showSessionList(): void {
     this.activeView.set('list');
     this.currentSession.set(null);
@@ -182,6 +225,8 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   showAvailableDoctors(): void {
     this.activeView.set('doctors');
+    // For now, both see doctors list
+    // TODO: Implement patient list for doctors in future
     this.chatService.loadAvailableDoctors();
   }
 
@@ -483,6 +528,29 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   // ==================== HELPERS ====================
+
+  private playNotificationSound(): void {
+    // Simple notification sound using Web Audio API
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (error) {
+      // Silently fail if audio not supported
+    }
+  }
 
   formatTime(dateStr: string): string {
     return new Date(dateStr).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });

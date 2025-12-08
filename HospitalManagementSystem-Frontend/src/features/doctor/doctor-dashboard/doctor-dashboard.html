@@ -4,6 +4,7 @@
     <div class="header-content">
       <h1>Doctor Dashboard</h1>
       <div class="header-actions">
+        <app-chat-notification-bell></app-chat-notification-bell>
         <span class="welcome-text">Welcome, Dr. {{ userName }}</span>
         <button class="btn btn-primary" routerLink="/chat">💬 Messages</button>
         <button class="btn btn-outline" (click)="onLogout()">Logout</button>

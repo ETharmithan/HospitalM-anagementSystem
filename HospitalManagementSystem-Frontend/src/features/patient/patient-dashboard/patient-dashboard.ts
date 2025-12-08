@@ -7,6 +7,7 @@ import { PatientService } from '../../../core/services/patient-service';
 import { AccountService } from '../../../core/services/account-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { Appointment, Doctor } from '../../../types/doctor';
+import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
 
 interface PatientStats {
   totalAppointments: number;
@@ -18,7 +19,7 @@ interface PatientStats {
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ChatNotificationBellComponent],
   templateUrl: './patient-dashboard.html',
   styleUrl: './patient-dashboard.css',
 })

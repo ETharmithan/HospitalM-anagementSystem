@@ -8,6 +8,7 @@ import { ToastService } from '../../../core/services/toast-service';
 import { DoctorScheduleService, DoctorSchedule, HospitalOption, CreateScheduleRequest } from '../../../core/services/doctor-schedule-service';
 import { PrescriptionService, PrescriptionRequest, PatientMedicalProfile } from '../../../core/services/prescription-service';
 import { Appointment } from '../../../types/doctor';
+import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
 
 interface PatientInfo {
   patientId: string;
@@ -39,7 +40,7 @@ interface ScheduleForm {
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, DatePipe, ChatNotificationBellComponent],
   templateUrl: './doctor-dashboard.html',
   styleUrl: './doctor-dashboard.css',
 })

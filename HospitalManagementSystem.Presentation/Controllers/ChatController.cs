@@ -11,10 +11,14 @@ namespace HospitalManagementSystem.Presentation.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly HospitalManagementSystem.Domain.IRepository.IDoctorRepository _doctorRepository;
+        private readonly HospitalManagementSystem.Application.IServices.IPatientRepository _patientRepository;
 
-        public ChatController(IChatService chatService)
+        public ChatController(IChatService chatService, HospitalManagementSystem.Domain.IRepository.IDoctorRepository doctorRepository, HospitalManagementSystem.Application.IServices.IPatientRepository patientRepository)
         {
             _chatService = chatService;
+            _doctorRepository = doctorRepository;
+            _patientRepository = patientRepository;
         }
 
         // ==================== SESSIONS ====================
@@ -27,10 +31,31 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             var userId = GetUserId();
             var userRole = GetUserRole();
+            var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
             if (userId == null) return Unauthorized();
 
-            var sessions = await _chatService.GetSessionsByUserIdAsync(Guid.Parse(userId), userRole);
+            Guid queryId;
+
+            // For doctors, we need to use Doctor.DoctorId, not User.UserId!
+            if (userRole == "Doctor")
+            {
+                var doctor = await _doctorRepository.GetByEmailAsync(userEmail);
+                if (doctor == null) return Ok(new List<object>());
+                queryId = doctor.DoctorId;
+            }
+            else if (userRole == "Patient")
+            {
+                var patient = await _patientRepository.GetByUserIdAsync(Guid.Parse(userId));
+                if (patient == null) return Ok(new List<object>());
+                queryId = patient.PatientId;
+            }
+            else
+            {
+                queryId = Guid.Parse(userId);
+            }
+
+            var sessions = await _chatService.GetSessionsByUserIdAsync(queryId, userRole);
             return Ok(sessions);
         }
 
@@ -57,24 +82,39 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 if (userId == null) return Unauthorized();
 
                 var userRole = GetUserRole();
+                var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                 Guid patientId;
                 Guid doctorId;
 
                 // Determine patient and doctor IDs based on user role
                 if (userRole == "Patient")
                 {
-                    patientId = Guid.Parse(userId);
+                    // Look up the actual Patient.PatientId from the Patients table
+                    var patient = await _patientRepository.GetByUserIdAsync(Guid.Parse(userId));
+                    if (patient == null)
+                        return BadRequest("Patient record not found. Please complete your patient registration.");
+                    
+                    patientId = patient.PatientId;
                     doctorId = dto.DoctorId;
                 }
                 else if (userRole == "Doctor")
                 {
-                    doctorId = Guid.Parse(userId);
+                    var loggedInDoctor = await _doctorRepository.GetByEmailAsync(userEmail);
+                    if (loggedInDoctor == null)
+                        return BadRequest("Doctor record not found.");
+                    
+                    doctorId = loggedInDoctor.DoctorId;
                     patientId = dto.DoctorId; // In this case, DoctorId field contains PatientId
                 }
                 else
                 {
                     return BadRequest("Only patients and doctors can create chat sessions");
                 }
+
+                // Validate doctor exists
+                var doctor = await _doctorRepository.GetByIdAsync(doctorId);
+                if (doctor == null)
+                    return BadRequest($"Doctor not found. Please try again.");
 
                 // Check if session already exists
                 var existingSessions = await _chatService.GetSessionsByUserIdAsync(patientId, "Patient");
@@ -98,10 +138,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
             }
             catch (Exception ex)
             {
-                // Log the error for debugging
-                Console.WriteLine($"Error creating direct session: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                return StatusCode(500, new { error = ex.Message, details = ex.InnerException?.Message });
+                return StatusCode(500, new { error = "Failed to create chat session. Please try again." });
             }
         }
 

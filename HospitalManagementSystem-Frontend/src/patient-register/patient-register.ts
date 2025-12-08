@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { ToastService } from '../core/services/toast-service';
 import { PatientService } from '../core/services/patient-service';
-import { AuthService } from '../core/services/auth.service';
+import { AuthService } from '../core/services/auth-service';
 import { AccountService } from '../core/services/account-service';
 
 @Component({
@@ -20,7 +20,6 @@ export class PatientRegister implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private authService = inject(AuthService);
-  private accountService = inject(AccountService);
 
   patientForm!: FormGroup;
   isLoading = false;
@@ -226,7 +225,7 @@ export class PatientRegister implements OnInit {
 
         
     // Register user account
-    this.accountService.register(registerData).subscribe({
+    this.authService.register(registerData).subscribe({
       next: (response: any) => {
         // Don't set isLoading = false here - patient creation will handle it
         

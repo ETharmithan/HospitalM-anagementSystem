@@ -9,18 +9,21 @@ namespace HospitalManagementSystem.Presentation.Hubs
     public class ChatHub : Hub
     {
         private readonly IChatService _chatService;
+        private readonly HospitalManagementSystem.Domain.IRepository.IDoctorRepository _doctorRepository;
         private static readonly Dictionary<string, string> _userConnections = new();
         private static readonly Dictionary<string, string> _connectionUsers = new();
 
-        public ChatHub(IChatService chatService)
+        public ChatHub(IChatService chatService, HospitalManagementSystem.Domain.IRepository.IDoctorRepository doctorRepository)
         {
             _chatService = chatService;
+            _doctorRepository = doctorRepository;
         }
 
         public override async Task OnConnectedAsync()
         {
             var userId = GetUserId();
             var userRole = GetUserRole();
+            var userEmail = Context.User?.FindFirst(ClaimTypes.Email)?.Value;
             
             if (!string.IsNullOrEmpty(userId))
             {
@@ -29,9 +32,13 @@ namespace HospitalManagementSystem.Presentation.Hubs
                 _connectionUsers[Context.ConnectionId] = userId;
 
                 // If doctor, update their connection ID in availability
-                if (userRole == "Doctor")
+                if (userRole == "Doctor" && !string.IsNullOrEmpty(userEmail))
                 {
-                    await _chatService.UpdateDoctorConnectionAsync(userId, Context.ConnectionId);
+                    var doctor = await _doctorRepository.GetByEmailAsync(userEmail);
+                    if (doctor != null)
+                    {
+                        await _chatService.UpdateDoctorConnectionAsync(doctor.DoctorId.ToString(), Context.ConnectionId);
+                    }
                 }
 
                 // Join user-specific group for targeted messages
@@ -48,6 +55,7 @@ namespace HospitalManagementSystem.Presentation.Hubs
         {
             var userId = GetUserId();
             var userRole = GetUserRole();
+            var userEmail = Context.User?.FindFirst(ClaimTypes.Email)?.Value;
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -55,9 +63,13 @@ namespace HospitalManagementSystem.Presentation.Hubs
                 _connectionUsers.Remove(Context.ConnectionId);
 
                 // If doctor, update their status to offline
-                if (userRole == "Doctor")
+                if (userRole == "Doctor" && !string.IsNullOrEmpty(userEmail))
                 {
-                    await _chatService.SetDoctorOfflineAsync(userId);
+                    var doctor = await _doctorRepository.GetByEmailAsync(userEmail);
+                    if (doctor != null)
+                    {
+                        await _chatService.SetDoctorOfflineAsync(doctor.DoctorId.ToString());
+                    }
                 }
 
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user_{userId}");
@@ -91,7 +103,6 @@ namespace HospitalManagementSystem.Presentation.Hubs
 
             if (message != null)
             {
-                // Send to all participants in the session
                 await Clients.Group($"session_{sessionId}").SendAsync("ReceiveMessage", message);
             }
         }
@@ -239,36 +250,46 @@ namespace HospitalManagementSystem.Presentation.Hubs
         /// </summary>
         public async Task SetChatAvailability(bool isAvailableForChat, bool isAvailableForVideo, string? statusMessage)
         {
-            var doctorId = GetUserId();
-            var userRole = GetUserRole();
-            
-            if (string.IsNullOrEmpty(doctorId))
+            try
             {
-                throw new HubException("User not authenticated");
-            }
-            
-            if (userRole != "Doctor")
-            {
-                // Silently ignore for non-doctors instead of throwing error
-                return;
-            }
+                var userId = GetUserId();
+                var userRole = GetUserRole();
+                var userEmail = Context.User?.FindFirst(ClaimTypes.Email)?.Value;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    throw new HubException("User not authenticated");
+                }
+                
+                if (userRole != "Doctor")
+                {
+                    // Silently ignore for non-doctors instead of throwing error
+                    return;
+                }
 
-            await _chatService.SetDoctorAvailabilityAsync(
-                Guid.Parse(doctorId),
-                isAvailableForChat,
-                isAvailableForVideo,
-                statusMessage,
-                Context.ConnectionId
-            );
+                var doctor = await _doctorRepository.GetByEmailAsync(userEmail);
+                if (doctor == null) return;
 
-            // Broadcast to all clients
-            await Clients.All.SendAsync("DoctorAvailabilityChanged", new
+                await _chatService.SetDoctorAvailabilityAsync(
+                    doctor.DoctorId,
+                    isAvailableForChat,
+                    isAvailableForVideo,
+                    statusMessage,
+                    Context.ConnectionId
+                );
+
+                await Clients.All.SendAsync("DoctorAvailabilityChanged", new
+                {
+                    DoctorId = doctor.DoctorId.ToString(),
+                    IsAvailableForChat = isAvailableForChat,
+                    IsAvailableForVideo = isAvailableForVideo,
+                    StatusMessage = statusMessage
+                });
+            }
+            catch
             {
-                DoctorId = doctorId,
-                IsAvailableForChat = isAvailableForChat,
-                IsAvailableForVideo = isAvailableForVideo,
-                StatusMessage = statusMessage
-            });
+                // Silently handle errors to prevent chat from breaking
+            }
         }
 
         // ==================== VIDEO CALL SIGNALING (WebRTC) ====================

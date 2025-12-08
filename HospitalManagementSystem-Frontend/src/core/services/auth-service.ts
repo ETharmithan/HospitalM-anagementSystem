@@ -1,9 +1,18 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, tap, Observable, map, timeout } from 'rxjs';
 import { Router } from '@angular/router';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth-model';
 import { environment } from '../../environments/environment';
+import { LoginCreds, RegisterCreds, User } from '../../types/user';
+
+export interface AuthResponse {
+  user?: User;
+  token?: string;
+  message?: string;
+  requiresVerification?: boolean;
+  email?: string;
+  emailSent?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -11,80 +20,130 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  
-  private currentUserSubject = new BehaviorSubject<AuthResponse | null>(this.getUserFromStorage());
+
+  // State
+  private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
+  
+  // Signal for modern reactivity
+  public currentUser = signal<User | null>(this.getUserFromStorage());
+  public isLoggedIn = signal<boolean>(!!this.getUserFromStorage());
 
-  private apiUrl = `${environment.apiUrl}/auth`;
+  private apiUrl = `${environment.apiUrl}/account`;
 
-  get isAuthenticated(): boolean {
-    return !!this.currentUserSubject.value;
+  constructor() {
+    // Sync signal with subject for backward compatibility
+    this.currentUser$.subscribe(user => {
+      this.currentUser.set(user);
+      this.isLoggedIn.set(!!user);
+    });
   }
 
-  get currentUserValue(): AuthResponse | null {
-    return this.currentUserSubject.value;
-  }
-
-  login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => this.handleAuthResponse(response))
+  // ------------------------
+  // LOGIN
+  // ------------------------
+  login(credentials: LoginCreds): Observable<AuthResponse> {
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
+      timeout(6000), // 6 second timeout for network errors
+      map(response => {
+        // Handle requiresVerification case
+        if (response.requiresVerification) {
+          return response as AuthResponse;
+        }
+        
+        // Handle successful login - map backend User_Dto (capital properties) to frontend User (lowercase)
+        if (response && (response.Token || response.token)) {
+          const user: User = {
+            id: response.Id || response.id,
+            displayName: response.DisplayName || response.displayName,
+            email: response.Email || response.email,
+            token: response.Token || response.token,
+            role: response.Role || response.role,
+            imageUrl: response.ImageUrl || response.imageUrl
+          };
+          
+          this.setUser(user);
+          return { user, token: user.token } as AuthResponse;
+        }
+        
+        return response as AuthResponse;
+      })
     );
   }
 
-  register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
-      tap(response => this.handleAuthResponse(response))
+  // ------------------------
+  // REGISTER
+  // ------------------------
+  register(data: RegisterCreds): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data);
+  }
+
+  // ------------------------
+  // VERIFY EMAIL
+  // ------------------------
+  verifyEmail(email: string, otp: string): Observable<AuthResponse> {
+    return this.http.post<any>(`${this.apiUrl}/verify-email`, { email, otp }).pipe(
+      map(response => {
+        if (response.user) {
+          const backendUser = response.user;
+          // Map backend User_Dto to frontend User
+          if (backendUser.Token || backendUser.token) {
+            const user: User = {
+              id: backendUser.Id || backendUser.id,
+              displayName: backendUser.DisplayName || backendUser.displayName,
+              email: backendUser.Email || backendUser.email,
+              token: backendUser.Token || backendUser.token,
+              role: backendUser.Role || backendUser.role,
+              imageUrl: backendUser.ImageUrl || backendUser.imageUrl
+            };
+            this.setUser(user);
+            response.user = user; // Update response with mapped user
+          }
+        }
+        return response;
+      })
     );
   }
 
+  // ------------------------
+  // RESEND OTP
+  // ------------------------
+  resendOtp(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/resend-otp`, { email });
+  }
+
+  // ------------------------
+  // LOGOUT
+  // ------------------------
   logout(): void {
-    const refreshToken = this.getRefreshToken();
-    if (refreshToken) {
-      this.http.post(`${this.apiUrl}/logout`, refreshToken).subscribe();
-    }
-    this.clearAuthData();
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('user'); // Clean up legacy key
+    this.currentUserSubject.next(null);
+    this.currentUser.set(null);
+    this.isLoggedIn.set(false);
     this.router.navigate(['/auth/login']);
   }
 
-  refreshToken(): Observable<AuthResponse> {
-    const refreshToken = this.getRefreshToken();
-    return this.http.post<AuthResponse>(`${this.apiUrl}/refresh-token`, refreshToken).pipe(
-      tap(response => this.handleAuthResponse(response))
-    );
+  // ------------------------
+  // STATE MANAGEMENT
+  // ------------------------
+  
+  setUser(user: User): void {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+    // Signal updates via subscription in constructor
   }
 
-  private handleAuthResponse(response: AuthResponse): void {
-    localStorage.setItem('currentUser', JSON.stringify(response));
-    localStorage.setItem('token', response.token);
-    localStorage.setItem('refreshToken', response.refreshToken);
-    this.currentUserSubject.next(response);
-  }
-
-  private clearAuthData(): void {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    this.currentUserSubject.next(null);
-  }
-
-  private getUserFromStorage(): AuthResponse | null {
-    const userJson = localStorage.getItem('currentUser');
-    return userJson ? JSON.parse(userJson) : null;
-  }
   getToken(): string | null {
-      const userJson = localStorage.getItem('currentUser');
-      if (!userJson) return null;
+    return this.currentUserSubject.value?.token ?? null;
+  }
 
-      const user1 = JSON.parse(userJson);
-      return user1.token || null;
-      }
+  getCurrentUser(): User | null {
+    return this.currentUserSubject.value;
+  }
 
-
-  // getToken(): string | null {
-  //   return localStorage.getItem('token');
-  // }
-
-  getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken');
+  private getUserFromStorage(): User | null {
+    const u = localStorage.getItem('currentUser');
+    return u ? JSON.parse(u) : null;
   }
 }

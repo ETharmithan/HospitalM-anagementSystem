@@ -24,7 +24,35 @@ export class Home implements OnInit {
   isLoading = signal(false);
 
   ngOnInit(): void {
+    // Redirect logged-in users to their dashboard
+    const user = this.currentUser();
+    if (user) {
+      this.redirectToDashboard(user);
+      return;
+    }
+    
     this.loadDoctorCount();
+  }
+
+  private redirectToDashboard(user: User): void {
+    const role = user.role?.toLowerCase();
+    switch (role) {
+      case 'superadmin':
+        this.router.navigate(['/superadmin/dashboard']);
+        break;
+      case 'admin':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'doctor':
+        this.router.navigate(['/doctor/dashboard']);
+        break;
+      case 'patient':
+        this.router.navigate(['/patient/dashboard']);
+        break;
+      default:
+        // If role is unknown, stay on homepage
+        break;
+    }
   }
 
   loadDoctorCount() {

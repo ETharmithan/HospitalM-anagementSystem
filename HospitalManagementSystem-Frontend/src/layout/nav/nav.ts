@@ -2,7 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
-import { AuthService, User } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth-service';
+import { User } from '../../types/user';
+
+import { getRoleDashboardRoute } from '../../core/utils/role-utils';
 
 @Component({
   selector: 'app-nav',
@@ -39,6 +42,13 @@ export class Nav {
         this.showUserMenu = false;
       }
     });
+  }
+
+  getHomeRoute(): string {
+    if (this.currentUser) {
+      return getRoleDashboardRoute(this.currentUser.role);
+    }
+    return '/';
   }
 
   toggleMenu(): void {
@@ -98,10 +108,10 @@ export class Nav {
   }
 
   get userInitials(): string {
-    if (!this.currentUser?.name) return 'U';
-    return this.currentUser.name
+    if (!this.currentUser?.displayName) return 'U';
+    return this.currentUser.displayName
       .split(' ')
-      .map(n => n[0])
+      .map((n: string) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);

@@ -3,7 +3,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { getRoleDashboardRoute } from '../../../core/utils/role-utils';
 
@@ -77,30 +77,17 @@ export class VerifyEmail implements OnInit {
     this.isLoading.set(true);
     const otp = this.otpForm.value.otp;
 
-    this.accountService.verifyEmail(this.email(), otp).subscribe({
+    this.authService.verifyEmail(this.email(), otp).subscribe({
       next: (response: any) => {
         this.isLoading.set(false);
         this.toastService.success('Email verified successfully! Logging you in...');
         
         // If user data is returned, log them in and navigate to dashboard
         if (response.user && response.user.token) {
-          // Convert to AuthService User format and login
-          const user = {
-            userId: response.user.id || response.user.userId,
-            patientId: response.user.patientId || '',
-            email: response.user.email,
-            name: response.user.displayName || response.user.name || 'User',
-            role: response.user.role || 'Patient',
-            imageUrl: response.user.imageUrl || '',
-            token: response.user.token
-          };
-          
-          // Login using AuthService
-          this.authService.login(user);
-          this.accountService.setCurrentUser(response.user);
+          // AuthService.verifyEmail already calls setUser, so we just navigate
           
           // Navigate to role-based dashboard
-          const landingRoute = getRoleDashboardRoute(user.role);
+          const landingRoute = getRoleDashboardRoute(response.user.role);
           this.router.navigate([landingRoute]);
         } else {
           // No token returned, redirect to login
@@ -119,7 +106,7 @@ export class VerifyEmail implements OnInit {
     if (this.countdown() > 0) return;
 
     this.isResending.set(true);
-    this.accountService.resendOtp(this.email()).subscribe({
+    this.authService.resendOtp(this.email()).subscribe({
       next: (response: any) => {
         this.isResending.set(false);
         this.toastService.success(response.message || 'OTP sent successfully!');

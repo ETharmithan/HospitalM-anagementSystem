@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from '../core/services/toast-service';
 import { AccountService } from '../core/services/account-service';
-import { AuthService } from '../core/services/auth.service';
+import { AuthService } from '../core/services/auth-service';
 import { getRoleDashboardRoute } from '../core/utils/role-utils';
+import { catchError, of, finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class Login implements OnInit {
   private toastService = inject(ToastService);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   loginForm!: FormGroup;
   isLoading = false;
@@ -29,7 +31,7 @@ export class Login implements OnInit {
     this.initializeForm();
     
     // Check if user is already logged in
-    if (this.authService.isLoggedInValue) {
+    if (this.authService.isLoggedIn()) {
       const user = this.accountService.currentUser();
       if (user) {
         const dashboardRoute = getRoleDashboardRoute(user.role);
@@ -68,6 +70,11 @@ export class Login implements OnInit {
       return;
     }
 
+    // Prevent multiple simultaneous login attempts
+    if (this.isLoading) {
+      return;
+    }
+
     this.isLoading = true;
     const formValue = this.loginForm.value;
 
@@ -76,9 +83,36 @@ export class Login implements OnInit {
       password: formValue.password
     };
 
-    this.accountService.login(loginData).subscribe({
-      next: (response: any) => {
+    this.authService.login(loginData).pipe(
+      catchError((error: any) => {
+        let errorMessage = 'Login failed. Please try again.';
+        
+        // Handle timeout error
+        if (error.name === 'TimeoutError') {
+          errorMessage = 'Connection timeout. Please check your network and try again.';
+        } else if (error?.status === 401) {
+          errorMessage = 'Invalid email or password.';
+        } else if (error?.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (error?.status === 0) {
+          errorMessage = 'Network error. Please check your connection.';
+        } else if (error?.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.toastService.error(errorMessage);
+        return of(null);
+      }),
+      finalize(() => {
         this.isLoading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: (response: any) => {
+        // If response is null (from error handler), just return
+        if (!response) {
+          return;
+        }
         
         // Check if email verification is required
         if (response.requiresVerification) {
@@ -90,62 +124,15 @@ export class Login implements OnInit {
           return;
         }
         
-        // Convert to AuthService User format
-        const user = {
-          userId: response.id || response.userId,
-          patientId: response.patientId || '',
-          email: response.email,
-          name: response.displayName || response.name || 'User',
-          role: response.role || 'User',
-          imageUrl: response.imageUrl || '',
-          token: response.token || response.Token || ''
-        };
-
-        // Login using AuthService
-        this.authService.login(user);
-        
-        // Show success message
-        this.toastService.success('Login successful! Welcome back.');
-        
-        // Navigate to role-based landing page
-        const landingRoute = getRoleDashboardRoute(user.role);
-        this.router.navigate([landingRoute]);
-      },
-      error: (error: any) => {
-        this.isLoading = false;
-        let errorMessage = 'Login failed. Please try again.';
-        
-        // Handle specific error cases
-        if (error?.status === 401) {
-          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-        } else if (error?.status === 400) {
-          if (error?.error?.message) {
-            errorMessage = error.error.message;
-            // Make specific errors more user-friendly
-            if (errorMessage.toLowerCase().includes('invalid email')) {
-              errorMessage = 'Invalid email address. Please enter a valid email.';
-            } else if (errorMessage.toLowerCase().includes('invalid password')) {
-              errorMessage = 'Invalid password. Please check your password and try again.';
-            } else if (errorMessage.toLowerCase().includes('email not found')) {
-              errorMessage = 'Email not found. Please check your email or register for a new account.';
-            }
-          } else if (error?.error?.title) {
-            errorMessage = error.error.title;
-          } else if (error?.error?.errors) {
-            // Handle validation errors
-            const errorMessages = Object.values(error.error.errors).flat();
-            errorMessage = errorMessages.join(', ') || 'Invalid login credentials';
-          }
-        } else if (error?.status === 500) {
-          errorMessage = 'Server error. Please try again later.';
-        } else if (error?.status === 0) {
-          errorMessage = 'Network error. Please check your internet connection.';
-        } else if (error?.error?.message) {
-          errorMessage = error.error.message;
+        // Successful login
+        if (response.user && response.token) {
+           // AuthService.login already calls setUser, so we just navigate
+           this.toastService.success('Login successful! Welcome back.');
+           
+           // Navigate to role-based landing page
+           const landingRoute = getRoleDashboardRoute(response.user.role);
+           this.router.navigate([landingRoute]);
         }
-        
-        this.toastService.error(errorMessage);
-        console.error('Login error:', error);
       }
     });
   }
