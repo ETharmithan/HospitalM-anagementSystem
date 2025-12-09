@@ -32,6 +32,32 @@
           >
             Home
           </a>
+          <a 
+            *ngIf="currentUser?.role === 'Patient'"
+            routerLink="/doctors"
+            routerLinkActive="active-link-style"
+            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
+            >
+            Doctors
+          </a>
+          <a 
+            *ngIf="currentUser?.role === 'Patient'"
+            routerLink="/hospitals"
+            routerLinkActive="active-link-style"
+            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
+            >
+            Hospitals
+          </a>
+          <a 
+            *ngIf="currentUser?.role === 'Patient'"
+            routerLink="/chat"
+            routerLinkActive="active-link-style"
+            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
+            >
+            Chat
+          </a>
+          
+          
           <a
             routerLink="/about"
             routerLinkActive="active-link-style"
@@ -112,27 +138,7 @@
                 d="M19 9l-7 7-7-7"
               ></path>
             </svg>
-          </div>
-
-          
-          <div
-            *ngIf="!currentUser"
-            class="hidden sm:flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-          >
-            <img
-              src="/assets/avatar-placeholder.svg"
-              alt="Guest avatar"
-              class="w-10 h-10 rounded-full object-cover shadow-sm border-2 border-white dark:border-slate-800"
-            />
-            <div class="flex flex-col items-start">
-              <span class="text-sm font-medium text-slate-700 dark:text-slate-200"
-                >Guest User</span
-              >
-              <span class="text-xs text-slate-500 dark:text-slate-400"
-                >Not logged in</span
-              >
-            </div>
-          </div>
+          </div>         
         </div>
 
         <button
@@ -300,6 +306,23 @@
           class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
           >🏠 Home</a
         >
+        <a
+        *ngIf= "currentUser?.role === 'Patient'"
+          (click)="closeMenu()"
+          routerLink="/doctors"
+          routerLinkActive="active-mobile-link-style"
+          class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
+          >🩺 Doctors</a
+        >
+        <a
+        *ngIf= "currentUser?.role === 'Patient'"
+          (click)="closeMenu()"
+          routerLink="/departments"
+          routerLinkActive="active-mobile-link-style"
+          class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
+          >🏥 Departments</a
+        >
+
         <a
           (click)="closeMenu()"
           routerLink="/about"

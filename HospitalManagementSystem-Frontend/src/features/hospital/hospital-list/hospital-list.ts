@@ -62,7 +62,7 @@ export class HospitalList implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load hospitals:', error);
-        this.toastService.error('Failed to load hospitals');
+        // this.toastService.error('Failed to load hospitals');
         this.isLoading.set(false);
       }
     });

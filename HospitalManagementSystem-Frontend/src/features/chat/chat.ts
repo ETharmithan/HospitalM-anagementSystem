@@ -6,11 +6,12 @@ import { ChatService, ChatSession, ChatMessage, ChatRequest, DoctorChatAvailabil
 import { AccountService } from '../../core/services/account-service';
 import { ToastService } from '../../core/services/toast-service';
 import { Subscription } from 'rxjs';
+import { Nav } from '../../layout/nav/nav';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Nav],
   templateUrl: './chat.html',
   styleUrls: ['./chat.css', './chat-theme-green.css']
 })

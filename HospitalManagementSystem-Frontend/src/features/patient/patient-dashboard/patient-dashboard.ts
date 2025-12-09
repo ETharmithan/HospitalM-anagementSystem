@@ -8,6 +8,7 @@ import { AccountService } from '../../../core/services/account-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { Appointment, Doctor } from '../../../types/doctor';
 import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
+import { Nav } from '../../../layout/nav/nav';
 
 interface PatientStats {
   totalAppointments: number;
@@ -19,7 +20,7 @@ interface PatientStats {
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ChatNotificationBellComponent],
+  imports: [CommonModule, RouterModule, ChatNotificationBellComponent, Nav],
   templateUrl: './patient-dashboard.html',
   styleUrl: './patient-dashboard.css',
 })
@@ -67,7 +68,7 @@ export class PatientDashboard implements OnInit {
           }
         },
         error: () => {
-          this.toastService.warning('Please complete your patient registration');
+          // this.toastService.warning('Please complete your patient registration');
           this.isLoading.set(false);
         }
       });
