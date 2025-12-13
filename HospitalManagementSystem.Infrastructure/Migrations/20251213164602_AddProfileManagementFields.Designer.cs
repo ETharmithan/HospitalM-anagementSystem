@@ -4,6 +4,7 @@ using HospitalManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HospitalManagementSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251213164602_AddProfileManagementFields")]
+    partial class AddProfileManagementFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,27 +323,6 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.Property<string>("AppointmentTime")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CancellationApprovalNote")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("CancellationApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("CancellationApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CancellationApprovedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CancellationReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("CancellationRequested")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("CancellationRequestedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");

@@ -71,11 +71,57 @@ namespace HospitalManagementSystem.Infrastructure.Repositories
 
         public async Task<bool> DeleteHospitalAsync(Guid hospitalId)
         {
-            var hospital = await _context.Hospitals.FindAsync(hospitalId);
+            var hospital = await _context.Hospitals
+                .Include(h => h.HospitalAdmins)
+                .Include(h => h.Departments)
+                .FirstOrDefaultAsync(h => h.HospitalId == hospitalId);
+            
             if (hospital == null) return false;
 
-            hospital.IsActive = false;
-            hospital.UpdatedAt = DateTime.UtcNow;
+            // Remove all appointments for this hospital
+            var appointments = await _context.DoctorAppointments
+                .Where(a => a.HospitalId == hospitalId)
+                .ToListAsync();
+            if (appointments.Any())
+            {
+                _context.DoctorAppointments.RemoveRange(appointments);
+            }
+
+            // Remove all doctor schedules for this hospital
+            var schedules = await _context.DoctorSchedules
+                .Where(s => s.HospitalId == hospitalId)
+                .ToListAsync();
+            if (schedules.Any())
+            {
+                _context.DoctorSchedules.RemoveRange(schedules);
+            }
+
+            // Remove all hospital admins
+            if (hospital.HospitalAdmins != null && hospital.HospitalAdmins.Any())
+            {
+                _context.HospitalAdmins.RemoveRange(hospital.HospitalAdmins);
+            }
+
+            // Remove all departments (and their doctors will be handled by cascade or restrict)
+            if (hospital.Departments != null && hospital.Departments.Any())
+            {
+                // Get all doctors in these departments
+                var departmentIds = hospital.Departments.Select(d => d.DepartmentId).ToList();
+                var doctors = await _context.Doctors
+                    .Where(d => departmentIds.Contains(d.DepartmentId.Value))
+                    .ToListAsync();
+                
+                // Set department to null for doctors instead of deleting them
+                foreach (var doctor in doctors)
+                {
+                    doctor.DepartmentId = null;
+                }
+
+                _context.Departments.RemoveRange(hospital.Departments);
+            }
+
+            // Finally remove the hospital
+            _context.Hospitals.Remove(hospital);
             await _context.SaveChangesAsync();
             return true;
         }

@@ -5,6 +5,6 @@ namespace HospitalManagementSystem.Application.IServices
 {
     public interface IAdminDashboardService
     {
-        Task<AdminOverviewDto> GetOverviewAsync();
+        Task<AdminOverviewDto> GetOverviewAsync(Guid? hospitalId = null);
     }
 }

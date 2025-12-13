@@ -113,6 +113,21 @@ export class AuthService {
   }
 
   // ------------------------
+  // PASSWORD MANAGEMENT
+  // ------------------------
+  changePassword(passwordData: { currentPassword: string; newPassword: string; confirmNewPassword: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/change-password`, passwordData);
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(resetData: { email: string; resetToken: string; newPassword: string; confirmNewPassword: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, resetData);
+  }
+
+  // ------------------------
   // LOGOUT
   // ------------------------
   logout(): void {

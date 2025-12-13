@@ -15,6 +15,11 @@ export const routes: Routes = [
     loadComponent: () => import('../features/superadmin/superadmin-dashboard').then(c => c.SuperAdminDashboard),
     canActivate: [superAdminGuard]
   },
+  { 
+    path: 'superadmin/hospital-details/:id', 
+    loadComponent: () => import('../features/superadmin/hospital-details/hospital-details').then(c => c.HospitalDetails),
+    canActivate: [superAdminGuard]
+  },
   
   // Admin (Hospital Owner) routes
   { 
@@ -34,18 +39,14 @@ export const routes: Routes = [
   { 
     path: 'patient/dashboard', 
     loadComponent: () => import('../features/patient/patient-dashboard/patient-dashboard').then(c => c.PatientDashboard),
-    canActivate: [patientGuard],
-    
+    canActivate: [patientGuard]
+  },
+  { 
+    path: 'patient-profile', 
+    loadComponent: () => import('../features/patient/patient-profile/patient-profile').then(c => c.PatientProfile),
+    canActivate: [authGuard]
+  },
   
-  
-  
-    },
-
-
-
-
-
-
   { 
     path: 'my-appointments', 
     loadComponent: () => import('../features/appointment/my-appointments/my-appointments').then(c => c.MyAppointments),
@@ -82,6 +83,10 @@ export const routes: Routes = [
     loadComponent: () => import('../features/E-Prescription/show-e-prescription/show-e-prescription').then(c => c.ShowEPrescription),
     canActivate: [authGuard]
   },
+
+  // Terms and Contact pages
+  { path: 'terms', loadComponent: () => import('../features/shared/terms-conditions/terms-conditions').then(c => c.TermsConditions) },
+  { path: 'contact', loadComponent: () => import('../features/shared/contact/contact').then(c => c.Contact) },
 
   { path: '**', redirectTo: 'home' } // Catch-all route
 ];

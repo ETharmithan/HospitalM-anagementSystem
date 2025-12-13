@@ -46,7 +46,13 @@
     <!-- Header -->
     <header class="content-header">
       <div class="header-left">
-        <h1 class="page-title">
+
+        @if (hospitalInfo()) {
+          <p class="page-subtitle">{{ hospitalInfo()!.hospitalName }} - {{ hospitalInfo()!.hospitalCity }}</p>
+        } @else {
+          <p class="page-subtitle">Manage your hospital operations efficiently</p>
+        }
+                <h1 class="page-title">
           @switch (activeTab()) {
             @case ('overview') { Dashboard Overview }
             @case ('doctors') { Doctor Management }
@@ -54,7 +60,6 @@
             @case ('appointments') { Appointments }
           }
         </h1>
-        <p class="page-subtitle">Manage your hospital operations efficiently</p>
       </div>
       <div class="header-right">
         @if (activeTab() === 'doctors') {
@@ -165,10 +170,9 @@
               <thead>
                 <tr>
                   <th>Doctor</th>
-                  <th>Specialization</th>
                   <th>Department</th>
                   <th>Contact</th>
-                  <th>Fee</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -177,22 +181,25 @@
                   <tr>
                     <td>
                       <div class="doctor-info">
-                        <div class="doctor-avatar">{{ doctor.firstName.charAt(0) }}{{ doctor.lastName.charAt(0) }}</div>
+                        <div class="doctor-avatar">{{ doctor.name?.charAt(0) || 'D' }}</div>
                         <div>
-                          <div class="doctor-name">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</div>
+                          <div class="doctor-name">Dr. {{ doctor.name }}</div>
                           <div class="doctor-qualification">{{ doctor.qualification || 'N/A' }}</div>
                         </div>
                       </div>
                     </td>
-                    <td>{{ doctor.specialization || 'General' }}</td>
                     <td>{{ doctor.departmentName || 'Unassigned' }}</td>
                     <td>
                       <div class="contact-info">
                         <div>{{ doctor.email }}</div>
-                        <div class="phone">{{ doctor.phoneNumber || 'N/A' }}</div>
+                        <div class="phone">{{ doctor.phone || 'N/A' }}</div>
                       </div>
                     </td>
-                    <td>{{ doctor.consultationFee ? ('$' + doctor.consultationFee) : 'N/A' }}</td>
+                    <td>
+                      <span class="status-badge" [class.active]="doctor.status === 'Active'">
+                        {{ doctor.status || 'Active' }}
+                      </span>
+                    </td>
                     <td>
                       <div class="action-buttons">
                         <button class="btn-icon" title="Manage Schedule" (click)="openScheduleModal(doctor)">📅</button>
@@ -261,54 +268,48 @@
         <button class="close-btn" (click)="closeDoctorModal()">×</button>
       </div>
       <div class="modal-body">
-        <div class="form-row">
-          <div class="form-group">
-            <label>First Name *</label>
-            <input type="text" [(ngModel)]="doctorForm.firstName" placeholder="First name">
-          </div>
-          <div class="form-group">
-            <label>Last Name *</label>
-            <input type="text" [(ngModel)]="doctorForm.lastName" placeholder="Last name">
-          </div>
+        <div class="form-group">
+          <label>Doctor Name *</label>
+          <input type="text" [(ngModel)]="doctorForm.name" placeholder="Dr. Full Name">
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Email *</label>
-            <input type="email" [(ngModel)]="doctorForm.email" placeholder="doctor@hospital.com">
+            <input type="email" [(ngModel)]="doctorForm.email" placeholder="doctor@example.com">
           </div>
           <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" [(ngModel)]="doctorForm.phoneNumber" placeholder="+1 234 567 8900">
+            <label>Phone *</label>
+            <input type="tel" [(ngModel)]="doctorForm.phone" placeholder="+1234567890">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Department *</label>
             <select [(ngModel)]="doctorForm.departmentId">
-              <option value="">-- Select Department --</option>
+              <option value="">Select Department</option>
               @for (dept of departments(); track dept.departmentId) {
                 <option [value]="dept.departmentId">{{ dept.name }}</option>
               }
             </select>
           </div>
           <div class="form-group">
-            <label>Specialization</label>
-            <input type="text" [(ngModel)]="doctorForm.specialization" placeholder="e.g., Cardiology">
+            <label>Qualification *</label>
+            <input type="text" [(ngModel)]="doctorForm.qualification" placeholder="e.g., MBBS, MD">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Qualification</label>
-            <input type="text" [(ngModel)]="doctorForm.qualification" placeholder="e.g., MD, MBBS">
+            <label>License Number *</label>
+            <input type="text" [(ngModel)]="doctorForm.licenseNumber" placeholder="License number">
           </div>
           <div class="form-group">
-            <label>Experience (years)</label>
-            <input type="number" [(ngModel)]="doctorForm.experience" min="0">
+            <label>Status *</label>
+            <select [(ngModel)]="doctorForm.status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="On Leave">On Leave</option>
+            </select>
           </div>
-        </div>
-        <div class="form-group">
-          <label>Consultation Fee ($)</label>
-          <input type="number" [(ngModel)]="doctorForm.consultationFee" min="0" step="0.01">
         </div>
       </div>
       <div class="modal-footer">
@@ -354,7 +355,7 @@
   <div class="modal-overlay" (click)="closeScheduleModal()">
     <div class="modal modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Manage Schedule - Dr. {{ selectedDoctorForSchedule()?.firstName }} {{ selectedDoctorForSchedule()?.lastName }}</h2>
+        <h2>Manage Schedule - Dr. {{ selectedDoctorForSchedule()?.name }}</h2>
         <button class="close-btn" (click)="closeScheduleModal()">×</button>
       </div>
       <div class="modal-body">

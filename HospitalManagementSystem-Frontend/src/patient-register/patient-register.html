@@ -648,6 +648,21 @@
         </div>
       </div>
 
+      <!-- Terms and Conditions Acceptance -->
+      <div class="terms-section" *ngIf="currentStep === 3">
+        <div class="terms-checkbox">
+          <input type="checkbox" id="acceptTerms" formControlName="acceptTerms" />
+          <label for="acceptTerms">
+            I have read and agree to the 
+            <a href="/terms" target="_blank" class="terms-link">Terms and Conditions</a>
+            including the appointment arrival policy (must arrive 5 minutes before appointment time)
+          </label>
+        </div>
+        <div class="error-message" *ngIf="patientForm.get('acceptTerms')?.invalid && patientForm.get('acceptTerms')?.touched">
+          You must accept the terms and conditions to register
+        </div>
+      </div>
+
       <!-- Submit Button -->
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()" [disabled]="isLoading">
@@ -662,7 +677,7 @@
           type="submit"
           class="btn btn-primary"
           *ngIf="currentStep === 3"
-          [disabled]="isLoading || patientForm.invalid"
+          [disabled]="isLoading || patientForm.invalid || !patientForm.get('acceptTerms')?.value"
         >
           <span *ngIf="!isLoading">Register Patient</span>
           <span *ngIf="isLoading">

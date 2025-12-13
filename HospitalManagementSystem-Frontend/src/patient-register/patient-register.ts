@@ -77,6 +77,8 @@ export class PatientRegister implements OnInit {
       postalCode: ['', Validators.required],
       country: ['', Validators.required],
       nationality: ['', Validators.required],
+      // Terms and Conditions
+      acceptTerms: [false, Validators.requiredTrue]
     }, { validators: this.passwordMatchValidator });
   }
 

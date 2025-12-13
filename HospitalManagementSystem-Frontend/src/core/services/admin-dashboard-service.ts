@@ -3,6 +3,15 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AdminOverview } from '../../types/admin-overview';
 
+export interface HospitalInfo {
+  hospitalId: string;
+  hospitalName: string;
+  hospitalAddress: string;
+  hospitalCity: string;
+  hospitalEmail: string;
+  hospitalPhone: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -12,5 +21,9 @@ export class AdminDashboardService {
 
   getOverview(): Observable<AdminOverview> {
     return this.http.get<AdminOverview>(`${this.baseUrl}/overview`);
+  }
+
+  getHospitalInfo(): Observable<HospitalInfo> {
+    return this.http.get<HospitalInfo>(`${this.baseUrl}/hospital-info`);
   }
 }

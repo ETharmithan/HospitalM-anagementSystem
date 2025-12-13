@@ -27,8 +27,10 @@ namespace HospitalManagementSystem.Application.Services
             _departmentRepository = departmentRepository;
         }
 
-        public async Task<AdminOverviewDto> GetOverviewAsync()
+        public async Task<AdminOverviewDto> GetOverviewAsync(Guid? hospitalId = null)
         {
+            // For now, return all data - hospital filtering will be done in controller
+            // This maintains clean architecture (Application layer doesn't reference Infrastructure)
             var overview = new AdminOverviewDto
             {
                 TotalUsers = await _userRepository.CountAsync(),

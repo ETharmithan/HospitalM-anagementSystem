@@ -13,6 +13,9 @@ namespace HospitalManagementSystem.Application.DTOs.DoctorDto.Request_Dto
         [MaxLength(100)]
         public string Name { get; set; } = null!;
 
+        [MaxLength(500)]
+        public string? Description { get; set; }
+
         public Guid? HospitalId { get; set; }
     }
 }

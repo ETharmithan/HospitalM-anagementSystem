@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AdminDashboardService } from '../../core/services/admin-dashboard-service';
-import { HospitalService, Hospital, CreateHospitalRequest } from '../../core/services/hospital-service';
+import { HospitalService, Hospital, CreateHospitalRequest, Admin, CreateAdminDto, UpdateAdminDto, Patient, SystemUser } from '../../core/services/hospital-service';
 import { UserManagementService, UserInfo, CreateUserRequest } from '../../core/services/user-management-service';
 import { AccountService } from '../../core/services/account-service';
 import { ToastService } from '../../core/services/toast-service';
@@ -29,15 +29,96 @@ export class SuperAdminDashboard implements OnInit {
   isLoading = signal(true);
   
   // Tab management
-  activeTab = signal<'overview' | 'hospitals' | 'admins' | 'doctors'>('overview');
+  activeTab = signal<'overview' | 'hospitals' | 'admins' | 'patients' | 'users'>('overview');
   
   // Hospitals
   hospitals = signal<Hospital[]>([]);
   isLoadingHospitals = signal(false);
   
   // Admins
-  admins = signal<UserInfo[]>([]);
+  admins = signal<Admin[]>([]);
   isLoadingAdmins = signal(false);
+  
+  // Patients
+  patients = signal<Patient[]>([]);
+  isLoadingPatients = signal(false);
+  
+  // Users
+  users = signal<SystemUser[]>([]);
+  isLoadingUsers = signal(false);
+  
+  // User filtering and sorting
+  userSearchTerm = signal<string>('');
+  userRoleFilter = signal<string>('all');
+  userSortBy = signal<'username' | 'role'>('username');
+  userSortOrder = signal<'asc' | 'desc'>('asc');
+  
+  // Group admins by hospital
+  adminsByHospital = computed(() => {
+    const grouped = new Map<string, { hospital: string; admins: Admin[] }>();
+    
+    // Group by hospital
+    this.admins().forEach(admin => {
+      if (admin.hospitals && admin.hospitals.length > 0) {
+        admin.hospitals.forEach(hospital => {
+          const key = hospital.hospitalId;
+          if (!grouped.has(key)) {
+            grouped.set(key, {
+              hospital: hospital.hospitalName,
+              admins: []
+            });
+          }
+          grouped.get(key)!.admins.push(admin);
+        });
+      }
+    });
+    
+    // Unassigned admins
+    const unassigned = this.admins().filter(admin => !admin.hospitals || admin.hospitals.length === 0);
+    if (unassigned.length > 0) {
+      grouped.set('unassigned', {
+        hospital: 'Unassigned Admins',
+        admins: unassigned
+      });
+    }
+    
+    return Array.from(grouped.values());
+  });
+
+  // Filtered and sorted users
+  filteredAndSortedUsers = computed(() => {
+    let filtered = this.users();
+    
+    // Filter by role
+    if (this.userRoleFilter() !== 'all') {
+      filtered = filtered.filter(user => user.role === this.userRoleFilter());
+    }
+    
+    // Filter by search term (username or email)
+    const searchTerm = this.userSearchTerm().toLowerCase();
+    if (searchTerm) {
+      filtered = filtered.filter(user => 
+        user.username.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Sort
+    const sortBy = this.userSortBy();
+    const sortOrder = this.userSortOrder();
+    
+    return filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortBy === 'username') {
+        comparison = a.username.localeCompare(b.username);
+      } else if (sortBy === 'role') {
+        comparison = a.role.localeCompare(b.role);
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  });
   
   // Modals
   showHospitalModal = signal(false);
@@ -45,6 +126,7 @@ export class SuperAdminDashboard implements OnInit {
   showAssignAdminModal = signal(false);
   isSubmitting = signal(false);
   editingHospital = signal<Hospital | null>(null);
+  editingAdmin = signal<Admin | null>(null);
   selectedHospitalForAdmin = signal<Hospital | null>(null);
   
   // Forms
@@ -85,10 +167,12 @@ export class SuperAdminDashboard implements OnInit {
     this.loadOverview();
     this.loadHospitals();
     this.loadAdmins();
+    this.loadPatients();
+    this.loadUsers();
   }
 
   // Tab switching
-  switchTab(tab: 'overview' | 'hospitals' | 'admins' | 'doctors'): void {
+  switchTab(tab: 'overview' | 'hospitals' | 'admins' | 'patients' | 'users'): void {
     this.activeTab.set(tab);
   }
 
@@ -124,13 +208,44 @@ export class SuperAdminDashboard implements OnInit {
   // Load admins
   loadAdmins(): void {
     this.isLoadingAdmins.set(true);
-    this.userService.getUsersByRole('Admin').subscribe({
+    this.hospitalService.getAllAdmins().subscribe({
       next: (data) => {
         this.admins.set(data);
         this.isLoadingAdmins.set(false);
       },
       error: () => {
         this.isLoadingAdmins.set(false);
+        this.toastService.error('Failed to load admins');
+      }
+    });
+  }
+
+  // Load patients
+  loadPatients(): void {
+    this.isLoadingPatients.set(true);
+    this.hospitalService.getAllPatients().subscribe({
+      next: (data) => {
+        this.patients.set(data);
+        this.isLoadingPatients.set(false);
+      },
+      error: () => {
+        this.isLoadingPatients.set(false);
+        this.toastService.error('Failed to load patients');
+      }
+    });
+  }
+
+  // Load users
+  loadUsers(): void {
+    this.isLoadingUsers.set(true);
+    this.hospitalService.getAllUsers().subscribe({
+      next: (data) => {
+        this.users.set(data);
+        this.isLoadingUsers.set(false);
+      },
+      error: () => {
+        this.isLoadingUsers.set(false);
+        this.toastService.error('Failed to load users');
       }
     });
   }
@@ -223,61 +338,25 @@ export class SuperAdminDashboard implements OnInit {
         }
       });
     } else {
-      // Create hospital first, then create admin and assign
-      this.hospitalService.createHospital(this.hospitalForm).subscribe({
-        next: (hospital: any) => {
-          const hospitalId = hospital.hospitalId || hospital.HospitalId;
-          
-          // Now create the admin user
-          const adminRequest = {
-            email: this.hospitalAdminForm.email,
-            displayName: this.hospitalAdminForm.displayName,
-            password: this.hospitalAdminForm.password,
-            role: 'Admin'
-          };
-          
-          this.userService.createUser(adminRequest).subscribe({
-            next: (userResponse: any) => {
-              const userId = userResponse.userId || userResponse.user?.id || userResponse.user?.userId;
-              
-              if (userId && hospitalId) {
-                // Assign admin to hospital
-                this.hospitalService.assignHospitalAdmin(hospitalId, userId).subscribe({
-                  next: () => {
-                    this.toastService.success('Hospital and admin created successfully');
-                    this.closeHospitalModal();
-                    this.loadHospitals();
-                    this.loadAdmins();
-                    this.loadOverview();
-                    this.isSubmitting.set(false);
-                  },
-                  error: () => {
-                    this.toastService.warning('Hospital created, admin created, but assignment failed');
-                    this.closeHospitalModal();
-                    this.loadHospitals();
-                    this.loadAdmins();
-                    this.isSubmitting.set(false);
-                  }
-                });
-              } else {
-                this.toastService.success('Hospital and admin created successfully');
-                this.closeHospitalModal();
-                this.loadHospitals();
-                this.loadAdmins();
-                this.loadOverview();
-                this.isSubmitting.set(false);
-              }
-            },
-            error: (err) => {
-              this.toastService.warning('Hospital created but failed to create admin: ' + (err.message || 'Unknown error'));
-              this.closeHospitalModal();
-              this.loadHospitals();
-              this.isSubmitting.set(false);
-            }
-          });
+      // Create hospital with admin in atomic transaction
+      const createData = {
+        ...this.hospitalForm,
+        adminEmail: this.hospitalAdminForm.email,
+        adminDisplayName: this.hospitalAdminForm.displayName,
+        adminPassword: this.hospitalAdminForm.password
+      };
+
+      this.hospitalService.createHospitalWithAdmin(createData).subscribe({
+        next: () => {
+          this.toastService.success('Hospital and admin created successfully');
+          this.closeHospitalModal();
+          this.loadHospitals();
+          this.loadAdmins();
+          this.loadOverview();
+          this.isSubmitting.set(false);
         },
         error: (err) => {
-          this.toastService.error(err.message || 'Failed to create hospital');
+          this.toastService.error(err.message || 'Failed to create hospital with admin');
           this.isSubmitting.set(false);
         }
       });
@@ -384,29 +463,132 @@ export class SuperAdminDashboard implements OnInit {
     });
   }
 
-  // Assign admin to hospital
-  openAssignAdminModal(hospital: Hospital): void {
-    this.selectedHospitalForAdmin.set(hospital);
-    this.showAssignAdminModal.set(true);
+  // View hospital details
+  viewHospitalDetails(hospitalId: string): void {
+    this.router.navigate(['/superadmin/hospital-details', hospitalId]);
   }
 
-  closeAssignAdminModal(): void {
-    this.showAssignAdminModal.set(false);
-    this.selectedHospitalForAdmin.set(null);
+  // Get admins for a specific hospital
+  getHospitalAdmins(hospitalId: string): any[] {
+    const hospital = this.hospitals().find(h => h.hospitalId === hospitalId);
+    if (!hospital || !hospital.hospitalAdmins) return [];
+    
+    const adminUserIds = hospital.hospitalAdmins.map(ha => ha.userId);
+    return this.admins().filter(admin => adminUserIds.includes(admin.userId));
   }
 
-  assignAdminToHospital(admin: UserInfo): void {
-    const hospital = this.selectedHospitalForAdmin();
-    if (!hospital) return;
+  // Get admin count for a hospital
+  getHospitalAdminCount(hospitalId: string): number {
+    return this.getHospitalAdmins(hospitalId).length;
+  }
 
-    this.hospitalService.assignHospitalAdmin(hospital.hospitalId, admin.userId).subscribe({
+  // Edit admin
+  editAdmin(admin: Admin): void {
+    this.editingAdmin.set(admin);
+    this.adminForm = {
+      email: admin.email,
+      displayName: admin.username,
+      password: '', // Don't pre-fill password
+      role: 'Admin',
+      hospitalId: admin.hospitals?.[0]?.hospitalId || ''
+    };
+    this.showAdminModal.set(true);
+  }
+
+  // Update admin
+  updateAdmin(): void {
+    const admin = this.editingAdmin();
+    if (!admin) return;
+
+    if (!this.adminForm.email || !this.adminForm.displayName) {
+      this.toastService.error('Please fill all required fields');
+      return;
+    }
+
+    if (this.adminForm.password && this.adminForm.password.length < 8) {
+      this.toastService.error('Password must be at least 8 characters');
+      return;
+    }
+
+    this.isSubmitting.set(true);
+
+    const updateData: UpdateAdminDto = {
+      username: this.adminForm.displayName,
+      email: this.adminForm.email
+    };
+
+    if (this.adminForm.password) {
+      updateData.password = this.adminForm.password;
+    }
+
+    this.hospitalService.updateAdmin(admin.userId, updateData).subscribe({
       next: () => {
-        this.toastService.success(`${admin.username} assigned to ${hospital.name}`);
-        this.closeAssignAdminModal();
-        this.loadHospitals();
+        this.toastService.success('Admin updated successfully');
+        this.closeAdminModal();
+        this.loadAdmins();
+        this.isSubmitting.set(false);
       },
       error: (err) => {
-        this.toastService.error(err.message);
+        this.toastService.error(err.message || 'Failed to update admin');
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  // Delete admin
+  deleteAdmin(admin: Admin): void {
+    const hospitalNames = admin.hospitals?.map(h => h.hospitalName).join(', ') || 'no hospitals';
+    if (!confirm(`Are you sure you want to delete admin "${admin.username}"?\n\nThis admin is currently assigned to: ${hospitalNames}\n\nThis will remove the admin user and all hospital assignments.`)) {
+      return;
+    }
+
+    this.hospitalService.deleteAdmin(admin.userId).subscribe({
+      next: () => {
+        this.toastService.success('Admin deleted successfully');
+        this.loadAdmins();
+        this.loadHospitals();
+        this.loadOverview();
+      },
+      error: (err) => {
+        this.toastService.error(err.message || 'Failed to delete admin');
+      }
+    });
+  }
+
+  // Delete patient
+  deletePatient(patient: Patient): void {
+    if (!confirm(`Are you sure you want to delete patient "${patient.firstName} ${patient.lastName}"?\n\nThis will remove the patient and all their appointments (${patient.appointmentCount} appointments).`)) {
+      return;
+    }
+
+    this.hospitalService.deletePatient(patient.patientId).subscribe({
+      next: () => {
+        this.toastService.success('Patient deleted successfully');
+        this.loadPatients();
+        this.loadOverview();
+      },
+      error: (err) => {
+        this.toastService.error(err.message || 'Failed to delete patient');
+      }
+    });
+  }
+
+  // Delete user
+  deleteUser(user: SystemUser): void {
+    if (!confirm(`Are you sure you want to delete user "${user.username}" (${user.role})?\n\nThis will remove the user and all associated data.`)) {
+      return;
+    }
+
+    this.hospitalService.deleteUser(user.userId).subscribe({
+      next: () => {
+        this.toastService.success('User deleted successfully');
+        this.loadUsers();
+        this.loadAdmins();
+        this.loadPatients();
+        this.loadOverview();
+      },
+      error: (err) => {
+        this.toastService.error(err.message || 'Failed to delete user');
       }
     });
   }

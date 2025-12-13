@@ -1,0 +1,221 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <button class="back-btn" (click)="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back
+    </button>
+    <h1>My Profile</h1>
+  </div>
+
+  <div class="tabs">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'profile'"
+      (click)="setActiveTab('profile')">
+      Profile Information
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'password'"
+      (click)="setActiveTab('password')">
+      Change Password
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading profile...</p>
+    </div>
+  }
+
+  @if (!isLoading() && activeTab() === 'profile') {
+    <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="profile-form">
+      <div class="form-section">
+        <h2>Contact Information</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="+1 234 567 8900">
+            @if (profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched) {
+              <span class="error-text">Please enter a valid phone number</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="nationality">Nationality</label>
+            <input type="text" id="nationality" formControlName="nationality" placeholder="Your nationality">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="addressLine1">Address Line 1</label>
+          <input type="text" id="addressLine1" formControlName="addressLine1" placeholder="Street address">
+        </div>
+
+        <div class="form-group">
+          <label for="addressLine2">Address Line 2</label>
+          <input type="text" id="addressLine2" formControlName="addressLine2" placeholder="Apartment, suite, etc. (optional)">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" formControlName="city" placeholder="City">
+          </div>
+          <div class="form-group">
+            <label for="state">State/Province</label>
+            <input type="text" id="state" formControlName="state" placeholder="State or Province">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="postalCode">Postal Code</label>
+            <input type="text" id="postalCode" formControlName="postalCode" placeholder="Postal code">
+          </div>
+          <div class="form-group">
+            <label for="country">Country</label>
+            <input type="text" id="country" formControlName="country" placeholder="Country">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Personal Information</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input type="date" id="dateOfBirth" formControlName="dateOfBirth">
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" formControlName="gender">
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Medical Information</h2>
+        <div class="form-group">
+          <label for="bloodType">Blood Type</label>
+          <select id="bloodType" formControlName="bloodType">
+            <option value="">Select blood type</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="allergies">Allergies</label>
+          <textarea id="allergies" formControlName="allergies" rows="3" placeholder="List any allergies (e.g., medications, food, environmental)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="chronicConditions">Chronic Conditions</label>
+          <textarea id="chronicConditions" formControlName="chronicConditions" rows="3" placeholder="List any chronic conditions or ongoing health issues"></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Emergency Contact</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="emergencyContactName">Contact Name</label>
+            <input type="text" id="emergencyContactName" formControlName="emergencyContactName" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label for="emergencyContactRelationship">Relationship</label>
+            <input type="text" id="emergencyContactRelationship" formControlName="emergencyContactRelationship" placeholder="e.g., Spouse, Parent, Sibling">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="emergencyContactPhone">Contact Phone</label>
+            <input type="tel" id="emergencyContactPhone" formControlName="emergencyContactPhone" placeholder="+1 234 567 8900">
+            @if (profileForm.get('emergencyContactPhone')?.invalid && profileForm.get('emergencyContactPhone')?.touched) {
+              <span class="error-text">Please enter a valid phone number</span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="emergencyContactEmail">Contact Email</label>
+            <input type="email" id="emergencyContactEmail" formControlName="emergencyContactEmail" placeholder="email@example.com">
+            @if (profileForm.get('emergencyContactEmail')?.invalid && profileForm.get('emergencyContactEmail')?.touched) {
+              <span class="error-text">Please enter a valid email</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="goBack()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+          @if (isSaving()) {
+            <span class="spinner-small"></span>
+            Saving...
+          } @else {
+            Save Changes
+          }
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (!isLoading() && activeTab() === 'password') {
+    <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="password-form">
+      <div class="form-section">
+        <h2>Change Password</h2>
+        <p class="section-description">Update your password to keep your account secure</p>
+
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input type="password" id="currentPassword" formControlName="currentPassword" placeholder="Enter current password">
+          @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
+            <span class="error-text">Current password is required</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" formControlName="newPassword" placeholder="Enter new password (min 6 characters)">
+          @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+            <span class="error-text">Password must be at least 6 characters</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="confirmNewPassword">Confirm New Password</label>
+          <input type="password" id="confirmNewPassword" formControlName="confirmNewPassword" placeholder="Confirm new password">
+          @if (passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmNewPassword')?.touched) {
+            <span class="error-text">Passwords do not match</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="goBack()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isChangingPassword()">
+          @if (isChangingPassword()) {
+            <span class="spinner-small"></span>
+            Changing...
+          } @else {
+            Change Password
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>

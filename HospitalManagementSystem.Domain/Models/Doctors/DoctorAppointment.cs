@@ -29,6 +29,15 @@ namespace HospitalManagementSystem.Domain.Models.Doctors
         // Hospital where the appointment takes place
         public Guid? HospitalId { get; set; }
 
+        // Cancellation workflow fields
+        public bool CancellationRequested { get; set; } = false;
+        public DateTime? CancellationRequestedAt { get; set; }
+        public string? CancellationReason { get; set; }
+        public bool CancellationApproved { get; set; } = false;
+        public DateTime? CancellationApprovedAt { get; set; }
+        public Guid? CancellationApprovedBy { get; set; }
+        public string? CancellationApprovalNote { get; set; }
+
         // Navigation properties
         public Doctor Doctor { get; set; } = null!;
         public Patient.Patient? Patient { get; set; }

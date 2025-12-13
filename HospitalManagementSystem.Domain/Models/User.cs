@@ -24,6 +24,10 @@ namespace HospitalManagementSystem.Domain.Models
         public DateTime? OtpExpiryTime { get; set; }
         public int OtpAttempts { get; set; } = 0;
 
+        // Password reset fields
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
         // public Patient? Patient { get; set; } //navigation property
     }
 }

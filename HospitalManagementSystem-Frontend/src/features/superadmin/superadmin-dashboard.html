@@ -33,6 +33,18 @@
       (click)="switchTab('admins')">
       👤 Admins
     </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'patients'"
+      (click)="switchTab('patients')">
+      🧑‍🤝‍🧑 Patients
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'users'"
+      (click)="switchTab('users')">
+      👥 Users
+    </button>
   </nav>
 
   <!-- Content Area -->
@@ -151,8 +163,7 @@
                     <span class="admin-count">{{ hospital.hospitalAdmins?.length || 0 }}</span>
                   </td>
                   <td class="actions">
-                    <button class="btn-icon" title="Edit" (click)="openEditHospitalModal(hospital)">✏️</button>
-                    <button class="btn-icon" title="Assign Admin" (click)="openAssignAdminModal(hospital)">👤</button>
+                    <button class="btn-icon" title="View/Edit Hospital" (click)="viewHospitalDetails(hospital.hospitalId)">👁️</button>
                     <button class="btn-icon danger" title="Delete" (click)="deleteHospital(hospital)">🗑️</button>
                   </td>
                 </tr>
@@ -182,17 +193,192 @@
           <button class="btn btn-primary" (click)="openCreateAdminModal()">Add Admin</button>
         </div>
       } @else {
-        <div class="cards-grid">
-          @for (admin of admins(); track admin.userId) {
-            <div class="admin-card">
-              <div class="admin-avatar">{{ admin.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
-              <div class="admin-info">
-                <h3>{{ admin.username }}</h3>
-                <p>{{ admin.email }}</p>
-                <span class="role-badge">{{ admin.role }}</span>
-              </div>
+        <!-- Admins grouped by hospital -->
+        @for (group of adminsByHospital(); track group.hospital) {
+          <div class="admin-group">
+            <div class="group-header">
+              <h3>{{ group.hospital }}</h3>
+              <span class="admin-count">{{ group.admins.length }} admin(s)</span>
             </div>
-          }
+            <div class="cards-grid">
+              @for (admin of group.admins; track admin.userId) {
+                <div class="admin-card">
+                  <div class="admin-avatar">{{ admin.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
+                  <div class="admin-info">
+                    <h4>{{ admin.username }}</h4>
+                    <p class="admin-email">{{ admin.email }}</p>
+                    @if (admin.hospitals && admin.hospitals.length > 1) {
+                      <span class="multi-hospital-badge">{{ admin.hospitals.length }} hospitals</span>
+                    }
+                  </div>
+                  <div class="admin-actions">
+                    <button class="btn-icon" (click)="editAdmin(admin)" title="Edit Admin">
+                      ✏️
+                    </button>
+                    <button class="btn-icon btn-danger" (click)="deleteAdmin(admin)" title="Delete Admin">
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    }
+
+    <!-- Patients Tab -->
+    @if (activeTab() === 'patients') {
+      <div class="section-header">
+        <h2>Patient Management</h2>
+        <span class="admin-count">{{ patients().length }} patients</span>
+      </div>
+
+      @if (isLoadingPatients()) {
+        <div class="loading-spinner">Loading patients...</div>
+      } @else if (patients().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🧑‍🤝‍🧑</span>
+          <h3>No Patients Yet</h3>
+          <p>No patients registered in the system</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>NIC</th>
+                <th>Location</th>
+                <th>Appointments</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (patient of patients(); track patient.patientId) {
+                <tr>
+                  <td>{{ patient.firstName }} {{ patient.lastName }}</td>
+                  <td>{{ patient.email }}</td>
+                  <td>{{ patient.phoneNumber }}</td>
+                  <td>{{ patient.nic }}</td>
+                  <td>{{ patient.city }}, {{ patient.province }}</td>
+                  <td>{{ patient.appointmentCount }}</td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon danger" (click)="deletePatient(patient)" title="Delete Patient">
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- Users Tab -->
+    @if (activeTab() === 'users') {
+      <div class="section-header">
+        <h2>User Management</h2>
+        <span class="admin-count">{{ filteredAndSortedUsers().length }} / {{ users().length }} users</span>
+      </div>
+
+      <!-- Filter and Sort Controls -->
+      <div class="filter-controls">
+        <div class="search-box">
+          <input 
+            type="text" 
+            placeholder="Search by username or email..." 
+            [(ngModel)]="userSearchTerm"
+            (ngModelChange)="userSearchTerm.set($event)"
+            class="search-input">
+        </div>
+        
+        <div class="filter-group">
+          <label>Role:</label>
+          <select [(ngModel)]="userRoleFilter" (ngModelChange)="userRoleFilter.set($event)" class="filter-select">
+            <option value="all">All Roles</option>
+            <option value="SuperAdmin">SuperAdmin</option>
+            <option value="Admin">Admin</option>
+            <option value="Doctor">Doctor</option>
+            <option value="Patient">Patient</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Sort By:</label>
+          <select [(ngModel)]="userSortBy" (ngModelChange)="userSortBy.set($event)" class="filter-select">
+            <option value="username">Username</option>
+            <option value="role">Role</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <button 
+            class="btn-sort" 
+            (click)="userSortOrder.set(userSortOrder() === 'asc' ? 'desc' : 'asc')"
+            [title]="userSortOrder() === 'asc' ? 'Ascending' : 'Descending'">
+            {{ userSortOrder() === 'asc' ? '↑' : '↓' }}
+          </button>
+        </div>
+      </div>
+
+      @if (isLoadingUsers()) {
+        <div class="loading-spinner">Loading users...</div>
+      } @else if (filteredAndSortedUsers().length === 0 && users().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">👥</span>
+          <h3>No Users Yet</h3>
+          <p>No users registered in the system</p>
+        </div>
+      } @else if (filteredAndSortedUsers().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🔍</span>
+          <h3>No Results Found</h3>
+          <p>No users match your current filters</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Email Verified</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of filteredAndSortedUsers(); track user.userId) {
+                <tr>
+                  <td>{{ user.username }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>
+                    <span class="role-badge" [class]="user.role.toLowerCase()">
+                      {{ user.role }}
+                    </span>
+                  </td>
+                  <td>
+                    <span [style.color]="user.isEmailVerified ? '#4caf50' : '#f44336'">
+                      {{ user.isEmailVerified ? '✓ Verified' : '✗ Not Verified' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-icon danger" (click)="deleteUser(user)" title="Delete User">
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       }
     }
@@ -336,35 +522,4 @@
     </div>
   }
 
-  <!-- Assign Admin Modal -->
-  @if (showAssignAdminModal()) {
-    <div class="modal-overlay" (click)="closeAssignAdminModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2>Assign Admin to {{ selectedHospitalForAdmin()?.name }}</h2>
-          <button class="close-btn" (click)="closeAssignAdminModal()">×</button>
-        </div>
-        <div class="modal-body">
-          @if (admins().length === 0) {
-            <p class="empty-message">No admins available. Create an admin first.</p>
-          } @else {
-            <div class="admin-list">
-              @for (admin of admins(); track admin.userId) {
-                <div class="admin-list-item" (click)="assignAdminToHospital(admin)">
-                  <div class="admin-avatar small">{{ admin.username?.charAt(0)?.toUpperCase() || 'A' }}</div>
-                  <div class="admin-details">
-                    <strong>{{ admin.username }}</strong>
-                    <span>{{ admin.email }}</span>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" (click)="closeAssignAdminModal()">Cancel</button>
-        </div>
-      </div>
-    </div>
-  }
 </div>

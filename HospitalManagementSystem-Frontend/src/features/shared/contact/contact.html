@@ -1,0 +1,301 @@
+<div class="contact-container">
+  <div class="contact-content">
+    <h1>Contact Information</h1>
+    <p class="subtitle">Get in touch with us for any assistance</p>
+
+    <!-- For Patients and Guests - Basic Hospital Contact -->
+    @if (userRole() === 'Patient' || userRole() === 'Guest') {
+      <section class="contact-section">
+        <h2>Hospital Locations</h2>
+        <p class="section-description">Contact any of our hospital locations for general inquiries and appointments</p>
+        
+        @if (isLoading()) {
+          <div class="loading">Loading hospital information...</div>
+        } @else if (hospitals().length === 0) {
+          <div class="no-data">No hospital information available at the moment.</div>
+        } @else {
+          <div class="hospitals-grid">
+            @for (hospital of hospitals(); track hospital.hospitalId) {
+              <div class="hospital-card">
+                <h3>{{ hospital.name }}</h3>
+                <div class="contact-details">
+                  <div class="contact-item">
+                    <span class="icon">📍</span>
+                    <div class="contact-info">
+                      <strong>Address</strong>
+                      <p>{{ hospital.address }}, {{ hospital.city }}</p>
+                      <p>{{ hospital.state }}, {{ hospital.country }} - {{ hospital.postalCode }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">📞</span>
+                    <div class="contact-info">
+                      <strong>Phone</strong>
+                      <p>{{ hospital.phoneNumber }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">✉️</span>
+                    <div class="contact-info">
+                      <strong>Email</strong>
+                      <p>{{ hospital.email }}</p>
+                    </div>
+                  </div>
+                  @if (hospital.website) {
+                    <div class="contact-item">
+                      <span class="icon">🌐</span>
+                      <div class="contact-info">
+                        <strong>Website</strong>
+                        <p><a [href]="hospital.website" target="_blank">{{ hospital.website }}</a></p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- For Doctors - Detailed Contact Including Admins -->
+    @if (userRole() === 'Doctor') {
+      <section class="contact-section">
+        <h2>Hospital Contacts</h2>
+        <p class="section-description">Detailed contact information for hospitals and administrators</p>
+        
+        @if (isLoading()) {
+          <div class="loading">Loading contact information...</div>
+        } @else if (hospitals().length === 0) {
+          <div class="no-data">No hospital information available.</div>
+        } @else {
+          <div class="hospitals-grid">
+            @for (hospital of hospitals(); track hospital.hospitalId) {
+              <div class="hospital-card detailed">
+                <h3>{{ hospital.name }}</h3>
+                <div class="contact-details">
+                  <div class="contact-item">
+                    <span class="icon">📍</span>
+                    <div class="contact-info">
+                      <strong>Address</strong>
+                      <p>{{ hospital.address }}, {{ hospital.city }}</p>
+                      <p>{{ hospital.state }}, {{ hospital.country }} - {{ hospital.postalCode }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">📞</span>
+                    <div class="contact-info">
+                      <strong>Phone</strong>
+                      <p>{{ hospital.phoneNumber }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">✉️</span>
+                    <div class="contact-info">
+                      <strong>Email</strong>
+                      <p>{{ hospital.email }}</p>
+                    </div>
+                  </div>
+                  @if (hospital.website) {
+                    <div class="contact-item">
+                      <span class="icon">🌐</span>
+                      <div class="contact-info">
+                        <strong>Website</strong>
+                        <p><a [href]="hospital.website" target="_blank">{{ hospital.website }}</a></p>
+                      </div>
+                    </div>
+                  }
+                  @if (hospital.description) {
+                    <div class="contact-item">
+                      <span class="icon">ℹ️</span>
+                      <div class="contact-info">
+                        <strong>About</strong>
+                        <p>{{ hospital.description }}</p>
+                      </div>
+                    </div>
+                  }
+                  
+                  <!-- Hospital Admins -->
+                  @if (hospital.hospitalAdmins && hospital.hospitalAdmins.length > 0) {
+                    <div class="admins-section">
+                      <strong>Hospital Administrators</strong>
+                      @for (admin of hospital.hospitalAdmins; track admin.hospitalAdminId) {
+                        <div class="admin-info">
+                          <p><strong>{{ admin.userName }}</strong></p>
+                          <p>Email: {{ admin.userEmail }}</p>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- For Admins - Superadmin Contact -->
+    @if (userRole() === 'Admin') {
+      <section class="contact-section">
+        <h2>System Administrator Contact</h2>
+        <p class="section-description">For technical support and system-related inquiries</p>
+        
+        <div class="superadmin-card">
+          <h3>{{ superadminContact.name }}</h3>
+          <p class="role-badge">System Administrator</p>
+          <div class="contact-details">
+            <div class="contact-item">
+              <span class="icon">📍</span>
+              <div class="contact-info">
+                <strong>Address</strong>
+                <p>{{ superadminContact.address }}</p>
+                <p>{{ superadminContact.city }}, {{ superadminContact.country }}</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="icon">📞</span>
+              <div class="contact-info">
+                <strong>Phone</strong>
+                <p>{{ superadminContact.phone }}</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="icon">✉️</span>
+              <div class="contact-info">
+                <strong>Email</strong>
+                <p>{{ superadminContact.email }}</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <span class="icon">🌐</span>
+              <div class="contact-info">
+                <strong>Website</strong>
+                <p><a [href]="'https://' + superadminContact.website" target="_blank">{{ superadminContact.website }}</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Also show hospital contacts for admins -->
+        <h2 style="margin-top: 40px;">Hospital Network</h2>
+        @if (isLoading()) {
+          <div class="loading">Loading hospital information...</div>
+        } @else if (hospitals().length > 0) {
+          <div class="hospitals-grid">
+            @for (hospital of hospitals(); track hospital.hospitalId) {
+              <div class="hospital-card">
+                <h3>{{ hospital.name }}</h3>
+                <div class="contact-details">
+                  <div class="contact-item">
+                    <span class="icon">📍</span>
+                    <div class="contact-info">
+                      <strong>Address</strong>
+                      <p>{{ hospital.address }}, {{ hospital.city }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">📞</span>
+                    <div class="contact-info">
+                      <strong>Phone</strong>
+                      <p>{{ hospital.phoneNumber }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">✉️</span>
+                    <div class="contact-info">
+                      <strong>Email</strong>
+                      <p>{{ hospital.email }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- For SuperAdmin - All Contacts -->
+    @if (userRole() === 'SuperAdmin') {
+      <section class="contact-section">
+        <h2>Complete Hospital Network</h2>
+        <p class="section-description">Full contact directory for all hospitals and administrators</p>
+        
+        @if (isLoading()) {
+          <div class="loading">Loading information...</div>
+        } @else if (hospitals().length > 0) {
+          <div class="hospitals-grid">
+            @for (hospital of hospitals(); track hospital.hospitalId) {
+              <div class="hospital-card detailed">
+                <h3>{{ hospital.name }}</h3>
+                <div class="contact-details">
+                  <div class="contact-item">
+                    <span class="icon">📍</span>
+                    <div class="contact-info">
+                      <strong>Full Address</strong>
+                      <p>{{ hospital.address }}</p>
+                      <p>{{ hospital.city }}, {{ hospital.state }}</p>
+                      <p>{{ hospital.country }} - {{ hospital.postalCode }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">📞</span>
+                    <div class="contact-info">
+                      <strong>Phone</strong>
+                      <p>{{ hospital.phoneNumber }}</p>
+                    </div>
+                  </div>
+                  <div class="contact-item">
+                    <span class="icon">✉️</span>
+                    <div class="contact-info">
+                      <strong>Email</strong>
+                      <p>{{ hospital.email }}</p>
+                    </div>
+                  </div>
+                  @if (hospital.website) {
+                    <div class="contact-item">
+                      <span class="icon">🌐</span>
+                      <div class="contact-info">
+                        <strong>Website</strong>
+                        <p><a [href]="hospital.website" target="_blank">{{ hospital.website }}</a></p>
+                      </div>
+                    </div>
+                  }
+                  @if (hospital.hospitalAdmins && hospital.hospitalAdmins.length > 0) {
+                    <div class="admins-section">
+                      <strong>Administrators ({{ hospital.hospitalAdmins.length }})</strong>
+                      @for (admin of hospital.hospitalAdmins; track admin.hospitalAdminId) {
+                        <div class="admin-info">
+                          <p><strong>{{ admin.userName }}</strong></p>
+                          <p>Email: {{ admin.userEmail }}</p>
+                          <p>Status: {{ admin.isActive ? 'Active' : 'Inactive' }}</p>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Emergency Contact -->
+    <section class="emergency-section">
+      <h2>Emergency Services</h2>
+      <p>For medical emergencies, please call your local emergency number or visit the nearest emergency department immediately.</p>
+      <div class="emergency-numbers">
+        <div class="emergency-item">
+          <span class="emergency-icon">🚨</span>
+          <strong>Emergency: 911</strong>
+        </div>
+        <div class="emergency-item">
+          <span class="emergency-icon">🏥</span>
+          <strong>Non-Emergency: Contact your nearest hospital</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

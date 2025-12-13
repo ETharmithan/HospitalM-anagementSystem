@@ -169,7 +169,14 @@
 .page-subtitle {
   color: rgba(255, 255, 255, 0.5);
   margin: 4px 0 0 0;
-  font-size: 14px;
+  font-size: 36px;
+  font-weight: 600;
+  color:#1177ebf8;
+  text-shadow:
+    -1px -2px 0 #aeb373,
+     2px -1px 0 #a8d5e7,
+    -1px  1px 0 #26771f,
+     1px  1px 0 #c7b512;
 }
 
 /* Buttons */

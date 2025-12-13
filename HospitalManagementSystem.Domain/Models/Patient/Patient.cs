@@ -18,7 +18,11 @@ namespace HospitalManagementSystem.Domain.Models.Patient
         public string Gender { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
 
-
+        // Additional info completion tracking
+        public bool HasCompletedAdditionalInfo { get; set; } = false;
+        public DateTime? AdditionalInfoCompletedAt { get; set; }
+        public bool AdditionalInfoReminderSent { get; set; } = false;
+        public DateTime? AdditionalInfoReminderSentAt { get; set; }
 
         public Patient_Contact_Information ContactInfo { get; set; }
         public Patient_Identification_Details IdentificationDetails { get; set; }

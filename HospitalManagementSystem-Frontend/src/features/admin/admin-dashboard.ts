@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AdminDashboardService } from '../../core/services/admin-dashboard-service';
+import { AdminDashboardService, HospitalInfo } from '../../core/services/admin-dashboard-service';
 import { HospitalAdminService, Doctor, Department, DoctorSchedule, CreateDoctorRequest, CreateDepartmentRequest, CreateScheduleRequest } from '../../core/services/hospital-admin-service';
 import { ToastService } from '../../core/services/toast-service';
 import { AccountService } from '../../core/services/account-service';
@@ -27,6 +27,7 @@ export class AdminDashboard implements OnInit {
   
   // Overview data
   overview = signal<AdminOverview | null>(null);
+  hospitalInfo = signal<HospitalInfo | null>(null);
   
   // Lists
   doctors = signal<Doctor[]>([]);
@@ -56,16 +57,14 @@ export class AdminDashboard implements OnInit {
   
   // Forms
   doctorForm: CreateDoctorRequest = {
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
-    phoneNumber: '',
-    specialization: '',
+    phone: '',
     departmentId: '',
     qualification: '',
-    experience: 0,
-    consultationFee: 0,
-    imageUrl: ''
+    licenseNumber: '',
+    status: 'Active',
+    profileImage: ''
   };
   
   departmentForm: CreateDepartmentRequest = {
@@ -94,9 +93,23 @@ export class AdminDashboard implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.loadHospitalInfo();
     this.loadOverview();
     this.loadDepartments();
     this.loadDoctors();
+  }
+
+  // Load hospital info
+  private loadHospitalInfo(): void {
+    this.dashboardService.getHospitalInfo().subscribe({
+      next: (data) => {
+        this.hospitalInfo.set(data);
+      },
+      error: (error) => {
+        console.error('Error loading hospital info:', error);
+        this.toastService.error('Failed to load hospital information');
+      }
+    });
   }
 
   setActiveTab(tab: 'overview' | 'doctors' | 'departments' | 'schedules' | 'appointments'): void {
@@ -174,16 +187,14 @@ export class AdminDashboard implements OnInit {
   openEditDoctorModal(doctor: Doctor): void {
     this.editingDoctor.set(doctor);
     this.doctorForm = {
-      firstName: doctor.firstName,
-      lastName: doctor.lastName,
+      name: doctor.name,
       email: doctor.email,
-      phoneNumber: doctor.phoneNumber || '',
-      specialization: doctor.specialization || '',
+      phone: doctor.phone || '',
       departmentId: doctor.departmentId,
       qualification: doctor.qualification || '',
-      experience: doctor.experience || 0,
-      consultationFee: doctor.consultationFee || 0,
-      imageUrl: doctor.imageUrl || ''
+      licenseNumber: doctor.licenseNumber || '',
+      status: doctor.status,
+      profileImage: doctor.profileImage || ''
     };
     this.showDoctorModal.set(true);
   }
@@ -195,21 +206,19 @@ export class AdminDashboard implements OnInit {
 
   resetDoctorForm(): void {
     this.doctorForm = {
-      firstName: '',
-      lastName: '',
+      name: '',
       email: '',
-      phoneNumber: '',
-      specialization: '',
+      phone: '',
       departmentId: '',
       qualification: '',
-      experience: 0,
-      consultationFee: 0,
-      imageUrl: ''
+      licenseNumber: '',
+      status: 'Active',
+      profileImage: ''
     };
   }
 
   saveDoctor(): void {
-    if (!this.doctorForm.firstName || !this.doctorForm.lastName || !this.doctorForm.email || !this.doctorForm.departmentId) {
+    if (!this.doctorForm.name || !this.doctorForm.email || !this.doctorForm.departmentId || !this.doctorForm.qualification || !this.doctorForm.licenseNumber) {
       this.toastService.error('Please fill all required fields');
       return;
     }
@@ -248,7 +257,7 @@ export class AdminDashboard implements OnInit {
   }
 
   deleteDoctor(doctor: Doctor): void {
-    if (!confirm(`Are you sure you want to delete Dr. ${doctor.firstName} ${doctor.lastName}?`)) {
+    if (!confirm(`Are you sure you want to delete Dr. ${doctor.name}?`)) {
       return;
     }
 
@@ -289,8 +298,7 @@ export class AdminDashboard implements OnInit {
   resetDepartmentForm(): void {
     this.departmentForm = {
       name: '',
-      description: '',
-      hospitalId: ''
+      description: ''
     };
   }
 

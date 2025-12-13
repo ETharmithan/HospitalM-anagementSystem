@@ -1,0 +1,244 @@
+.contact-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 40px 20px;
+  color: #fff;
+}
+
+.contact-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.contact-content h1 {
+  font-size: 36px;
+  margin-bottom: 8px;
+  color: #667eea;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  margin-bottom: 40px;
+}
+
+.contact-section {
+  margin-bottom: 48px;
+}
+
+.contact-section h2 {
+  font-size: 28px;
+  color: #667eea;
+  margin-bottom: 12px;
+}
+
+.section-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.hospitals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.hospital-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hospital-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.hospital-card h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: #fff;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.contact-item .icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.contact-info {
+  flex: 1;
+}
+
+.contact-info strong {
+  display: block;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.contact-info p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  margin: 2px 0;
+}
+
+.contact-info a {
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contact-info a:hover {
+  color: #8b9ef5;
+  text-decoration: underline;
+}
+
+.admins-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admins-section strong {
+  display: block;
+  color: #667eea;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+.admin-info {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.admin-info p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.admin-info strong {
+  color: #fff;
+  font-size: 14px;
+}
+
+.superadmin-card {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 2px solid #667eea;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.superadmin-card h3 {
+  font-size: 24px;
+  color: #667eea;
+  margin-bottom: 8px;
+}
+
+.role-badge {
+  display: inline-block;
+  background: rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.emergency-section {
+  background: rgba(220, 53, 69, 0.1);
+  border: 2px solid #dc3545;
+  border-radius: 16px;
+  padding: 32px;
+  margin-top: 48px;
+}
+
+.emergency-section h2 {
+  color: #dc3545;
+  margin-bottom: 12px;
+}
+
+.emergency-section p {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 20px;
+}
+
+.emergency-numbers {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.emergency-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px 24px;
+  border-radius: 8px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.emergency-icon {
+  font-size: 32px;
+}
+
+.emergency-item strong {
+  color: #fff;
+  font-size: 16px;
+}
+
+.loading,
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .contact-content h1 {
+    font-size: 28px;
+  }
+
+  .contact-section h2 {
+    font-size: 22px;
+  }
+
+  .hospitals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-numbers {
+    flex-direction: column;
+  }
+
+  .emergency-item {
+    min-width: 100%;
+  }
+}

@@ -195,18 +195,27 @@
             </div>
 
             <a
+              *ngIf="currentUser?.role === 'Patient'"
+              routerLink="/patient-profile"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              👤 Profile
+            </a>
+            <a
+              *ngIf="currentUser?.role !== 'Patient'"
               routerLink="/profile"
               (click)="showUserMenu = false"
               class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
-              � Profile
+              👤 Profile
             </a>
             <a
               routerLink="/dashboard"
               (click)="showUserMenu = false"
               class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
-              � Dashboard
+              📊 Dashboard
             </a>
             <a
               routerLink="/my-appointments"
@@ -432,6 +441,15 @@
           </a>
 
           <a
+            *ngIf="currentUser?.role === 'Patient'"
+            routerLink="/patient-profile"
+            (click)="closeMenu()"
+            class="block w-full text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+          >
+            👤 Profile
+          </a>
+          <a
+            *ngIf="currentUser?.role !== 'Patient'"
             routerLink="/profile"
             (click)="closeMenu()"
             class="block w-full text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition"

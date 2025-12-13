@@ -5,18 +5,15 @@ import { catchError, timeout } from 'rxjs/operators';
 
 export interface Doctor {
   doctorId: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
-  phoneNumber?: string;
-  specialization?: string;
+  phone?: string;
   departmentId: string;
   departmentName?: string;
   qualification?: string;
-  experience?: number;
-  consultationFee?: number;
-  isActive: boolean;
-  imageUrl?: string;
+  licenseNumber?: string;
+  status: string;
+  profileImage?: string;
 }
 
 export interface DoctorSchedule {
@@ -51,22 +48,20 @@ export interface Appointment {
 }
 
 export interface CreateDoctorRequest {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
-  phoneNumber?: string;
-  specialization?: string;
+  phone: string;
   departmentId: string;
-  qualification?: string;
-  experience?: number;
-  consultationFee?: number;
-  imageUrl?: string;
+  qualification: string;
+  licenseNumber: string;
+  status: string;
+  profileImage?: string;
 }
 
 export interface CreateDepartmentRequest {
   name: string;
   description?: string;
-  hospitalId: string;
+  hospitalId?: string;
 }
 
 export interface CreateScheduleRequest {

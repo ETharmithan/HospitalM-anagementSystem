@@ -2,6 +2,10 @@ using HospitalManagementSystem.Application.IServices;
 using HospitalManagementSystem.Application.IServices.DoctorIServices;
 using HospitalManagementSystem.Application.DTOs.DoctorDto.Request_Dto;
 using HospitalManagementSystem.Application.DTOs.DoctorDto.Response_Dto;
+using HospitalManagementSystem.Domain.IRepository;
+using HospitalManagementSystem.Domain.Models.Patient;
+using HospitalManagementSystem.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,17 +20,37 @@ namespace HospitalManagementSystem.Presentation.Controllers
         private readonly IDoctorScheduleService _doctorScheduleService;
         private readonly IDepartmentService _departmentService;
         private readonly IHospitalService _hospitalService;
+        private readonly IPatientRepository _patientRepository;
+        private readonly AppDbContext _dbContext;
 
         public HospitalAdminController(
             IDoctorService doctorService,
             IDoctorScheduleService doctorScheduleService,
             IDepartmentService departmentService,
-            IHospitalService hospitalService)
+            IHospitalService hospitalService,
+            IPatientRepository patientRepository,
+            AppDbContext dbContext)
         {
             _doctorService = doctorService;
             _doctorScheduleService = doctorScheduleService;
             _departmentService = departmentService;
             _hospitalService = hospitalService;
+            _patientRepository = patientRepository;
+            _dbContext = dbContext;
+        }
+
+        // Helper method to get admin's hospital ID
+        private async Task<Guid?> GetAdminHospitalIdAsync()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return null;
+
+            var userId = Guid.Parse(userIdClaim);
+            var hospitalAdmin = await _dbContext.HospitalAdmins
+                .FirstOrDefaultAsync(ha => ha.UserId == userId && ha.IsActive);
+
+            return hospitalAdmin?.HospitalId;
         }
 
         // Doctor Management
@@ -57,8 +81,21 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
-                // Note: You should filter by admin's hospital
+                var hospitalId = await GetAdminHospitalIdAsync();
+                if (!hospitalId.HasValue)
+                    return Unauthorized(new { message = "Admin not assigned to any hospital" });
+
+                // Get departments for this hospital
+                var hospitalDepartments = await _dbContext.Departments
+                    .Where(d => d.HospitalId == hospitalId.Value)
+                    .Select(d => d.DepartmentId)
+                    .ToListAsync();
+
+                // Get all doctors
                 var doctors = await _doctorService.GetAllAsync();
+                
+                // Filter by hospital's departments
+                doctors = doctors.Where(d => d.DepartmentId.HasValue && hospitalDepartments.Contains(d.DepartmentId.Value)).ToList();
                 
                 if (departmentId.HasValue)
                 {
@@ -209,10 +246,16 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
-                // Note: You should filter by admin's hospital
-                // This would require getting the admin's hospital assignment from current user context
+                var hospitalId = await GetAdminHospitalIdAsync();
+                if (!hospitalId.HasValue)
+                    return Unauthorized(new { message = "Admin not assigned to any hospital" });
+
                 var departments = await _departmentService.GetAllAsync();
-                return Ok(departments);
+                
+                // Filter by admin's hospital
+                var filteredDepartments = departments.Where(d => d.HospitalId == hospitalId.Value).ToList();
+                
+                return Ok(filteredDepartments);
             }
             catch (Exception ex)
             {
@@ -225,7 +268,18 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
-                // Note: You should verify the HospitalId belongs to the admin's hospital
+                var hospitalId = await GetAdminHospitalIdAsync();
+                if (!hospitalId.HasValue)
+                    return Unauthorized(new { message = "Admin not assigned to any hospital" });
+
+                // Verify the hospital exists
+                var hospital = await _hospitalService.GetByIdAsync(hospitalId.Value);
+                if (hospital == null)
+                    return BadRequest(new { message = "The hospital assigned to this admin does not exist. Please contact the system administrator." });
+
+                // Set the hospital ID to the admin's hospital
+                departmentDto.HospitalId = hospitalId.Value;
+                
                 var result = await _departmentService.CreateAsync(departmentDto);
                 return CreatedAtAction(nameof(GetDepartment), new { departmentId = result.DepartmentId }, result);
             }
@@ -279,6 +333,84 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 var result = await _departmentService.DeleteAsync(departmentId);
                 if (!result)
                     return NotFound(new { message = "Department not found" });
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // Patient Management
+        [HttpGet("patients")]
+        public async Task<ActionResult<List<Patient>>> GetPatients()
+        {
+            try
+            {
+                var patients = await _patientRepository.GetAllPatientsAsync();
+                return Ok(patients);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("patients/{patientId}")]
+        public async Task<ActionResult<Patient>> GetPatient(Guid patientId)
+        {
+            try
+            {
+                var patient = await _patientRepository.GetPatientWithDetailsAsync(patientId);
+                if (patient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                return Ok(patient);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("patients/{patientId}")]
+        public async Task<ActionResult> UpdatePatient(Guid patientId, [FromBody] Patient patient)
+        {
+            try
+            {
+                var existingPatient = await _patientRepository.GetByIdAsync(patientId);
+                if (existingPatient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                existingPatient.FirstName = patient.FirstName;
+                existingPatient.LastName = patient.LastName;
+                existingPatient.DateOfBirth = patient.DateOfBirth;
+                existingPatient.Gender = patient.Gender;
+                existingPatient.ImageUrl = patient.ImageUrl;
+
+                await _patientRepository.UpdateAsync(existingPatient);
+                await _patientRepository.SaveChangesAsync();
+
+                return Ok(new { message = "Patient updated successfully", patient = existingPatient });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("patients/{patientId}")]
+        public async Task<ActionResult> DeletePatient(Guid patientId)
+        {
+            try
+            {
+                var patient = await _patientRepository.GetByIdAsync(patientId);
+                if (patient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                await _patientRepository.DeleteAsync(patientId);
+                await _patientRepository.SaveChangesAsync();
 
                 return NoContent();
             }

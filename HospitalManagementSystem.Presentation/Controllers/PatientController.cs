@@ -1,4 +1,5 @@
 using HospitalManagementSystem.Application.DTOs;
+using HospitalManagementSystem.Application.DTOs.Patient;
 using HospitalManagementSystem.Application.DTOs.PatientDto;
 using HospitalManagementSystem.Application.IServices;
 using HospitalManagementSystem.Application.IServices.DoctorIServices;
@@ -25,7 +26,8 @@ namespace HospitalManagementSystem.Presentation.Controllers
         IImageUploadService imageUploadService, 
         HospitalManagementSystem.Infrastructure.Data.AppDbContext dbContext,
         IDoctorPatientRecordsService prescriptionService,
-        IDoctorAppointmentService appointmentService) : ControllerBase
+        IDoctorAppointmentService appointmentService,
+        IEmailService emailService) : ControllerBase
     {
         /// <summary>
         /// Get all patients
@@ -356,6 +358,10 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 dbContext.Set<Patient_Medical_History>().Add(medicalHistory);
                 dbContext.Set<Patient_Medical_Related_Info>().Add(medicalInfo);
                 
+                // Mark additional info as completed
+                existingPatient.HasCompletedAdditionalInfo = true;
+                existingPatient.AdditionalInfoCompletedAt = DateTime.UtcNow;
+                
                 await dbContext.SaveChangesAsync();
 
                 return Ok(new { message = "Additional patient details saved successfully" });
@@ -469,6 +475,169 @@ namespace HospitalManagementSystem.Presentation.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An error occurred while fetching prescriptions", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Update patient profile (excluding NIC, email, and name)
+        /// </summary>
+        [HttpPut("{patientId}/profile")]
+        public async Task<IActionResult> UpdatePatientProfile(Guid patientId, [FromBody] UpdatePatientProfileDto profileDto)
+        {
+            try
+            {
+                var patient = await patientRepository.GetPatientWithDetailsAsync(patientId);
+                if (patient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                // Update basic info (excluding name)
+                if (profileDto.DateOfBirth.HasValue)
+                    patient.DateOfBirth = profileDto.DateOfBirth.Value;
+                if (!string.IsNullOrWhiteSpace(profileDto.Gender))
+                    patient.Gender = profileDto.Gender;
+                if (!string.IsNullOrWhiteSpace(profileDto.ImageUrl))
+                    patient.ImageUrl = profileDto.ImageUrl;
+
+                // Update contact info
+                if (patient.ContactInfo != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(profileDto.PhoneNumber))
+                        patient.ContactInfo.PhoneNumber = profileDto.PhoneNumber;
+                    if (!string.IsNullOrWhiteSpace(profileDto.AddressLine1))
+                        patient.ContactInfo.AddressLine1 = profileDto.AddressLine1;
+                    if (profileDto.AddressLine2 != null)
+                        patient.ContactInfo.AddressLine2 = profileDto.AddressLine2;
+                    if (!string.IsNullOrWhiteSpace(profileDto.City))
+                        patient.ContactInfo.City = profileDto.City;
+                    if (!string.IsNullOrWhiteSpace(profileDto.State))
+                        patient.ContactInfo.State = profileDto.State;
+                    if (!string.IsNullOrWhiteSpace(profileDto.PostalCode))
+                        patient.ContactInfo.PostalCode = profileDto.PostalCode;
+                    if (!string.IsNullOrWhiteSpace(profileDto.Country))
+                        patient.ContactInfo.Country = profileDto.Country;
+                    if (!string.IsNullOrWhiteSpace(profileDto.Nationality))
+                        patient.ContactInfo.Nationality = profileDto.Nationality;
+                }
+
+                // Update or create medical info
+                if (patient.MedicalRelatedInfo == null)
+                {
+                    patient.MedicalRelatedInfo = new Patient_Medical_Related_Info
+                    {
+                        PatientId = patientId,
+                        BloodType = profileDto.BloodType ?? string.Empty,
+                        Allergies = profileDto.Allergies ?? string.Empty,
+                        ChronicConditions = profileDto.ChronicConditions ?? string.Empty
+                    };
+                    dbContext.Set<Patient_Medical_Related_Info>().Add(patient.MedicalRelatedInfo);
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(profileDto.BloodType))
+                        patient.MedicalRelatedInfo.BloodType = profileDto.BloodType;
+                    if (profileDto.Allergies != null)
+                        patient.MedicalRelatedInfo.Allergies = profileDto.Allergies;
+                    if (profileDto.ChronicConditions != null)
+                        patient.MedicalRelatedInfo.ChronicConditions = profileDto.ChronicConditions;
+                }
+
+                // Update or create emergency contact
+                if (patient.EmergencyContact == null && 
+                    (!string.IsNullOrWhiteSpace(profileDto.EmergencyContactName) || 
+                     !string.IsNullOrWhiteSpace(profileDto.EmergencyContactPhone)))
+                {
+                    patient.EmergencyContact = new Patient_Emergency_Contact
+                    {
+                        Id = Guid.NewGuid(),
+                        PatientId = patientId,
+                        ContactName = profileDto.EmergencyContactName ?? string.Empty,
+                        ContactEmail = profileDto.EmergencyContactEmail ?? string.Empty,
+                        ContactPhone = profileDto.EmergencyContactPhone ?? string.Empty,
+                        RelationshipToPatient = profileDto.EmergencyContactRelationship ?? string.Empty
+                    };
+                    dbContext.Set<Patient_Emergency_Contact>().Add(patient.EmergencyContact);
+                }
+                else if (patient.EmergencyContact != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(profileDto.EmergencyContactName))
+                        patient.EmergencyContact.ContactName = profileDto.EmergencyContactName;
+                    if (profileDto.EmergencyContactEmail != null)
+                        patient.EmergencyContact.ContactEmail = profileDto.EmergencyContactEmail;
+                    if (!string.IsNullOrWhiteSpace(profileDto.EmergencyContactPhone))
+                        patient.EmergencyContact.ContactPhone = profileDto.EmergencyContactPhone;
+                    if (profileDto.EmergencyContactRelationship != null)
+                        patient.EmergencyContact.RelationshipToPatient = profileDto.EmergencyContactRelationship;
+                }
+
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { message = "Profile updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating profile", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Skip additional info and send reminder email
+        /// </summary>
+        [HttpPost("{patientId}/skip-additional-info")]
+        public async Task<IActionResult> SkipAdditionalInfo(Guid patientId)
+        {
+            try
+            {
+                var patient = await patientRepository.GetPatientWithDetailsAsync(patientId);
+                if (patient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                patient.AdditionalInfoReminderSent = true;
+                patient.AdditionalInfoReminderSentAt = DateTime.UtcNow;
+
+                await dbContext.SaveChangesAsync();
+
+                // Send reminder email
+                var user = await dbContext.Users.FindAsync(patient.UserId);
+                if (user != null)
+                {
+                    await emailService.SendEmailAsync(
+                        user.Email, 
+                        "Complete Your Patient Profile", 
+                        $"Hello {patient.FirstName},<br/><br/>We noticed you haven't completed your medical profile yet. Please log in and complete your profile to help us serve you better.<br/><br/>Best regards,<br/>MediBridge Team"
+                    );
+                }
+
+                return Ok(new { message = "Reminder will be sent to your email" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Check if patient has completed additional info
+        /// </summary>
+        [HttpGet("{patientId}/additional-info-status")]
+        public async Task<ActionResult> GetAdditionalInfoStatus(Guid patientId)
+        {
+            try
+            {
+                var patient = await patientRepository.GetByIdAsync(patientId);
+                if (patient == null)
+                    return NotFound(new { message = "Patient not found" });
+
+                return Ok(new 
+                { 
+                    hasCompletedAdditionalInfo = patient.HasCompletedAdditionalInfo,
+                    completedAt = patient.AdditionalInfoCompletedAt,
+                    reminderSent = patient.AdditionalInfoReminderSent,
+                    reminderSentAt = patient.AdditionalInfoReminderSentAt
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
             }
         }
     }

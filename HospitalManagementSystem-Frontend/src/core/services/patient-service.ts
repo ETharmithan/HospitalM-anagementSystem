@@ -112,4 +112,27 @@ export class PatientService {
       })
     );
   }
+
+  // Update patient profile
+  updatePatientProfile(patientId: string, profileData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${patientId}/profile`, profileData).pipe(
+      timeout(10000),
+      catchError(error => {
+        if (error.name === 'TimeoutError') {
+          return throwError(() => new Error('Update profile timed out. Please try again.'));
+        }
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Skip additional info
+  skipAdditionalInfo(patientId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${patientId}/skip-additional-info`, {});
+  }
+
+  // Get additional info status
+  getAdditionalInfoStatus(patientId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${patientId}/additional-info-status`);
+  }
 }
