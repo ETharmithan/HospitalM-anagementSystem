@@ -1,0 +1,90 @@
+<div class="min-h-screen bg-background-light dark:bg-background-dark px-4 py-8">
+  <div class="max-w-5xl mx-auto">
+    <div class="bg-white/80 dark:bg-white/5 backdrop-blur rounded-2xl shadow-xl border border-white/20 p-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">E-Prescriptions</h2>
+          <p class="text-sm text-gray-600 dark:text-white/70 mt-1" *ngIf="role() === 'Doctor'">Manage your prescriptions</p>
+          <p class="text-sm text-gray-600 dark:text-white/70 mt-1" *ngIf="role() === 'Patient'">View and download your prescriptions</p>
+        </div>
+
+        <a *ngIf="role() === 'Doctor'" class="btn btn-primary" routerLink="/e-prescription/create">Create</a>
+      </div>
+
+      <div class="mt-6" *ngIf="isLoading()">
+        <div class="text-gray-600 dark:text-white/70">Loading...</div>
+      </div>
+
+      <div class="mt-6" *ngIf="!isLoading() && items().length === 0">
+        <div class="text-gray-600 dark:text-white/70">No prescriptions found.</div>
+      </div>
+
+      <div class="mt-6 overflow-x-auto" *ngIf="!isLoading() && items().length > 0">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Diagnosis</th>
+              <th class="hidden md:table-cell">Notes</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of items()">
+              <td>{{ (p.visitDate | date:'yyyy-MM-dd') || (p.visitDate?.slice(0,10)) }}</td>
+              <td class="font-medium">{{ p.diagnosis }}</td>
+              <td class="hidden md:table-cell">{{ p.notes }}</td>
+              <td class="text-right">
+                <div class="inline-flex gap-2">
+                  <button *ngIf="role() === 'Doctor'" class="btn btn-sm" type="button" (click)="startEdit(p)">Edit</button>
+                  <button *ngIf="role() === 'Doctor'" class="btn btn-sm btn-error" type="button" (click)="delete(p)">Delete</button>
+                  <button *ngIf="role() === 'Patient'" class="btn btn-sm btn-primary" type="button" (click)="download(p)">Download</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal (Doctor) -->
+  <div *ngIf="editing()" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl p-6">
+      <div class="flex items-start justify-between gap-4">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Edit E-Prescription</h3>
+        <button class="btn btn-sm" type="button" (click)="cancelEdit()">Close</button>
+      </div>
+
+      <form class="mt-4 space-y-4" [formGroup]="editForm" (ngSubmit)="saveEdit()">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-white/80">Visit Date</label>
+          <input type="date" class="input input-bordered w-full mt-1" formControlName="visitDate" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-white/80">Diagnosis</label>
+          <input class="input input-bordered w-full mt-1" formControlName="diagnosis" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-white/80">Prescription</label>
+          <textarea class="textarea textarea-bordered w-full mt-1" rows="4" formControlName="prescription"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-white/80">Notes</label>
+          <textarea class="textarea textarea-bordered w-full mt-1" rows="3" formControlName="notes"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button class="btn" type="button" (click)="cancelEdit()">Cancel</button>
+          <button class="btn btn-primary" type="submit" [disabled]="isSaving()">
+            <span *ngIf="!isSaving()">Save</span>
+            <span *ngIf="isSaving()">Saving...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

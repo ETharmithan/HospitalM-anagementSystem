@@ -12,6 +12,14 @@ namespace HospitalManagementSystem.Infrastructure.Repositories
 {
     public class PatientRepository(AppDbContext dbContext) : GenericRepository<Patient>(dbContext), IPatientRepository
     {
+        public override async Task<Patient> GetByIdAsync(Guid id)
+        {
+            return await _dbSet
+                .Include(p => p.ContactInfo)
+                .Include(p => p.IdentificationDetails)
+                .FirstOrDefaultAsync(p => p.PatientId == id);
+        }
+
         public async Task<Patient> GetByUserIdAsync(Guid userId)
         {
             return await _dbSet.FirstOrDefaultAsync(p => p.UserId == userId);

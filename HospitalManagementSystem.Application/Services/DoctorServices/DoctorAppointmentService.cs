@@ -335,7 +335,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
         {
             try
             {
-                var patient = await _patientRepository.GetByIdAsync(appointment.PatientId);
+                var patient = await _patientRepository.GetPatientWithDetailsAsync(appointment.PatientId);
                 var doctor = await _doctorRepository.GetByIdAsync(appointment.DoctorId);
                 
                 if (patient == null || doctor == null) return null;
@@ -355,7 +355,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
 
                 return new BookingEmailDto
                 {
-                    PatientEmail = patient.ContactInfo.EmailAddress,
+                    PatientEmail = patient.ContactInfo?.EmailAddress ?? "",
                     PatientName = $"{patient.FirstName} {patient.LastName}",
                     DoctorName = doctor.Name,
                     DoctorSpecialization = doctor.Qualification ?? "",

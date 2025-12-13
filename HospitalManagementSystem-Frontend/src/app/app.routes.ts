@@ -70,12 +70,18 @@ export const routes: Routes = [
     loadComponent: () => import('../features/chat/chat').then(c => c.ChatComponent),
     canActivate: [authGuard]
   },
-  // {
-  //   path: 'Prescription',
-  //   loadComponent: () => import('../features/E-Prescription/create-e-prescription/create-e-prescription').then(c => c.CreateEPrescription),
-  //   canActivate: [authGuard]
-   
-  // },
+
+  {
+    path: 'e-prescription/create',
+    loadComponent: () => import('../features/E-Prescription/create-e-prescription/create-e-prescription').then(c => c.CreateEPrescription),
+    canActivate: [doctorGuard]
+  },
+
+  {
+    path: 'e-prescription',
+    loadComponent: () => import('../features/E-Prescription/show-e-prescription/show-e-prescription').then(c => c.ShowEPrescription),
+    canActivate: [authGuard]
+  },
 
   { path: '**', redirectTo: 'home' } // Catch-all route
 ];

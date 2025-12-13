@@ -20,6 +20,7 @@ namespace HospitalManagementSystem.Infrastructure.Data
         public DbSet<DoctorAppointment> DoctorAppointments { get; set; } = null!;
         public DbSet<DoctorLeave> DoctorLeaves { get; set; } = null!;
         public DbSet<DoctorPatientRecords> DoctorPatientRecords { get; set; } = null!;
+        public DbSet<EPrescription> EPrescriptions { get; set; } = null!;
         public DbSet<DoctorSalary> DoctorSalaries { get; set; } = null!;
         public DbSet<DoctorSchedule> DoctorSchedules { get; set; } = null!;
         public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; } = null!;
