@@ -11,10 +11,11 @@ import { AvailabilityService, TimeSlot } from '../../../core/services/availabili
 import { Doctor } from '../../../types/doctor';
 import { CalendarPicker } from '../components/calendar-picker/calendar-picker';
 import { TimeSlotPicker } from '../components/time-slot-picker/time-slot-picker';
+import { Nav } from '../../../layout/nav/nav';
 
 @Component({
   selector: 'app-book-appointment',
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, CalendarPicker, TimeSlotPicker],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, CalendarPicker, TimeSlotPicker, Nav],
   templateUrl: './book-appointment.html',
   styleUrl: './book-appointment.css',
 })

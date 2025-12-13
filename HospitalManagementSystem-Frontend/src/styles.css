@@ -2,6 +2,22 @@
  @import "tailwindcss";
 @plugin "daisyui"; 
 
+@source "./**/*.{html,ts}";
+@source "./index.html";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #4799eb;
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #111921;
+  --font-display: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --radius: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
 /* Toast Container Positioning */
 #toast-container {
   position: fixed;

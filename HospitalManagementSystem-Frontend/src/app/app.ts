@@ -12,9 +12,10 @@ import { User } from '../types/user';
 import { Dashboard } from '../layout/patient/dashboard/dashboard';
 import { filter } from 'rxjs/operators';
 
+
 @Component({
   selector: 'app-root',
-  imports: [ Nav, PatientRegister, Home, QuickCard, Sidebar, Topnavbar, Dashboard, RouterOutlet ],
+  imports: [ Nav, PatientRegister, Home, QuickCard, Sidebar, Topnavbar, Dashboard, RouterOutlet],
 
   templateUrl: './app.html',
   styleUrl: './app.css',

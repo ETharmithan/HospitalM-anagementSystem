@@ -30,6 +30,7 @@ export class PatientRegister implements OnInit {
   showPatientDetails = false;
   showAdditionalDetails = false;
   additionalDetailsForm!: FormGroup;
+  currentStep: 1 | 2 | 3 = 1;
 
   srilankanProvinces = [
     'Central',
@@ -170,7 +171,7 @@ export class PatientRegister implements OnInit {
     };
 
     // First register user account, then create patient
-    this.registerUserAccount(formValue, null, imageUrl, (userResponse: any) => {
+    this.registerUserAccount(formValue, imageUrl, patientData, (userResponse: any) => {
       // Associate patient with the created user account
       patientData.userId = userResponse.id;
       // Also try with capital U for C# convention
@@ -213,7 +214,12 @@ export class PatientRegister implements OnInit {
     });
   }
 
-  private registerUserAccount(formValue: any, patientResponse: any, imageUrl: string, onSuccess: (userResponse: any) => void): void {
+  private registerUserAccount(
+    formValue: any,
+    imageUrl: string,
+    pendingPatientData: any,
+    onSuccess: (userResponse: any) => void
+  ): void {
     // Prepare user account data
     const registerData = {
       email: formValue.emailAddress,
@@ -231,6 +237,20 @@ export class PatientRegister implements OnInit {
         
         // Check if email verification is required
         if (response.requiresVerification) {
+          const createdUserId = response.userId || response.user?.id || response.user?.Id || response.user?.userId;
+          try {
+            localStorage.setItem(
+              'pendingPatientRegistration',
+              JSON.stringify({
+                patientData: pendingPatientData,
+                userId: createdUserId,
+                email: registerData.email,
+              })
+            );
+          } catch {
+            // ignore
+          }
+
           this.isLoading = false;
           this.toastService.success(response.message || 'Registration successful! Please verify your email.');
           
@@ -345,6 +365,125 @@ export class PatientRegister implements OnInit {
     return this.patientForm.get('confirmPassword');
   }
 
+  private getStepControls(step: 1 | 2 | 3): string[] {
+    if (step === 1) {
+      return ['firstName', 'lastName', 'dateOfBirth', 'gender', 'nic'];
+    }
+
+    if (step === 2) {
+      return ['password', 'confirmPassword'];
+    }
+
+    return [
+      'phoneNumber',
+      'emailAddress',
+      'addressLine1',
+      'city',
+      'province',
+      'postalCode',
+      'country',
+      'nationality',
+    ];
+  }
+
+  private validateStep(step: 1 | 2 | 3): boolean {
+    const controls = this.getStepControls(step);
+
+    for (const name of controls) {
+      const control = this.patientForm.get(name);
+      if (!control) continue;
+      control.markAsTouched();
+      control.updateValueAndValidity({ onlySelf: true });
+    }
+
+    if (step === 2 && !this.passwordsMatch()) {
+      return false;
+    }
+
+    return controls.every((name) => {
+      const control = this.patientForm.get(name);
+      return control ? control.valid : true;
+    });
+  }
+
+  goToStep(step: 1 | 2 | 3): void {
+    if (this.isLoading) return;
+    if (step < this.currentStep) {
+      this.currentStep = step;
+      return;
+    }
+
+    if (step === this.currentStep) return;
+
+    let cursor: 1 | 2 | 3 = this.currentStep;
+    while (cursor < step) {
+      if (!this.validateStep(cursor)) return;
+      cursor = (cursor + 1) as 1 | 2 | 3;
+    }
+    this.currentStep = step;
+  }
+
+  nextStep(): void {
+    if (this.isLoading) return;
+    if (!this.validateStep(this.currentStep)) return;
+    if (this.currentStep < 3) {
+      this.currentStep = (this.currentStep + 1) as 1 | 2 | 3;
+    }
+  }
+
+  prevStep(): void {
+    if (this.isLoading) return;
+    if (this.currentStep > 1) {
+      this.currentStep = (this.currentStep - 1) as 1 | 2 | 3;
+    }
+  }
+
+  get registrationProgress(): number {
+    if (!this.patientForm) return 0;
+
+    const requiredFields: string[] = [
+      'firstName',
+      'lastName',
+      'dateOfBirth',
+      'gender',
+      'password',
+      'confirmPassword',
+      'nic',
+      'phoneNumber',
+      'emailAddress',
+      'addressLine1',
+      'city',
+      'province',
+      'postalCode',
+      'country',
+      'nationality',
+    ];
+
+    let completed = 0;
+
+    for (const name of requiredFields) {
+      const control = this.patientForm.get(name);
+      if (!control) continue;
+
+      const value = control.value;
+      const hasValue = value !== null && value !== undefined && String(value).trim().length > 0;
+      if (!hasValue) continue;
+
+      if (name === 'confirmPassword') {
+        if (this.passwordsMatch()) {
+          completed += 1;
+        }
+        continue;
+      }
+
+      completed += 1;
+    }
+
+    const total = requiredFields.length;
+    const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+    return Math.min(100, Math.max(0, percent));
+  }
+
   // Password validation helper methods
   hasUppercase(): boolean {
     const password = this.password?.value;
@@ -432,6 +571,7 @@ export class PatientRegister implements OnInit {
   hidePatientDetails(): void {
     this.registeredPatient = null;
     this.showPatientDetails = false;
+    this.currentStep = 1;
   }
 
   onImageError(event: any): void {

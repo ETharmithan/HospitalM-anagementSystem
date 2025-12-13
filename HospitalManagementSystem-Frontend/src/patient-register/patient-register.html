@@ -223,9 +223,51 @@
     <h1>Patient Registration</h1>
     <p class="subtitle">Create your patient profile</p>
 
+    <div class="progress-section" aria-label="Registration progress">
+      <div class="progress-header">
+        <span class="progress-label">Progress</span>
+        <span class="progress-value">{{ registrationProgress }}%</span>
+      </div>
+      <div
+        class="progress-track"
+        role="progressbar"
+        [attr.aria-valuenow]="registrationProgress"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div class="progress-fill" [style.width.%]="registrationProgress"></div>
+      </div>
+    </div>
+
+    <div class="stepper" aria-label="Registration steps">
+      <button type="button" class="step-item" [class.active]="currentStep === 1" (click)="goToStep(1)">
+        <span class="step-circle">1</span>
+        <span class="step-text">
+          <span class="step-title">Personal</span>
+          <span class="step-subtitle">Info</span>
+        </span>
+      </button>
+      <div class="step-line" aria-hidden="true"></div>
+      <button type="button" class="step-item" [class.active]="currentStep === 2" (click)="goToStep(2)">
+        <span class="step-circle">2</span>
+        <span class="step-text">
+          <span class="step-title">Account</span>
+          <span class="step-subtitle">Security</span>
+        </span>
+      </button>
+      <div class="step-line" aria-hidden="true"></div>
+      <button type="button" class="step-item" [class.active]="currentStep === 3" (click)="goToStep(3)">
+        <span class="step-circle">3</span>
+        <span class="step-text">
+          <span class="step-title">Contact</span>
+          <span class="step-subtitle">Info</span>
+        </span>
+      </button>
+    </div>
+
     <form [formGroup]="patientForm" (ngSubmit)="registerPatient()">
       <!-- Profile Picture Section -->
-      <div class="form-section">
+      <div class="form-section" *ngIf="currentStep === 1">
         <h2>Profile Picture (Optional)</h2>
 
         <div class="image-upload-container">
@@ -306,7 +348,7 @@
       </div>
 
       <!-- Personal Information Section -->
-      <div class="form-section">
+      <div class="form-section" *ngIf="currentStep === 1">
         <h2>Personal Information</h2>
 
         <div class="form-row">
@@ -395,7 +437,7 @@
       </div>
 
       <!-- Account Security Section -->
-      <div class="form-section">
+      <div class="form-section" *ngIf="currentStep === 2">
         <h2>Account Security</h2>
         <p class="section-description">Create a secure password for your account</p>
 
@@ -415,25 +457,24 @@
               <span *ngIf="password?.errors?.['minlength']">Password must be at least 8 characters</span>
               <span *ngIf="password?.errors?.['pattern']">Password must contain uppercase, lowercase, number, and special character</span>
             </div>
-            <div class="password-requirements">
-              <small class="requirement-title">Password requirements:</small>
-              <ul class="requirement-list">
-                <li [class.valid]="hasUppercase()" [class.invalid]="password?.value && !hasUppercase()">
-                  <span class="bullet">•</span> At least one uppercase letter
-                </li>
-                <li [class.valid]="hasLowercase()" [class.invalid]="password?.value && !hasLowercase()">
-                  <span class="bullet">•</span> At least one lowercase letter
-                </li>
-                <li [class.valid]="hasNumber()" [class.invalid]="password?.value && !hasNumber()">
-                  <span class="bullet">•</span> At least one number
-                </li>
-                <li [class.valid]="hasSpecialChar()" [class.invalid]="password?.value && !hasSpecialChar()">
-                  <span class="bullet">•</span> At least one special character (@$!%*?&)
-                </li>
-                <li [class.valid]="hasMinLength()" [class.invalid]="password?.value && !hasMinLength()">
-                  <span class="bullet">•</span> Minimum 8 characters
-                </li>
-              </ul>
+            <div class="password-requirements" *ngIf="password?.value">
+              <div class="requirement-chips">
+                <span class="req-chip" [class.valid]="hasUppercase()" [class.invalid]="!hasUppercase()" title="At least one uppercase letter">
+                  A-Z
+                </span>
+                <span class="req-chip" [class.valid]="hasLowercase()" [class.invalid]="!hasLowercase()" title="At least one lowercase letter">
+                  a-z
+                </span>
+                <span class="req-chip" [class.valid]="hasNumber()" [class.invalid]="!hasNumber()" title="At least one number">
+                  0-9
+                </span>
+                <span class="req-chip" [class.valid]="hasSpecialChar()" [class.invalid]="!hasSpecialChar()" title="At least one special character">
+                  @
+                </span>
+                <span class="req-chip" [class.valid]="hasMinLength()" [class.invalid]="!hasMinLength()" title="Minimum 8 characters">
+                  8+
+                </span>
+              </div>
             </div>
           </div>
 
@@ -461,7 +502,7 @@
       </div>
 
       <!-- Contact Information Section -->
-      <div class="form-section">
+      <div class="form-section" *ngIf="currentStep === 3">
         <h2>Contact Information</h2>
 
         <div class="form-row">
@@ -609,9 +650,18 @@
 
       <!-- Submit Button -->
       <div class="form-actions">
+        <button type="button" class="btn btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()" [disabled]="isLoading">
+          Back
+        </button>
+
+        <button type="button" class="btn btn-primary" *ngIf="currentStep < 3" (click)="nextStep()" [disabled]="isLoading">
+          Next
+        </button>
+
         <button
           type="submit"
           class="btn btn-primary"
+          *ngIf="currentStep === 3"
           [disabled]="isLoading || patientForm.invalid"
         >
           <span *ngIf="!isLoading">Register Patient</span>

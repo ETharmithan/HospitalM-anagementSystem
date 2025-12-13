@@ -34,8 +34,18 @@ export const routes: Routes = [
   { 
     path: 'patient/dashboard', 
     loadComponent: () => import('../features/patient/patient-dashboard/patient-dashboard').then(c => c.PatientDashboard),
-    canActivate: [patientGuard]
-  },
+    canActivate: [patientGuard],
+    
+  
+  
+  
+    },
+
+
+
+
+
+
   { 
     path: 'my-appointments', 
     loadComponent: () => import('../features/appointment/my-appointments/my-appointments').then(c => c.MyAppointments),
@@ -60,6 +70,12 @@ export const routes: Routes = [
     loadComponent: () => import('../features/chat/chat').then(c => c.ChatComponent),
     canActivate: [authGuard]
   },
+  // {
+  //   path: 'Prescription',
+  //   loadComponent: () => import('../features/E-Prescription/create-e-prescription/create-e-prescription').then(c => c.CreateEPrescription),
+  //   canActivate: [authGuard]
+   
+  // },
 
   { path: '**', redirectTo: 'home' } // Catch-all route
 ];

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
 import { AuthService } from '../../../core/services/auth-service';
+import { PatientService } from '../../../core/services/patient-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { getRoleDashboardRoute } from '../../../core/utils/role-utils';
 
@@ -20,6 +21,7 @@ export class VerifyEmail implements OnInit {
   private router = inject(Router);
   private accountService = inject(AccountService);
   private authService = inject(AuthService);
+  private patientService = inject(PatientService);
   private toastService = inject(ToastService);
 
   otpForm!: FormGroup;
@@ -79,21 +81,54 @@ export class VerifyEmail implements OnInit {
 
     this.authService.verifyEmail(this.email(), otp).subscribe({
       next: (response: any) => {
-        this.isLoading.set(false);
         this.toastService.success('Email verified successfully! Logging you in...');
-        
-        // If user data is returned, log them in and navigate to dashboard
-        if (response.user && response.user.token) {
-          // AuthService.verifyEmail already calls setUser, so we just navigate
-          
-          // Navigate to role-based dashboard
-          const landingRoute = getRoleDashboardRoute(response.user.role);
-          this.router.navigate([landingRoute]);
-        } else {
-          // No token returned, redirect to login
+
+        if (!(response.user && response.user.token)) {
+          this.isLoading.set(false);
           this.toastService.info('Please login with your credentials.');
           this.router.navigate(['/login']);
+          return;
         }
+
+        let pending: any = null;
+        try {
+          const raw = localStorage.getItem('pendingPatientRegistration');
+          pending = raw ? JSON.parse(raw) : null;
+        } catch {
+          pending = null;
+        }
+
+        const landingRoute = getRoleDashboardRoute(response.user.role);
+
+        if (!pending?.patientData) {
+          this.isLoading.set(false);
+          this.router.navigate([landingRoute]);
+          return;
+        }
+
+        const patientPayload = {
+          ...pending.patientData,
+          userId: pending.userId || response.user.id,
+          UserId: pending.userId || response.user.id,
+        };
+
+        this.patientService.createPatient(patientPayload).subscribe({
+          next: () => {
+            try {
+              localStorage.removeItem('pendingPatientRegistration');
+            } catch {
+              // ignore
+            }
+            this.isLoading.set(false);
+            this.router.navigate([landingRoute]);
+          },
+          error: (error: any) => {
+            this.isLoading.set(false);
+            const message = error?.error?.message || error?.message || 'Failed to create patient record.';
+            this.toastService.error(message);
+            this.router.navigate([landingRoute]);
+          },
+        });
       },
       error: (error: any) => {
         this.isLoading.set(false);

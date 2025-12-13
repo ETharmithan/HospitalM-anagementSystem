@@ -1,83 +1,99 @@
-<nav
-  class="w-full top-0 z-[30] px-4 py-3 sm:py-4 bg-gradient-to-r from-emerald-500/10 to-sky-500/10 dark:from-slate-800/80 dark:to-slate-900/80"
->
-  <div
-    class="max-w-7xl mx-auto bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-white/40 dark:border-slate-700/50 rounded-2xl shadow-2xl transition-all duration-300"
-  >
-    <div class="flex items-center justify-between gap-4 px-4 py-2">
+<nav class="w-full top-0 z-[30] bg-gradient-to-r from-emerald-500 to-sky-500 dark:from-slate-800 dark:to-slate-900 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between gap-4 h-16 md:h-20">
       <div class="flex items-center gap-3">
-        <a routerLink="/" class="flex items-center gap-3 group">
-          <div
-            class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-bold shadow-md transform group-hover:scale-105 transition"
+        <a routerLink="/" class="flex items-center gap-3 group relative overflow-hidden">
+          <div 
+            class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-bold shadow-md transform group-hover:scale-110 transition-all duration-300 group-active:scale-95"
           >
-            MB
+            <span class="group-hover:scale-110 transition-transform duration-300">MB</span>
           </div>
+          <span class="text-lg font-semibold text-white tracking-wide">MediBridge</span>
           <div class="hidden sm:block">
-            <span class="block font-bold text-lg text-slate-900 dark:text-white"
+            <span class="block font-bold text-lg text-white"
               >MyBrand</span
             >
-            <span class="text-xs text-slate-500 dark:text-slate-300"
+            <span class="text-xs text-white/70"
               >Caring for Life</span
             >
           </div>
         </a>
       </div>
 
-      <div class="hidden md:flex items-center flex-1 justify-center">
-        <div class="flex gap-8">
+      <div class="flex-1 flex items-center justify-center">
+        <div class="hidden md:flex items-center space-x-1 bg-white/10 dark:bg-slate-800/30 backdrop-blur-md p-1 rounded-full shadow-inner">
           <a
             routerLink="/"
-            routerLinkActive="active-link-style"
-            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
+            routerLinkActive="text-white font-semibold"
+            [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link group relative px-4 py-2 font-medium text-white/90 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
           >
-            Home
+            <span class="relative z-10">
+              Home
+            </span>
           </a>
+          
           <a 
             *ngIf="currentUser?.role === 'Patient'"
             routerLink="/doctors"
-            routerLinkActive="active-link-style"
-            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
-            >
-            Doctors
+            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+          >
+            <span class="relative z-10">
+              Doctors
+            </span>
           </a>
+          
           <a 
             *ngIf="currentUser?.role === 'Patient'"
             routerLink="/hospitals"
-            routerLinkActive="active-link-style"
-            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
-            >
-            Hospitals
+            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+          >
+            <span class="relative z-10">
+              Hospitals
+            </span>
           </a>
+          
           <a 
             *ngIf="currentUser?.role === 'Patient'"
             routerLink="/chat"
-            routerLinkActive="active-link-style"
-            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
-            >
-            Chat
+            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+          >
+            <span class="relative z-10">
+              Chat
+            </span>
           </a>
-          
           
           <a
-            routerLink="/about"
-            routerLinkActive="active-link-style"
-            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
+            routerLink="/Prescription"
+            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
           >
-            About
+            <span class="relative z-10">
+              Prescription
+            </span>
           </a>
+          
           <a
             routerLink="/services"
-            routerLinkActive="active-link-style"
-            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
+            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
           >
-            Services
+            <span class="relative z-10">
+              Services
+            </span>
           </a>
+          
           <a
             routerLink="/contact"
-            routerLinkActive="active-link-style"
-            class="nav-link relative text-slate-700 dark:text-slate-200 font-semibold transition py-2"
+            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
           >
-            Contact
+            <span class="relative z-10">
+              Contact
+            </span>
           </a>
         </div>
       </div>
@@ -86,16 +102,20 @@
         <ng-container *ngIf="!currentUser">
           <a
             routerLink="/login"
-            class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold shadow-md hover:scale-[1.03] transition transform hover:shadow-lg"
+            class="relative hidden sm:inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl hover:shadow-black/20 transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-105 active:scale-95 group overflow-hidden border border-white/20"
           >
-            Login / Register 🚀
+            <span class="relative z-10 flex items-center gap-2">
+              <span class="group-hover:translate-x-0.5 transition-transform duration-300">Login / Register</span>
+              <span class="group-hover:translate-x-0.5 transition-transform duration-300">🚀</span>
+            </span>
+            <span class="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
           </a>
         </ng-container>
 
         <div class="relative user-menu-container">
           <div
             *ngIf="currentUser"
-            class="hidden sm:flex items-center gap-3 px-3 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+            class="hidden sm:flex items-center gap-3 px-3 py-2 rounded-full bg-white/10 hover:bg-white/15 transition cursor-pointer"
             (click)="toggleUserMenu()"
           >
             <div class="relative">
@@ -104,29 +124,29 @@
                 [src]="getImageUrl(currentUser?.imageUrl)"
                 [alt]="currentUser?.displayName || 'User'"
                 (error)="onImageError($event)"
-                class="w-10 h-10 rounded-full object-cover shadow-sm border-2 border-white dark:border-slate-800"
+                class="w-10 h-10 rounded-full object-cover shadow-sm border-2 border-white/80"
               />
               <div
                 *ngIf="!currentUser?.imageUrl"
-                class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-semibold shadow-sm border-2 border-white dark:border-slate-800"
+                class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-semibold shadow-sm border-2 border-white/80"
               >
                 {{ userInitials }}
               </div>
               <div
-                class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"
+                class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white/80 rounded-full"
               ></div>
             </div>
             <div class="flex flex-col items-start">
               <span
-                class="text-sm font-semibold text-slate-900 dark:text-white"
+                class="text-sm font-semibold text-white"
                 >{{ currentUser?.displayName || 'User' }}</span
               >
-              <span class="text-xs text-slate-500 dark:text-slate-400">{{
+              <span class="text-xs text-white/70">{{
                 currentUser?.role || 'Patient'
               }}</span>
             </div>
             <svg
-              class="w-4 h-4 text-slate-500"
+              class="w-4 h-4 text-white/70"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -139,17 +159,87 @@
               ></path>
             </svg>
           </div>         
+
+          <div
+            *ngIf="showUserMenu && currentUser"
+            class="absolute right-0 mt-3 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg rounded-xl shadow-2xl border border-white/30 dark:border-slate-700/50 py-2 z-[80]"
+            style="max-height: 500px; overflow-y: auto"
+          >
+            <div class="px-4 py-3 border-b border-slate-200/70 dark:border-slate-700/50">
+              <div class="flex items-center gap-3">
+                <img
+                  *ngIf="currentUser?.imageUrl"
+                  [src]="getImageUrl(currentUser?.imageUrl)"
+                  [alt]="currentUser?.displayName || 'User'"
+                  (error)="onImageError($event)"
+                  class="w-12 h-12 rounded-full object-cover shadow-sm"
+                />
+                <div
+                  *ngIf="!currentUser?.imageUrl"
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-semibold shadow-sm"
+                >
+                  {{ userInitials }}
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                    {{ currentUser?.displayName || 'User' }}
+                  </p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ currentUser?.email || 'No email' }}
+                  </p>
+                  <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    {{ currentUser?.role || 'Patient' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <a
+              routerLink="/profile"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              � Profile
+            </a>
+            <a
+              routerLink="/dashboard"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              � Dashboard
+            </a>
+            <a
+              routerLink="/my-appointments"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              � My Appointments
+            </a>
+            <a
+              routerLink="/settings"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              ⚙️ Settings
+            </a>
+            <a
+              (click)="logout(); showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition cursor-pointer"
+            >
+              🚪 Logout
+            </a>
+          </div>
         </div>
 
         <button
           (click)="toggleMenu()"
           aria-label="Open menu"
-          class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+          class="md:hidden p-2 rounded-lg hover:bg-white/10 transition"
         >
           <svg
             *ngIf="!isMenuOpen"
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6 text-slate-700 dark:text-slate-200"
+            class="h-6 w-6 text-white"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -164,7 +254,7 @@
           <svg
             *ngIf="isMenuOpen"
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6 text-slate-700 dark:text-slate-200"
+            class="h-6 w-6 text-white"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -181,75 +271,6 @@
     </div>
   </div>
 
-  <div
-    *ngIf="showUserMenu && currentUser"
-    class="fixed top-24 right-4 sm:right-auto sm:left-1/2 sm:transform sm:-translate-x-1/2 sm:ml-[calc(theme('maxWidth.7xl')/2 - 12rem)] w-64 bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-3 z-[70] overflow-visible"
-    style="max-height: 500px; overflow-y: auto"
-  >
-    <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-      <div class="flex items-center gap-3">
-        <img
-          *ngIf="currentUser?.imageUrl"
-          [src]="getImageUrl(currentUser?.imageUrl)"
-          [alt]="currentUser?.displayName || 'User'"
-          (error)="onImageError($event)"
-          class="w-12 h-12 rounded-full object-cover shadow-sm"
-        />
-        <div
-          *ngIf="!currentUser?.imageUrl"
-          class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-semibold shadow-sm"
-        >
-          {{ userInitials }}
-        </div>
-        <div>
-          <p class="text-sm font-semibold text-slate-900 dark:text-white">
-            {{ currentUser?.displayName || 'User' }}
-          </p>
-          <p class="text-xs text-slate-500 dark:text-slate-400">
-            {{ currentUser?.email || 'No email' }}
-          </p>
-          <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            {{ currentUser?.role || 'Patient' }}
-          </p>
-          <a
-            (click)="logout(); showUserMenu = false"
-            class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition cursor-pointer mt-1 inline-block"
-          >
-            🚪 Logout
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <a
-      routerLink="/profile"
-      (click)="showUserMenu = false"
-      class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-    >
-      👤 Profile
-    </a>
-    <a
-      routerLink="/dashboard"
-      (click)="showUserMenu = false"
-      class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-    >
-      📊 Dashboard
-    </a>
-    <a
-      routerLink="/my-appointments"
-      (click)="showUserMenu = false"
-      class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-    >
-      📅 My Appointments
-    </a>
-    <a
-      routerLink="/settings"
-      (click)="showUserMenu = false"
-      class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-    >
-      ⚙️ Settings
-    </a>
-  </div>
 
   <div class="fixed inset-0 z-40" *ngIf="isMenuOpen">
     <div
