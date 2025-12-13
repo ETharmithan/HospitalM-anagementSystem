@@ -81,8 +81,11 @@ namespace HospitalManagementSystem.Presentation.Controllers
         [Authorize(Roles = "Doctor")]
         public async Task<ActionResult<IEnumerable<EPrescriptionResponseDto>>> GetByPatientId(Guid patientId)
         {
+            var doctorId = await GetCurrentDoctorIdAsync();
+            if (!doctorId.HasValue) return Unauthorized(new { message = "Doctor profile not found" });
+
             var list = await dbContext.EPrescriptions
-                .Where(x => x.PatientId == patientId)
+                .Where(x => x.PatientId == patientId && x.DoctorId == doctorId.Value)
                 .OrderByDescending(x => x.VisitDate)
                 .ToListAsync();
 
@@ -103,6 +106,10 @@ namespace HospitalManagementSystem.Presentation.Controllers
         [Authorize(Roles = "Doctor")]
         public async Task<ActionResult<IEnumerable<EPrescriptionResponseDto>>> GetByDoctorId(Guid doctorId)
         {
+            var currentDoctorId = await GetCurrentDoctorIdAsync();
+            if (!currentDoctorId.HasValue) return Unauthorized(new { message = "Doctor profile not found" });
+            if (doctorId != currentDoctorId.Value) return Forbid();
+
             var list = await dbContext.EPrescriptions
                 .Where(x => x.DoctorId == doctorId)
                 .OrderByDescending(x => x.VisitDate)
@@ -130,10 +137,12 @@ namespace HospitalManagementSystem.Presentation.Controllers
             var doctorId = await GetCurrentDoctorIdAsync();
             if (!doctorId.HasValue) return Unauthorized(new { message = "Doctor profile not found" });
 
-            if (dto.DoctorId != doctorId.Value)
-            {
-                return BadRequest(new { message = "DoctorId mismatch" });
-            }
+            if (dto.PatientId == Guid.Empty)
+                return BadRequest(new { message = "PatientId is required" });
+
+            var patientExists = await dbContext.Patients.AnyAsync(p => p.PatientId == dto.PatientId);
+            if (!patientExists)
+                return NotFound(new { message = "Patient profile not found" });
 
             var entity = new EPrescription
             {
@@ -143,7 +152,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 Notes = dto.Notes ?? string.Empty,
                 VisitDate = dto.VisitDate,
                 CreatedAt = DateTime.UtcNow,
-                DoctorId = dto.DoctorId,
+                DoctorId = doctorId.Value,
                 PatientId = dto.PatientId
             };
 

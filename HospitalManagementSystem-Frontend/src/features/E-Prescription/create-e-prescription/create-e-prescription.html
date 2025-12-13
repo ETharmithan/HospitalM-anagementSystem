@@ -8,14 +8,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-white/80">Doctor ID</label>
-            <input class="input input-bordered w-full mt-1" formControlName="doctorId" placeholder="Loading..." />
+            <input class="input input-bordered w-full mt-1" formControlName="doctorId" placeholder="Loading..." readonly />
             <p class="text-xs text-gray-500 dark:text-white/60 mt-1" *ngIf="isLoadingDoctor()">Loading doctor...</p>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-white/80">Patient ID <span class="text-red-500">*</span></label>
             <input class="input input-bordered w-full mt-1" formControlName="patientId" placeholder="Patient GUID" />
-            <p class="text-xs text-red-600 mt-1" *ngIf="form.get('patientId')?.touched && form.get('patientId')?.invalid">Patient ID is required</p>
+            <p class="text-xs text-red-600 mt-1" *ngIf="form.get('patientId')?.touched && form.get('patientId')?.invalid">Patient ID must be a valid GUID</p>
           </div>
         </div>
 
