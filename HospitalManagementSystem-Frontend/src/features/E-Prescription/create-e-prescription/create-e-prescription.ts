@@ -22,9 +22,11 @@ export class CreateEPrescription {
   isLoadingDoctor = signal(true);
   isSubmitting = signal(false);
 
+  private guidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+
   form = this.fb.group({
-    doctorId: this.fb.control<string>({ value: '', disabled: true }, { validators: [Validators.required] }),
-    patientId: this.fb.control<string>('', { validators: [Validators.required] }),
+    doctorId: this.fb.control<string>('', { validators: [Validators.required] }),
+    patientId: this.fb.control<string>('', { validators: [Validators.required, Validators.pattern(this.guidPattern)] }),
     visitDate: this.fb.control<string>('', { validators: [Validators.required] }),
     diagnosis: this.fb.control<string>('', { validators: [Validators.required] }),
     prescription: this.fb.control<string>('', { validators: [Validators.required] }),
@@ -58,6 +60,12 @@ export class CreateEPrescription {
     }
 
     const raw = this.form.getRawValue();
+
+    if (!raw.doctorId) {
+      this.toast.error('Doctor ID is missing. Please reload the page and try again.');
+      return;
+    }
+
     this.isSubmitting.set(true);
 
     this.ePrescriptionService.create({
@@ -82,7 +90,8 @@ export class CreateEPrescription {
       },
       error: (error) => {
         console.error('Failed to create e-prescription', error);
-        this.toast.error('Failed to create e-prescription');
+        const message = error?.error?.message || error?.message || 'Failed to create e-prescription';
+        this.toast.error(message);
         this.isSubmitting.set(false);
       },
     });

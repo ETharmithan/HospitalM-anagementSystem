@@ -56,6 +56,63 @@
         <span class="action-icon">📋</span>
         <span>My Appointments</span>
       </button>
+
+      <button class="action-btn" routerLink="/e-prescription">
+        <span class="action-icon">🧾</span>
+        <span>My Prescriptions</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="content-section" style="padding-top: 0;">
+    <div class="prescription-card">
+      <div class="prescription-card-header">
+        <div>
+          <h2 style="margin: 0;">Latest Prescription</h2>
+          <p class="prescription-subtitle">Your most recent e-prescription</p>
+        </div>
+        <button class="btn btn-outline btn-sm" type="button" (click)="openPrescriptionHistory()">View all</button>
+      </div>
+
+      @if (isLoadingPrescriptions()) {
+        <div class="loading-container small">
+          <div class="spinner"></div>
+          <p>Loading prescriptions...</p>
+        </div>
+      } @else {
+        @if (!latestPrescription()) {
+          <div class="empty-inline">
+            <span class="empty-inline-icon">🧾</span>
+            <div>
+              <div class="empty-inline-title">No prescriptions yet</div>
+              <div class="empty-inline-text">When your doctor creates an e-prescription, it will appear here.</div>
+            </div>
+          </div>
+        } @else {
+          <div class="prescription-body">
+            <div class="prescription-meta">
+              <div class="meta-item">
+                <div class="meta-label">Visit Date</div>
+                <div class="meta-value">{{ latestPrescription()!.visitDate | date:'yyyy-MM-dd' }}</div>
+              </div>
+              <div class="meta-item">
+                <div class="meta-label">Diagnosis</div>
+                <div class="meta-value">{{ latestPrescription()!.diagnosis }}</div>
+              </div>
+            </div>
+
+            <div class="prescription-text">
+              <div class="meta-label">Prescription</div>
+              <div class="prescription-box">{{ latestPrescription()!.prescription }}</div>
+            </div>
+
+            <div class="prescription-actions">
+              <button class="btn btn-primary" type="button" (click)="downloadPrescription(latestPrescription()!)">Download</button>
+              <button class="btn btn-outline" type="button" (click)="openPrescriptionHistory()">Open history</button>
+            </div>
+          </div>
+        }
+      }
     </div>
   </div>
 
