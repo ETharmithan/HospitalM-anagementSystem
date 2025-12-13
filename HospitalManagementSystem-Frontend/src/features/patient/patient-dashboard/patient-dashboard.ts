@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment-service';
 import { DoctorService } from '../../../core/services/doctor-service';
 import { PatientService } from '../../../core/services/patient-service';
 import { AccountService } from '../../../core/services/account-service';
+import { EPrescriptionResponse, EPrescriptionService } from '../../../core/services/e-prescription-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { Appointment, Doctor } from '../../../types/doctor';
 import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
@@ -28,6 +29,7 @@ export class PatientDashboard implements OnInit {
   private appointmentService = inject(AppointmentService);
   private doctorService = inject(DoctorService);
   private patientService = inject(PatientService);
+  private ePrescriptionService = inject(EPrescriptionService);
   accountService = inject(AccountService); // public for template access
   private toastService = inject(ToastService);
   private router = inject(Router);
@@ -53,8 +55,60 @@ export class PatientDashboard implements OnInit {
     cancelledAppointments: 0
   });
 
+  prescriptions = signal<EPrescriptionResponse[]>([]);
+  isLoadingPrescriptions = signal(false);
+  latestPrescription = computed<EPrescriptionResponse | null>(() => {
+    const list = this.prescriptions();
+    if (!list || list.length === 0) return null;
+
+    // Prefer visitDate; fallback to createdAt
+    const sorted = [...list].sort((a, b) => {
+      const aDate = new Date(a.visitDate || a.createdAt).getTime();
+      const bDate = new Date(b.visitDate || b.createdAt).getTime();
+      return bDate - aDate;
+    });
+
+    return sorted[0] ?? null;
+  });
+
   ngOnInit(): void {
     this.loadPatientData();
+    this.loadMyPrescriptions();
+  }
+
+  loadMyPrescriptions(): void {
+    this.isLoadingPrescriptions.set(true);
+    this.ePrescriptionService.getMyPrescriptions().subscribe({
+      next: (items) => {
+        this.prescriptions.set(items ?? []);
+        this.isLoadingPrescriptions.set(false);
+      },
+      error: () => {
+        this.isLoadingPrescriptions.set(false);
+      },
+    });
+  }
+
+  openPrescriptionHistory(): void {
+    this.router.navigate(['/e-prescription']);
+  }
+
+  downloadPrescription(p: EPrescriptionResponse): void {
+    this.ePrescriptionService.download(p.ePrescriptionId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `e-prescription-${p.ePrescriptionId}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.toastService.error('Failed to download prescription');
+      },
+    });
   }
 
   loadPatientData(): void {
