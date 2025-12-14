@@ -189,8 +189,38 @@ export class MyAppointments implements OnInit {
       return;
     }
 
-    const reason = prompt('Please provide a reason for cancellation:');
-    if (reason === null) return; // User cancelled
+    // Predefined cancellation reasons
+    const reasons = [
+      'Personal emergency',
+      'Schedule conflict',
+      'Feeling better, no longer need appointment',
+      'Transportation issues',
+      'Financial reasons',
+      'Other'
+    ];
+
+    const reasonsText = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
+    const selection = prompt(`Please select a reason for cancellation:\n\n${reasonsText}\n\nEnter number (1-${reasons.length}) or type your own reason:`);
+    
+    if (selection === null) return; // User cancelled
+
+    let reason: string;
+    const selectionNum = parseInt(selection);
+    if (selectionNum >= 1 && selectionNum <= reasons.length) {
+      reason = reasons[selectionNum - 1];
+      if (reason === 'Other') {
+        const customReason = prompt('Please specify your reason:');
+        if (!customReason) return;
+        reason = customReason;
+      }
+    } else {
+      reason = selection;
+    }
+
+    if (!reason.trim()) {
+      this.toastService.error('Please provide a cancellation reason');
+      return;
+    }
 
     this.appointmentService.requestCancellation(appointmentId, reason).subscribe({
       next: () => {

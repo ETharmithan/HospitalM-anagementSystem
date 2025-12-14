@@ -36,7 +36,7 @@ export class Contact implements OnInit {
   }
 
   loadHospitals(): void {
-    this.hospitalService.getAllHospitals().subscribe({
+    this.hospitalService.getPublicHospitals().subscribe({
       next: (data) => {
         this.hospitals.set(data);
         this.isLoading.set(false);

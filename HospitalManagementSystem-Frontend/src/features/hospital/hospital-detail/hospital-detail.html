@@ -1,0 +1,87 @@
+<app-nav></app-nav>
+
+<div class="dashboard-container">
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading hospital details...</p>
+    </div>
+  } @else if (hospital()) {
+    <!-- Back Button -->
+    <button class="btn btn-outline" (click)="goBack()" style="margin-bottom: 1.5rem;">
+      ← Back to Hospitals
+    </button>
+
+    <!-- Hospital Profile Card -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="hospital-avatar-large">
+          🏥
+        </div>
+        <div class="profile-info">
+          <h1>{{ hospital()!.name }}</h1>
+          <p class="location">{{ hospital()!.city }}, {{ hospital()!.state }}, {{ hospital()!.country }}</p>
+          <p class="address">{{ hospital()!.address }}</p>
+          @if (hospital()!.postalCode) {
+            <p class="postal-code">Postal Code: {{ hospital()!.postalCode }}</p>
+          }
+          <div class="contact-info">
+            <div>📞 {{ hospital()!.phoneNumber }}</div>
+            <div>📧 {{ hospital()!.email }}</div>
+            @if (hospital()!.website) {
+              <div>🌐 <a [href]="hospital()!.website" target="_blank">{{ hospital()!.website }}</a></div>
+            }
+          </div>
+          @if (hospital()!.description) {
+            <p class="description">{{ hospital()!.description }}</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Doctors Section -->
+    <div class="content-section">
+      <h2>Available Doctors</h2>
+      
+      @if (isLoadingDoctors()) {
+        <div class="loading-container small">
+          <div class="spinner"></div>
+          <p>Loading doctors...</p>
+        </div>
+      } @else if (doctors().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">👨‍⚕️</span>
+          <h3>No Doctors Available</h3>
+          <p>There are currently no doctors available at this hospital.</p>
+        </div>
+      } @else {
+        <div class="doctors-grid">
+          @for (doctor of doctors(); track doctor.doctorId) {
+            <div class="doctor-card">
+              <div class="doctor-avatar">
+                {{ doctor.name.charAt(0) }}
+              </div>
+              <div class="doctor-info">
+                <h3>{{ doctor.name }}</h3>
+                <p class="qualification">{{ doctor.qualification }}</p>
+                <p class="department">{{ doctor.departmentName || 'General Practice' }}</p>
+                <div class="contact-details">
+                  <div>📧 {{ doctor.email }}</div>
+                  <div>📞 {{ doctor.phone }}</div>
+                </div>
+              </div>
+              <div class="doctor-actions">
+                <button class="btn btn-primary btn-sm" (click)="bookAppointment(doctor.doctorId)">
+                  Book Appointment
+                </button>
+                <button class="btn btn-outline btn-sm" (click)="viewDoctorDetails(doctor.doctorId)">
+                  View Details
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

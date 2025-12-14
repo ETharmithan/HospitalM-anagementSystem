@@ -266,9 +266,14 @@
                 <p class="qualification">{{ doctor.qualification }}</p>
                 <p class="department">{{ doctor.departmentName || 'General' }}</p>
               </div>
-              <button class="btn btn-primary btn-sm" (click)="bookAppointment(doctor.doctorId)">
-                Book Now
-              </button>
+              <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <button class="btn btn-primary btn-sm" (click)="bookAppointment(doctor.doctorId)" style="flex: 1;">
+                  Book Now
+                </button>
+                <a [routerLink]="['/doctor-detail', doctor.doctorId]" class="btn btn-outline btn-sm" style="flex: 1;">
+                  View Details
+                </a>
+              </div>
             </div>
           }
         </div>
@@ -287,12 +292,41 @@
   @if (!isLoading() && activeTab() === 'hospitals') {
     <div class="content-section">
       <h2>Available Hospitals</h2>
-      <div class="coming-soon">
-        <span class="icon">🏥</span>
-        <h3>Hospital Directory</h3>
-        <p>Browse all available hospitals in our network</p>
-        <a routerLink="/hospitals" class="btn btn-primary">View Hospitals</a>
-      </div>
+      
+      @if (isLoadingHospitals()) {
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Loading hospitals...</p>
+        </div>
+      } @else if (hospitals().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🏥</span>
+          <h3>No Hospitals Available</h3>
+          <p>Please check back later.</p>
+        </div>
+      } @else {
+        <div class="doctors-grid">
+          @for (hospital of hospitals(); track hospital.hospitalId) {
+            <div class="doctor-card">
+              <div class="doctor-avatar">
+                🏥
+              </div>
+              <div class="doctor-info">
+                <h3>{{ hospital.name }}</h3>
+                <p class="qualification">{{ hospital.city }}, {{ hospital.state }}</p>
+                <p class="department">{{ hospital.address }}</p>
+                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">
+                  <div>📞 {{ hospital.phoneNumber }}</div>
+                  <div>✉️ {{ hospital.email }}</div>
+                </div>
+              </div>
+              <a [routerLink]="['/hospital-detail', hospital.hospitalId]" class="btn btn-primary btn-sm">
+                View Details
+              </a>
+            </div>
+          }
+        </div>
+      }
     </div>
   }
 </div>
