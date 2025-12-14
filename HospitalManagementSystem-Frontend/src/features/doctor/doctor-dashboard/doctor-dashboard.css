@@ -929,7 +929,7 @@ input[type="time"].form-control {
   background: #f9fafb;
   border-radius: 8px;
   padding: 1rem;
-  border-left: 4px solid #2563eb;
+  border-left: 4px solid #6187da;
 }
 
 .rx-header {
@@ -937,7 +937,7 @@ input[type="time"].form-control {
   justify-content: space-between;
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #166577;
 }
 
 .rx-date {

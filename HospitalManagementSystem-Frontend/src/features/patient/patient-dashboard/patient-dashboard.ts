@@ -10,6 +10,7 @@ import { ToastService } from '../../../core/services/toast-service';
 import { Appointment, Doctor } from '../../../types/doctor';
 import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
 import { Nav } from '../../../layout/nav/nav';
+import { HospitalService, Hospital } from '../../../core/services/hospital-service';
 
 interface PatientStats {
   totalAppointments: number;
@@ -30,6 +31,7 @@ export class PatientDashboard implements OnInit {
   private doctorService = inject(DoctorService);
   private patientService = inject(PatientService);
   private prescriptionService = inject(PrescriptionService);
+  private hospitalService = inject(HospitalService);
   accountService = inject(AccountService); // public for template access
   private toastService = inject(ToastService);
   private router = inject(Router);
@@ -43,9 +45,11 @@ export class PatientDashboard implements OnInit {
   upcomingAppointments = signal<Appointment[]>([]);
   pastAppointments = signal<Appointment[]>([]);
   doctors = signal<Doctor[]>([]);
+  hospitals = signal<Hospital[]>([]);
   patientId = signal<string | null>(null);
   isLoading = signal(true);
   isLoadingDoctors = signal(false);
+  isLoadingHospitals = signal(false);
   activeTab = signal<'upcoming' | 'past' | 'doctors' | 'hospitals'>('upcoming');
 
   stats = signal<PatientStats>({
@@ -194,27 +198,86 @@ export class PatientDashboard implements OnInit {
     });
   }
 
+  loadHospitals(): void {
+    if (this.hospitals().length > 0) return;
+    
+    this.isLoadingHospitals.set(true);
+    this.hospitalService.getPublicHospitals().subscribe({
+      next: (hospitals) => {
+        this.hospitals.set(hospitals);
+        this.isLoadingHospitals.set(false);
+      },
+      error: () => {
+        this.toastService.error('Failed to load hospitals');
+        this.isLoadingHospitals.set(false);
+      }
+    });
+  }
+
   setActiveTab(tab: 'upcoming' | 'past' | 'doctors' | 'hospitals'): void {
     this.activeTab.set(tab);
     if (tab === 'doctors') {
       this.loadDoctors();
+    } else if (tab === 'hospitals') {
+      this.loadHospitals();
     }
   }
 
   cancelAppointment(appointment: Appointment): void {
-    if (confirm('Are you sure you want to cancel this appointment?')) {
-      this.appointmentService.cancelAppointment(appointment.appointmentId).subscribe({
-        next: () => {
-          this.toastService.success('Appointment cancelled successfully');
-          if (this.patientId()) {
-            this.loadAppointments(this.patientId()!);
-          }
-        },
-        error: () => {
-          this.toastService.error('Failed to cancel appointment');
-        }
-      });
+    // Check if appointment is within 60 minutes
+    const appointmentDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    const timeUntilAppointment = appointmentDateTime.getTime() - new Date().getTime();
+    const minutesUntilAppointment = timeUntilAppointment / (1000 * 60);
+    
+    if (minutesUntilAppointment < 60) {
+      this.toastService.error('Cancellations must be requested at least 60 minutes before the appointment time.');
+      return;
     }
+
+    // Predefined cancellation reasons
+    const reasons = [
+      'Personal emergency',
+      'Schedule conflict',
+      'Feeling better, no longer need appointment',
+      'Transportation issues',
+      'Financial reasons',
+      'Other'
+    ];
+
+    const reasonsText = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
+    const selection = prompt(`Please select a reason for cancellation:\n\n${reasonsText}\n\nEnter number (1-${reasons.length}) or type your own reason:`);
+    
+    if (selection === null) return; // User cancelled
+
+    let reason: string;
+    const selectionNum = parseInt(selection);
+    if (selectionNum >= 1 && selectionNum <= reasons.length) {
+      reason = reasons[selectionNum - 1];
+      if (reason === 'Other') {
+        const customReason = prompt('Please specify your reason:');
+        if (!customReason) return;
+        reason = customReason;
+      }
+    } else {
+      reason = selection;
+    }
+
+    if (!reason.trim()) {
+      this.toastService.error('Please provide a cancellation reason');
+      return;
+    }
+
+    this.appointmentService.requestCancellation(appointment.appointmentId, reason).subscribe({
+      next: () => {
+        this.toastService.success('Cancellation request submitted successfully. Your doctor will review and approve the request.');
+        if (this.patientId()) {
+          this.loadAppointments(this.patientId()!);
+        }
+      },
+      error: (error: any) => {
+        this.toastService.error(error.error?.message || 'Failed to submit cancellation request');
+      }
+    });
   }
 
   bookAppointment(doctorId: string): void {

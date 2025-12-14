@@ -12,7 +12,7 @@ import { Nav } from '../../../layout/nav/nav';
 @Component({
   selector: 'app-show-e-prescription',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, Nav],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './show-e-prescription.html',
   styleUrl: './show-e-prescription.css',
 })

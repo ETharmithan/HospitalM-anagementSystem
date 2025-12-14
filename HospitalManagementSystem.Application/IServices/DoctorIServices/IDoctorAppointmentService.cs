@@ -33,5 +33,10 @@ namespace HospitalManagementSystem.Application.IServices.DoctorIServices
         
         // Cancel appointment
         Task<bool> CancelAppointmentAsync(Guid appointmentId, string? cancellationReason = null);
+        
+        // Cancellation workflow methods
+        Task<bool> RequestCancellationAsync(Guid appointmentId, string? cancellationReason = null);
+        Task<bool> ApproveCancellationAsync(Guid appointmentId, Guid approvedBy, string? approvalNote = null);
+        Task<bool> RejectCancellationAsync(Guid appointmentId, Guid rejectedBy, string? rejectionReason = null);
     }
 }

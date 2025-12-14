@@ -89,9 +89,36 @@ export class MyAppointments implements OnInit {
   }
 
   formatDate(dateString: string): string {
-    // Parse date as local date (YYYY-MM-DD format)
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
+    if (!dateString) return 'Invalid date';
+    
+    let date: Date;
+    
+    // Try to parse various date formats
+    if (dateString.includes('T')) {
+      // ISO format: 2024-01-15T00:00:00
+      date = new Date(dateString);
+    } else if (dateString.includes('-')) {
+      // Date format: 2024-01-15
+      const parts = dateString.split('-');
+      if (parts.length === 3) {
+        const [year, month, day] = parts.map(Number);
+        date = new Date(year, month - 1, day);
+      } else {
+        date = new Date(dateString);
+      }
+    } else if (dateString.includes('/')) {
+      // Date format: 01/15/2024
+      date = new Date(dateString);
+    } else {
+      // Try as-is
+      date = new Date(dateString);
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid date';
+    }
+    
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -101,12 +128,38 @@ export class MyAppointments implements OnInit {
   }
 
   formatTime(timeString: string): string {
-    // Assuming time is in HH:mm format
-    const [hours, minutes] = timeString.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
+    if (!timeString) return 'Invalid time';
+    
+    try {
+      // Handle various time formats
+      let hours: number;
+      let minutes: string;
+      
+      if (timeString.includes(':')) {
+        const [h, m] = timeString.split(':');
+        hours = parseInt(h);
+        minutes = m.padStart(2, '0');
+      } else if (timeString.includes('.')) {
+        const [h, m] = timeString.split('.');
+        hours = parseInt(h);
+        minutes = m.padStart(2, '0');
+      } else {
+        // Try to parse as number (e.g., 14.5 = 14:30)
+        const timeFloat = parseFloat(timeString);
+        hours = Math.floor(timeFloat);
+        minutes = Math.round((timeFloat - hours) * 60).toString().padStart(2, '0');
+      }
+      
+      if (isNaN(hours) || isNaN(parseInt(minutes))) {
+        return 'Invalid time';
+      }
+      
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHour = hours % 12 || 12;
+      return `${displayHour}:${minutes} ${ampm}`;
+    } catch (error) {
+      return 'Invalid time';
+    }
   }
 
   getStatusColor(status: string): string {
@@ -117,6 +170,8 @@ export class MyAppointments implements OnInit {
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'cancelled':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'cancellationrequested':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       default:
@@ -124,21 +179,62 @@ export class MyAppointments implements OnInit {
     }
   }
 
-  cancelAppointment(appointmentId: string) {
-    if (confirm('Are you sure you want to cancel this appointment?')) {
-      this.appointmentService.deleteAppointment(appointmentId).subscribe({
-        next: () => {
-          this.toastService.success('Appointment cancelled successfully');
-          if (this.patientId()) {
-            this.loadAppointments(this.patientId()!);
-          }
-        },
-        error: (error) => {
-          this.toastService.error('Failed to cancel appointment');
-          console.error(error);
-        },
-      });
+  cancelAppointment(appointmentId: string, appointmentDate: string, appointmentTime: string) {
+    // Check if appointment is within 60 minutes
+    const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+    const timeUntilAppointment = appointmentDateTime.getTime() - new Date().getTime();
+    const minutesUntilAppointment = timeUntilAppointment / (1000 * 60);
+    
+    if (minutesUntilAppointment < 60) {
+      this.toastService.error('Cancellations must be requested at least 60 minutes before the appointment time.');
+      return;
     }
+
+    // Predefined cancellation reasons
+    const reasons = [
+      'Personal emergency',
+      'Schedule conflict',
+      'Feeling better, no longer need appointment',
+      'Transportation issues',
+      'Financial reasons',
+      'Other'
+    ];
+
+    const reasonsText = reasons.map((r, i) => `${i + 1}. ${r}`).join('\n');
+    const selection = prompt(`Please select a reason for cancellation:\n\n${reasonsText}\n\nEnter number (1-${reasons.length}) or type your own reason:`);
+    
+    if (selection === null) return; // User cancelled
+
+    let reason: string;
+    const selectionNum = parseInt(selection);
+    if (selectionNum >= 1 && selectionNum <= reasons.length) {
+      reason = reasons[selectionNum - 1];
+      if (reason === 'Other') {
+        const customReason = prompt('Please specify your reason:');
+        if (!customReason) return;
+        reason = customReason;
+      }
+    } else {
+      reason = selection;
+    }
+
+    if (!reason.trim()) {
+      this.toastService.error('Please provide a cancellation reason');
+      return;
+    }
+
+    this.appointmentService.requestCancellation(appointmentId, reason).subscribe({
+      next: () => {
+        this.toastService.success('Cancellation request submitted successfully. Your doctor will review and approve the request.');
+        if (this.patientId()) {
+          this.loadAppointments(this.patientId()!);
+        }
+      },
+      error: (error) => {
+        this.toastService.error(error.error?.message || 'Failed to submit cancellation request');
+        console.error(error);
+      },
+    });
   }
 
   isUpcoming(appointmentDate: string, appointmentTime: string): boolean {

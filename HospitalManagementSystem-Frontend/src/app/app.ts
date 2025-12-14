@@ -31,7 +31,7 @@ export class App {
   protected user  = signal<User | null>(null );
 
   // Pages where nav should be shown (public/home pages only)
-  private navRoutes = ['/', '/home', '/doctors', '/hospitals', '/login', '/register', '/patient-register', '/about', '/services', '/contact'];
+  private navRoutes = ['/', '/home', '/doctors', '/hospitals', '/login', '/register', '/patient-register', '/about', '/services', '/contact', '/e-prescription', '/e-prescription/show'];
   
   showNav = computed(() => {
     const url = this.currentRoute();

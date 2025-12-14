@@ -11,6 +11,9 @@ namespace HospitalManagementSystem.Application.IServices
         Task<Notification> CreateAsync(Notification notification);
         Task CreateBookingNotificationAsync(Guid patientId, string doctorName, DateTime appointmentDate, string appointmentTime, string hospitalName, string appointmentId);
         Task CreateBookingCancellationNotificationAsync(Guid patientId, string doctorName, DateTime appointmentDate, string appointmentTime, string appointmentId);
+        Task CreateCancellationRequestNotificationAsync(Guid doctorId, string doctorName, DateTime appointmentDate, string appointmentTime, string patientName, string? reason, string appointmentId);
+        Task CreateCancellationApprovalNotificationAsync(Guid patientId, DateTime appointmentDate, string appointmentTime, string appointmentId);
+        Task CreateCancellationRejectionNotificationAsync(Guid patientId, DateTime appointmentDate, string appointmentTime, string? reason, string appointmentId);
         Task CreatePrescriptionNotificationAsync(Guid patientId, string doctorName, string diagnosis, string recordId);
         Task CreatePaymentNotificationAsync(Guid patientId, decimal amount, string transactionId, string appointmentId);
         

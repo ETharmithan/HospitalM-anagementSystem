@@ -56,6 +56,7 @@ export const routes: Routes = [
   // Public doctor listing and booking
   { path: 'doctors', loadComponent: () => import('../features/doctor/doctor-list/doctor-list').then(c => c.DoctorList) },
   { path: 'doctor/:doctorId', loadComponent: () => import('../features/doctor/doctor-list/doctor-list').then(c => c.DoctorList) },
+  { path: 'doctor-detail/:id', loadComponent: () => import('../features/doctor/doctor-detail/doctor-detail').then(c => c.DoctorDetail) },
   { 
     path: 'book-appointment/:doctorId', 
     loadComponent: () => import('../features/appointment/book-appointment/book-appointment').then(c => c.BookAppointment),
@@ -64,6 +65,7 @@ export const routes: Routes = [
   
   // Hospitals listing (public)
   { path: 'hospitals', loadComponent: () => import('../features/hospital/hospital-list/hospital-list').then(c => c.HospitalList) },
+  { path: 'hospital-detail/:id', loadComponent: () => import('../features/hospital/hospital-detail/hospital-detail').then(c => c.HospitalDetail) },
   
   // Chat
   { 

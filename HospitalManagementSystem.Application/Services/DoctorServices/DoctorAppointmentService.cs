@@ -138,6 +138,100 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             return await _doctorAppointmentRepository.DeleteAsync(id);
         }
 
+        public async Task<bool> RequestCancellationAsync(Guid appointmentId, string? cancellationReason = null)
+        {
+            var entity = await _doctorAppointmentRepository.GetByIdAsync(appointmentId);
+            if (entity == null) return false;
+
+            // Check if cancellation is already requested
+            if (entity.CancellationRequested)
+            {
+                throw new InvalidOperationException("Cancellation has already been requested for this appointment.");
+            }
+
+            // Check if appointment is already cancelled
+            if (entity.AppointmentStatus.ToLower() == "cancelled")
+            {
+                throw new InvalidOperationException("This appointment is already cancelled.");
+            }
+
+            // Check if appointment is within 60 minutes (patients can only request cancellation 60+ minutes before)
+            var appointmentDateTime = DateTime.Parse($"{entity.AppointmentDate:yyyy-MM-dd}T{entity.AppointmentTime}");
+            var timeUntilAppointment = appointmentDateTime - DateTime.Now;
+            
+            if (timeUntilAppointment.TotalMinutes < 60)
+            {
+                throw new InvalidOperationException("Cancellations must be requested at least 60 minutes before the appointment time.");
+            }
+
+            // Set cancellation request details
+            entity.CancellationRequested = true;
+            entity.CancellationRequestedAt = DateTime.UtcNow;
+            entity.CancellationReason = cancellationReason;
+            entity.AppointmentStatus = "CancellationRequested";
+
+            await _doctorAppointmentRepository.UpdateAsync(entity);
+
+            // Send cancellation request notification to doctor/admin (fire and forget)
+            _ = SendCancellationRequestNotificationAsync(entity);
+
+            return true;
+        }
+
+        public async Task<bool> ApproveCancellationAsync(Guid appointmentId, Guid approvedBy, string? approvalNote = null)
+        {
+            var entity = await _doctorAppointmentRepository.GetByIdAsync(appointmentId);
+            if (entity == null) return false;
+
+            // Check if cancellation was requested
+            if (!entity.CancellationRequested)
+            {
+                throw new InvalidOperationException("No cancellation request found for this appointment.");
+            }
+
+            // Approve the cancellation
+            entity.CancellationApproved = true;
+            entity.CancellationApprovedAt = DateTime.UtcNow;
+            entity.CancellationApprovedBy = approvedBy;
+            entity.CancellationApprovalNote = approvalNote;
+            entity.AppointmentStatus = "Cancelled";
+
+            await _doctorAppointmentRepository.UpdateAsync(entity);
+
+            // Send cancellation confirmation emails (fire and forget)
+            _ = SendBookingCancellationEmailAsync(entity, entity.CancellationReason);
+            _ = SendCancellationApprovalNotificationAsync(entity);
+
+            // Create cancellation notification (fire and forget)
+            _ = CreateCancellationNotificationAsync(entity);
+
+            return true;
+        }
+
+        public async Task<bool> RejectCancellationAsync(Guid appointmentId, Guid rejectedBy, string? rejectionReason = null)
+        {
+            var entity = await _doctorAppointmentRepository.GetByIdAsync(appointmentId);
+            if (entity == null) return false;
+
+            // Check if cancellation was requested
+            if (!entity.CancellationRequested)
+            {
+                throw new InvalidOperationException("No cancellation request found for this appointment.");
+            }
+
+            // Reject the cancellation - reset request status but keep appointment active
+            entity.CancellationRequested = false;
+            entity.AppointmentStatus = "Scheduled";
+
+            await _doctorAppointmentRepository.UpdateAsync(entity);
+
+            // Send cancellation rejection notification (fire and forget)
+            _ = SendCancellationRejectionNotificationAsync(entity, rejectedBy, rejectionReason);
+
+            return true;
+        }
+
+        // Keep the original method for direct cancellation (for admin use)
         public async Task<bool> CancelAppointmentAsync(Guid appointmentId, string? cancellationReason = null)
         {
             var entity = await _doctorAppointmentRepository.GetByIdAsync(appointmentId);
@@ -159,10 +253,14 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
         {
             var appointments = await _doctorAppointmentRepository.GetByDoctorIdAsync(doctorId);
             
+            // Normalize the input date to ensure consistent comparison
+            var targetDate = date.Date; // This removes any time component
+            
             // Filter to same date and active appointments
             var sameDateAppointments = appointments.Where(a => 
-                a.AppointmentDate.Date == date.Date && 
+                a.AppointmentDate.Date == targetDate && 
                 a.AppointmentStatus != "Cancelled" &&
+                a.AppointmentStatus != "CancellationRequested" &&
                 (excludeAppointmentId == null || a.AppointmentId != excludeAppointmentId));
 
             // Check for exact time match or overlap
@@ -233,9 +331,11 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
 
             // Get booked appointments for this date
             var appointments = await _doctorAppointmentRepository.GetByDoctorIdAsync(doctorId);
+            var targetDate = date.Date; // Normalize the target date
             var bookedSlots = appointments
-                .Where(a => a.AppointmentDate.Date == date.Date && 
+                .Where(a => a.AppointmentDate.Date == targetDate && 
                            a.AppointmentStatus != "Cancelled" &&
+                           a.AppointmentStatus != "CancellationRequested" &&
                            (hospitalId == null || a.HospitalId == hospitalId))
                 .Select(a => a.AppointmentTime)
                 .ToHashSet();
@@ -450,6 +550,77 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to create cancellation notification: {ex.Message}");
+            }
+        }
+
+        private async Task SendCancellationRequestNotificationAsync(DoctorAppointment appointment)
+        {
+            try
+            {
+                var doctor = await _doctorRepository.GetByIdAsync(appointment.DoctorId);
+                var patient = await _patientRepository.GetPatientWithDetailsAsync(appointment.PatientId);
+                
+                if (doctor != null && patient != null)
+                {
+                    await _notificationService.CreateCancellationRequestNotificationAsync(
+                        appointment.DoctorId,
+                        doctor.Name,
+                        appointment.AppointmentDate,
+                        appointment.AppointmentTime,
+                        $"{patient.FirstName} {patient.LastName}",
+                        appointment.CancellationReason,
+                        appointment.AppointmentId.ToString()
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send cancellation request notification: {ex.Message}");
+            }
+        }
+
+        private async Task SendCancellationApprovalNotificationAsync(DoctorAppointment appointment)
+        {
+            try
+            {
+                var patient = await _patientRepository.GetPatientWithDetailsAsync(appointment.PatientId);
+                
+                if (patient != null)
+                {
+                    await _notificationService.CreateCancellationApprovalNotificationAsync(
+                        appointment.PatientId,
+                        appointment.AppointmentDate,
+                        appointment.AppointmentTime,
+                        appointment.AppointmentId.ToString()
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send cancellation approval notification: {ex.Message}");
+            }
+        }
+
+        private async Task SendCancellationRejectionNotificationAsync(DoctorAppointment appointment, Guid rejectedBy, string? rejectionReason)
+        {
+            try
+            {
+                var patient = await _patientRepository.GetPatientWithDetailsAsync(appointment.PatientId);
+                
+                if (patient != null)
+                {
+                    await _notificationService.CreateCancellationRejectionNotificationAsync(
+                        appointment.PatientId,
+                        appointment.AppointmentDate,
+                        appointment.AppointmentTime,
+                        rejectionReason,
+                        appointment.AppointmentId.ToString()
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send cancellation rejection notification: {ex.Message}");
             }
         }
     }

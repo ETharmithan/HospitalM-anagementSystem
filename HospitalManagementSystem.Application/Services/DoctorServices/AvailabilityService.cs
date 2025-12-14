@@ -111,9 +111,11 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             
             // Get existing appointments for this date
             var appointments = await _doctorAppointmentRepository.GetByDoctorIdAsync(doctorId);
+            var targetDate = date.Date; // Normalize the target date
             var dateAppointments = appointments
-                .Where(a => a.AppointmentDate.Date == date.Date && 
-                           a.AppointmentStatus.ToLower() != "cancelled")
+                .Where(a => a.AppointmentDate.Date == targetDate && 
+                           a.AppointmentStatus.ToLower() != "cancelled" &&
+                           a.AppointmentStatus.ToLower() != "cancellationrequested")
                 .ToList();
 
             // Mark booked slots as unavailable

@@ -3,6 +3,22 @@
     <h1>Contact Information</h1>
     <p class="subtitle">Get in touch with us for any assistance</p>
 
+     <!-- Emergency Contact -->
+    <section class="emergency-section">
+      <h2>Emergency Services</h2>
+      <p>For medical emergencies, please call your local emergency number or visit the nearest emergency department immediately.</p>
+      <div class="emergency-numbers">
+        <div class="emergency-item">
+          <span class="emergency-icon">🚨</span>
+          <strong>Emergency: 911</strong>
+        </div>
+        <div class="emergency-item">
+          <span class="emergency-icon">🏥</span>
+          <strong>Non-Emergency: Contact your nearest hospital</strong>
+        </div>
+      </div>
+    </section>
+    
     <!-- For Patients and Guests - Basic Hospital Contact -->
     @if (userRole() === 'Patient' || userRole() === 'Guest') {
       <section class="contact-section">
@@ -282,20 +298,6 @@
       </section>
     }
 
-    <!-- Emergency Contact -->
-    <section class="emergency-section">
-      <h2>Emergency Services</h2>
-      <p>For medical emergencies, please call your local emergency number or visit the nearest emergency department immediately.</p>
-      <div class="emergency-numbers">
-        <div class="emergency-item">
-          <span class="emergency-icon">🚨</span>
-          <strong>Emergency: 911</strong>
-        </div>
-        <div class="emergency-item">
-          <span class="emergency-icon">🏥</span>
-          <strong>Non-Emergency: Contact your nearest hospital</strong>
-        </div>
-      </div>
-    </section>
+   
   </div>
 </div>

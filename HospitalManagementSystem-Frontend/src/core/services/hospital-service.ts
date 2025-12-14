@@ -116,8 +116,30 @@ export class HospitalService {
     );
   }
 
-  // Get hospital by ID
+  // Get all hospitals (Public - for patients)
+  getPublicHospitals(): Observable<Hospital[]> {
+    return this.http.get<Hospital[]>(`${this.baseUrl}/publichospital/hospitals`).pipe(
+      timeout(10000),
+      catchError(error => {
+        console.error('Error fetching hospitals:', error);
+        return throwError(() => new Error('Failed to fetch hospitals.'));
+      })
+    );
+  }
+
+  // Get hospital by ID (Public - for patients)
   getHospitalById(hospitalId: string): Observable<Hospital> {
+    return this.http.get<Hospital>(`${this.baseUrl}/publichospital/hospitals/${hospitalId}`).pipe(
+      timeout(10000),
+      catchError(error => {
+        console.error('Error fetching hospital:', error);
+        return throwError(() => new Error('Failed to fetch hospital details.'));
+      })
+    );
+  }
+
+  // Get hospital by ID (SuperAdmin only)
+  getHospitalByIdAdmin(hospitalId: string): Observable<Hospital> {
     return this.http.get<Hospital>(`${this.baseUrl}/superadmin/hospitals/${hospitalId}`).pipe(
       timeout(10000),
       catchError(error => {

@@ -1,0 +1,74 @@
+<app-nav></app-nav>
+
+<div class="dashboard-container">
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading doctor details...</p>
+    </div>
+  } @else if (doctor()) {
+    <!-- Back Button -->
+    <button class="btn btn-outline" (click)="goBack()" style="margin-bottom: 1.5rem;">
+      ← Back to Doctors
+    </button>
+
+    <!-- Doctor Profile Card -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="doctor-avatar-large">
+          {{ doctor()!.name.charAt(0) }}
+        </div>
+        <div class="profile-info">
+          <h1>{{ doctor()!.name }}</h1>
+          <p class="qualification">{{ doctor()!.qualification }}</p>
+          <p class="department">{{ doctor()!.departmentName || 'General Practice' }}</p>
+          <div class="contact-info">
+            <div>📧 {{ doctor()!.email }}</div>
+            <div>📞 {{ doctor()!.phone }}</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" (click)="bookAppointment()">
+          Book Appointment
+        </button>
+      </div>
+    </div>
+
+    <!-- Hospitals Section -->
+    <div class="content-section">
+      <h2>Available at Hospitals</h2>
+      
+      @if (isLoadingHospitals()) {
+        <div class="loading-container small">
+          <div class="spinner"></div>
+          <p>Loading hospitals...</p>
+        </div>
+      } @else if (hospitals().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🏥</span>
+          <h3>No Hospitals Available</h3>
+          <p>This doctor is not currently available at any hospitals.</p>
+        </div>
+      } @else {
+        <div class="hospitals-grid">
+          @for (hospital of hospitals(); track hospital.hospitalId) {
+            <div class="hospital-card">
+              <div class="hospital-icon">🏥</div>
+              <div class="hospital-info">
+                <h3>{{ hospital.name }}</h3>
+                <p class="location">{{ hospital.city }}, {{ hospital.state }}</p>
+                <p class="address">{{ hospital.address }}</p>
+                <div class="contact-details">
+                  <div>📞 {{ hospital.phoneNumber }}</div>
+                  <div>✉️ {{ hospital.email }}</div>
+                </div>
+              </div>
+              <a [routerLink]="['/hospital-detail', hospital.hospitalId]" class="btn btn-outline btn-sm">
+                View Hospital
+              </a>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -126,13 +126,25 @@ export class AppointmentService {
     );
   }
 
-  // Cancel appointment
+  // Cancel appointment (admin direct cancel)
   cancelAppointment(appointmentId: string): Observable<any> {
     return this.http.put<any>(`${this.baseUrl}/doctorappointment/cancel/${appointmentId}`, {}).pipe(
       timeout(10000),
       catchError(error => {
         console.error('Error canceling appointment:', error);
         return throwError(() => new Error('Failed to cancel appointment.'));
+      })
+    );
+  }
+
+  // Request cancellation (patient workflow)
+  requestCancellation(appointmentId: string, reason: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/doctorappointment/request-cancellation/${appointmentId}`, { reason }).pipe(
+      timeout(10000),
+      catchError(error => {
+        console.error('Error requesting cancellation:', error);
+        const errorMessage = error.error?.message || 'Failed to submit cancellation request.';
+        return throwError(() => new Error(errorMessage));
       })
     );
   }

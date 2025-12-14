@@ -48,14 +48,13 @@ export class HospitalList implements OnInit {
 
   loadHospitals(): void {
     this.isLoading.set(true);
-    this.http.get<Hospital[]>(`${this.baseUrl}/superadmin/hospitals`).subscribe({
+    this.http.get<Hospital[]>(`${this.baseUrl}/publichospital/hospitals`).subscribe({
       next: (hospitals) => {
-        const activeHospitals = hospitals.filter(h => h.isActive);
-        this.hospitals.set(activeHospitals);
-        this.filteredHospitals.set(activeHospitals);
+        this.hospitals.set(hospitals);
+        this.filteredHospitals.set(hospitals);
         
         // Extract unique cities
-        const uniqueCities = [...new Set(activeHospitals.map(h => h.city))].sort();
+        const uniqueCities = [...new Set(hospitals.map(h => h.city))].sort();
         this.cities.set(uniqueCities);
         
         this.isLoading.set(false);
