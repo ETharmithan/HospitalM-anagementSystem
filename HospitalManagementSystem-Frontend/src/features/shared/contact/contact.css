@@ -1,8 +1,12 @@
 .contact-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  padding: 40px 20px;
-  color: #fff;
+  background:
+    radial-gradient(900px 560px at 12% 18%, rgba(130, 234, 234, 0.20), transparent 60%),
+    radial-gradient(900px 560px at 88% 22%, rgba(148, 27, 109, 0.18), transparent 60%),
+    radial-gradient(900px 620px at 55% 92%, rgba(48, 9, 52, 0.18), transparent 62%),
+    linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(248, 250, 252, 1) 100%);
+  padding: 120px 20px 40px 20px;
+  color: #0f172a;
 }
 
 .contact-content {
@@ -13,13 +17,13 @@
 .contact-content h1 {
   font-size: 36px;
   margin-bottom: 8px;
-  color: #667eea;
+  color: #300934;
   text-align: center;
 }
 
 .subtitle {
   text-align: center;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(15, 23, 42, 0.6);
   font-size: 16px;
   margin-bottom: 40px;
 }
@@ -30,12 +34,12 @@
 
 .contact-section h2 {
   font-size: 28px;
-  color: #667eea;
+  color: #941B6D;
   margin-bottom: 12px;
 }
 
 .section-description {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(15, 23, 42, 0.65);
   margin-bottom: 24px;
   font-size: 15px;
 }
@@ -48,11 +52,12 @@
 }
 
 .hospital-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 16px;
   padding: 24px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(18px);
 }
 
 .hospital-card:hover {
@@ -63,9 +68,9 @@
 .hospital-card h3 {
   font-size: 20px;
   margin-bottom: 16px;
-  color: #fff;
+  color: rgba(15, 23, 42, 0.92);
   padding-bottom: 12px;
-  border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+  border-bottom: 2px solid rgba(148, 27, 109, 0.18);
 }
 
 .contact-details {

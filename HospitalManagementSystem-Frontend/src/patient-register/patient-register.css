@@ -1,10 +1,10 @@
 .patient-register-container {
   min-height: 100vh;
   background:
-    radial-gradient(1200px 700px at 15% 20%, rgba(16, 185, 129, 0.35), transparent 60%),
-    radial-gradient(1100px 650px at 85% 15%, rgba(14, 165, 233, 0.30), transparent 55%),
-    radial-gradient(900px 600px at 70% 85%, rgba(99, 102, 241, 0.22), transparent 60%),
-    linear-gradient(135deg, #0ea5e9 0%, #10b981 50%, #6366f1 100%);
+    radial-gradient(1200px 700px at 15% 20%, rgba(130, 234, 234, 0.28), transparent 60%),
+    radial-gradient(1100px 650px at 85% 15%, rgba(148, 27, 109, 0.22), transparent 58%),
+    radial-gradient(900px 600px at 70% 85%, rgba(48, 9, 52, 0.22), transparent 62%),
+    linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(248, 250, 252, 1) 100%);
   padding: 170px 20px 40px 20px; /* Added top padding for navbar */
   display: flex;
   align-items: flex-start; /* Changed from center to flex-start */
@@ -16,7 +16,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.10), rgba(15, 23, 42, 0.35));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), transparent 55%, rgba(255, 255, 255, 0.35));
   pointer-events: none;
 }
 
@@ -36,21 +36,23 @@
 }
 
 .patient-details-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 24px;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.12);
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px);
 }
 
 .details-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #300934 0%, #941B6D 55%, #82EAEA 100%);
   color: white;
   padding: 20px 30px;
-  border-radius: 12px 12px 0 0;
+  border-radius: 24px 24px 0 0;
   position: relative;
 }
 
@@ -125,7 +127,7 @@
   font-weight: 600;
   margin-bottom: 15px;
   padding-bottom: 8px;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid rgba(148, 27, 109, 0.35);
 }
 
 .detail-grid {
@@ -170,7 +172,7 @@
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #667eea;
+  border: 3px solid rgba(148, 27, 109, 0.55);
   margin-top: 5px;
 }
 
@@ -228,8 +230,8 @@
 .progress-fill {
   height: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #10b981 0%, #0ea5e9 55%, #6366f1 100%);
-  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.25);
+  background: linear-gradient(90deg, #300934 0%, #941B6D 55%, #82EAEA 100%);
+  box-shadow: 0 10px 22px rgba(148, 27, 109, 0.22);
   transition: width 220ms ease;
 }
 
@@ -281,9 +283,9 @@
 
 .step-item.active .step-circle {
   color: white;
-  background: linear-gradient(90deg, #10b981 0%, #0ea5e9 55%, #6366f1 100%);
+  background: linear-gradient(90deg, #300934 0%, #941B6D 55%, #82EAEA 100%);
   border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.22);
+  box-shadow: 0 12px 24px rgba(148, 27, 109, 0.18);
 }
 
 .step-text {
@@ -335,11 +337,11 @@
 }
 
 .form-section h2 {
-  color: #667eea;
+  color: #941B6D;
   font-size: 18px;
   margin-bottom: 20px;
   padding-bottom: 10px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid rgba(15, 23, 42, 0.10);
 }
 
 .form-row {
@@ -375,12 +377,12 @@
 }
 
 .tab-btn:hover {
-  color: #667eea;
+  color: #941B6D;
 }
 
 .tab-btn.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: #941B6D;
+  border-bottom-color: #941B6D;
 }
 
 .upload-option {
@@ -465,8 +467,8 @@
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: rgba(130, 234, 234, 0.9);
+  box-shadow: 0 0 0 3px rgba(130, 234, 234, 0.18);
 }
 
 .form-control.is-invalid {
@@ -493,7 +495,7 @@
   padding: 10px 12px;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid rgba(148, 27, 109, 0.6);
 }
 
 .requirement-chips {
@@ -611,14 +613,14 @@
 }
 
 .terms-link {
-  color: #667eea;
+  color: #941B6D;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .terms-link:hover {
-  color: #764ba2;
+  color: #300934;
   text-decoration: underline;
 }
 
@@ -647,7 +649,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #941B6D 0%, #82EAEA 100%);
   color: white;
   flex: 1;
 }
@@ -678,7 +680,7 @@
 
 .file-input-label:hover {
   background: #e8e8e8;
-  border-color: #667eea;
+  border-color: rgba(130, 234, 234, 0.9);
 }
 
 .file-input {
@@ -702,7 +704,7 @@
 }
 
 .btn-upload {
-  background: #667eea;
+  background: #941B6D;
   color: white;
 }
 
@@ -719,7 +721,7 @@
 }
 
 .btn-change {
-  background: #667eea;
+  background: #941B6D;
   color: white;
 }
 

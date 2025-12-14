@@ -3,17 +3,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  background:
+    radial-gradient(900px 560px at 14% 20%, rgba(130, 234, 234, 0.28), transparent 62%),
+    radial-gradient(900px 560px at 86% 22%, rgba(148, 27, 109, 0.22), transparent 62%),
+    radial-gradient(900px 620px at 55% 92%, rgba(48, 9, 52, 0.22), transparent 64%),
+    linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(248, 250, 252, 1) 100%);
+  padding: 120px 20px 40px 20px;
+  position: relative;
+}
+
+.verify-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), transparent 55%, rgba(255, 255, 255, 0.35));
+  pointer-events: none;
 }
 
 .verify-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 20px;
   padding: 40px;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px);
+  position: relative;
 }
 
 .verify-header {
@@ -24,7 +40,7 @@
 .icon-container {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #941B6D 0%, #82EAEA 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -47,7 +63,7 @@
 }
 
 .email {
-  color: #667eea;
+  color: #941B6D;
   font-weight: 600;
   margin: 5px 0 0;
   font-size: 15px;
@@ -108,7 +124,7 @@
 .btn-verify {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #941B6D 0%, #82EAEA 100%);
   color: white;
   border: none;
   border-radius: 12px;
