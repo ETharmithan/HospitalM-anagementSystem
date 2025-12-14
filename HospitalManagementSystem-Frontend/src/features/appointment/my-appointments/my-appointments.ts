@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment-service';
 import { DoctorService } from '../../../core/services/doctor-service';
 import { PatientService } from '../../../core/services/patient-service';
@@ -15,6 +15,7 @@ import { Appointment, Doctor } from '../../../types/doctor';
   styleUrl: './my-appointments.css',
 })
 export class MyAppointments implements OnInit {
+  router = inject(Router);
   private appointmentService = inject(AppointmentService);
   private doctorService = inject(DoctorService);
   private patientService = inject(PatientService);
@@ -87,7 +88,9 @@ export class MyAppointments implements OnInit {
   }
 
   formatDate(dateString: string): string {
-    const date = new Date(dateString);
+    // Parse date as local date (YYYY-MM-DD format)
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',

@@ -77,10 +77,21 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             }
             else
             {
-                // Use weekly schedule
+                // Check DoctorSchedule: First try specific date, then weekly recurring
                 var dayOfWeek = date.DayOfWeek.ToString();
                 var schedules = await _doctorScheduleRepository.GetByDoctorIdAsync(doctorId);
-                var schedule = schedules.FirstOrDefault(s => s.DayOfWeek.Equals(dayOfWeek, StringComparison.OrdinalIgnoreCase));
+                
+                // Priority 1: Specific date schedule (ScheduleDate matches exactly)
+                var schedule = schedules.FirstOrDefault(s => 
+                    s.ScheduleDate.HasValue && s.ScheduleDate.Value.Date == date.Date);
+                
+                // Priority 2: Weekly recurring schedule (DayOfWeek matches)
+                if (schedule == null)
+                {
+                    schedule = schedules.FirstOrDefault(s => 
+                        !string.IsNullOrEmpty(s.DayOfWeek) && 
+                        s.DayOfWeek.Equals(dayOfWeek, StringComparison.OrdinalIgnoreCase));
+                }
                 
                 if (schedule == null)
                 {
@@ -107,12 +118,22 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
 
             // Mark booked slots as unavailable
             var availableSlots = new List<TimeSlotDto>();
+            var now = DateTime.Now;
+            var isToday = date.Date == now.Date;
+            var currentTime = now.TimeOfDay;
+
             foreach (var slot in slots)
             {
                 // Be defensive: if slot time cannot be parsed, skip this slot instead of crashing
                 if (!TimeSpan.TryParse(slot, out var slotTime))
                 {
                     continue;
+                }
+
+                // Filter out past time slots for today
+                if (isToday && slotTime <= currentTime)
+                {
+                    continue; // Skip past time slots
                 }
 
                 var isBooked = dateAppointments.Any(apt =>
@@ -175,9 +196,16 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             var dateAvailabilities = await _doctorAvailabilityRepository.GetByDoctorIdAndDateRangeAsync(doctorId, startDate, endDate);
             var availabilityDict = dateAvailabilities.ToDictionary(a => a.Date.Date, a => a);
 
-            // Get weekly schedules
+            // Get schedules (both specific dates and weekly recurring)
             var schedules = await _doctorScheduleRepository.GetByDoctorIdAsync(doctorId);
-            var scheduledDays = schedules.Select(s => s.DayOfWeek).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var specificDateSchedules = schedules
+                .Where(s => s.ScheduleDate.HasValue)
+                .GroupBy(s => s.ScheduleDate!.Value.Date)
+                .ToDictionary(g => g.Key, g => g.First()); // Take first schedule if duplicates exist
+            var scheduledDays = schedules
+                .Where(s => !string.IsNullOrEmpty(s.DayOfWeek))
+                .Select(s => s.DayOfWeek!)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             // Get all appointments
             var appointments = await _doctorAppointmentRepository.GetByDoctorIdAsync(doctorId);
@@ -201,7 +229,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                     continue;
                 }
 
-                // Check date-specific availability
+                // Check date-specific availability override
                 if (availabilityDict.TryGetValue(date, out var dateAvailability))
                 {
                     if (!dateAvailability.IsAvailable)
@@ -210,35 +238,53 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                         continue;
                     }
                     // Has date-specific schedule, check if fully booked
-                    var availability = await GetAvailabilityAsync(doctorId, date);
-                    if (availability.IsFullyBooked)
+                    try
                     {
-                        response.FullyBookedDates.Add(date);
+                        var availability = await GetAvailabilityAsync(doctorId, date);
+                        if (availability.IsFullyBooked)
+                        {
+                            response.FullyBookedDates.Add(date);
+                        }
+                        else if (availability.HasSchedule)
+                        {
+                            response.AvailableDates.Add(date);
+                        }
                     }
-                    else if (availability.HasSchedule)
+                    catch
                     {
-                        response.AvailableDates.Add(date);
+                        // If error checking availability, mark as unavailable
+                        response.UnavailableDates.Add(date);
                     }
                     continue;
                 }
 
-                // Check weekly schedule
+                // Check if there's a specific date schedule or weekly schedule
                 var dayOfWeek = date.DayOfWeek.ToString();
-                if (!scheduledDays.Contains(dayOfWeek))
+                var hasSchedule = specificDateSchedules.ContainsKey(date) || scheduledDays.Contains(dayOfWeek);
+                
+                if (!hasSchedule)
                 {
                     response.UnavailableDates.Add(date);
                     continue;
                 }
 
                 // Check if fully booked
-                var dayAvailability = await GetAvailabilityAsync(doctorId, date);
-                if (dayAvailability.IsFullyBooked)
+                try
                 {
-                    response.FullyBookedDates.Add(date);
+                    var dayAvailability = await GetAvailabilityAsync(doctorId, date);
+                    if (dayAvailability.IsFullyBooked)
+                    {
+                        response.FullyBookedDates.Add(date);
+                    }
+                    else
+                    {
+                        response.AvailableDates.Add(date);
+                    }
                 }
-                else
+                catch
                 {
-                    response.AvailableDates.Add(date);
+                    // If error checking availability, mark as unavailable
+                    response.UnavailableDates.Add(date);
                 }
             }
 

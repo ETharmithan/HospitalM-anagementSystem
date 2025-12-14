@@ -16,6 +16,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
     {
         private readonly IDoctorAppointmentRepository _doctorAppointmentRepository;
         private readonly IDoctorAvailabilityRepository _availabilityRepository;
+        private readonly IDoctorScheduleRepository _doctorScheduleRepository;
         private readonly IEmailService _emailService;
         private readonly IPatientRepository _patientRepository;
         private readonly IDoctorRepository _doctorRepository;
@@ -25,6 +26,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
         public DoctorAppointmentService(
             IDoctorAppointmentRepository doctorAppointmentRepository,
             IDoctorAvailabilityRepository availabilityRepository,
+            IDoctorScheduleRepository doctorScheduleRepository,
             IEmailService emailService,
             IPatientRepository patientRepository,
             IDoctorRepository doctorRepository,
@@ -33,6 +35,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
         {
             _doctorAppointmentRepository = doctorAppointmentRepository;
             _availabilityRepository = availabilityRepository;
+            _doctorScheduleRepository = doctorScheduleRepository;
             _emailService = emailService;
             _patientRepository = patientRepository;
             _doctorRepository = doctorRepository;
@@ -183,6 +186,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             string startTime = "09:00";
             string endTime = "17:00";
             int slotDuration = 30;
+            bool isAvailable = true;
 
             if (availability != null && availability.IsAvailable)
             {
@@ -193,6 +197,34 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             else if (availability != null && !availability.IsAvailable)
             {
                 // Doctor not available on this date
+                return Enumerable.Empty<string>();
+            }
+            else
+            {
+                // No availability found, check DoctorSchedule
+                var schedules = await _doctorScheduleRepository.GetByDoctorIdAsync(doctorId);
+                var matchingSchedule = schedules.FirstOrDefault(s => 
+                    (s.ScheduleDate.HasValue && s.ScheduleDate.Value.Date == date.Date && 
+                     (hospitalId == null || s.HospitalId == hospitalId)) ||
+                    (!s.ScheduleDate.HasValue && s.DayOfWeek == date.DayOfWeek.ToString() &&
+                     (hospitalId == null || s.HospitalId == hospitalId))
+                );
+
+                if (matchingSchedule != null)
+                {
+                    startTime = matchingSchedule.StartTime;
+                    endTime = matchingSchedule.EndTime;
+                    isAvailable = true;
+                }
+                else
+                {
+                    // No schedule found for this date, doctor is not available
+                    return Enumerable.Empty<string>();
+                }
+            }
+
+            if (!isAvailable)
+            {
                 return Enumerable.Empty<string>();
             }
 

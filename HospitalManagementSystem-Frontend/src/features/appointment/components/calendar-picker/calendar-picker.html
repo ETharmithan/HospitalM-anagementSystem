@@ -1,6 +1,7 @@
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
   <div class="flex items-center justify-between mb-6">
     <button
+      type="button"
       (click)="previousMonth()"
       class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
       <span class="material-symbols-outlined">chevron_left</span>
@@ -11,6 +12,7 @@
     </h3>
     
     <button
+      type="button"
       (click)="nextMonth()"
       [disabled]="!canGoToNextMonth()"
       class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
@@ -31,6 +33,7 @@
   <div class="grid grid-cols-7 gap-2">
     @for (day of calendarDays(); track day.date.getTime()) {
       <button
+        type="button"
         (click)="selectDate(day)"
         [disabled]="day.isDisabled || !day.isCurrentMonth"
         [class.bg-blue-600]="day.isSelected"

@@ -49,8 +49,15 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
         [HttpPost]
         public async Task<IActionResult> Create(DoctorPatientRecordsRequestDto doctorPatientRecordsRequestDto)
         {
-            var result = await _doctorPatientRecordsService.CreateAsync(doctorPatientRecordsRequestDto);
-            return CreatedAtAction(nameof(GetById), new { id = result.RecordId }, result);
+            try
+            {
+                var result = await _doctorPatientRecordsService.CreateAsync(doctorPatientRecordsRequestDto);
+                return CreatedAtAction(nameof(GetById), new { id = result.RecordId }, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, details = ex.InnerException?.Message });
+            }
         }
 
         [HttpPut("{id:guid}")]

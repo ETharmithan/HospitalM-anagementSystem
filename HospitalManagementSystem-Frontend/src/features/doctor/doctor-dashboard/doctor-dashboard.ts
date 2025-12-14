@@ -6,7 +6,7 @@ import { AppointmentService } from '../../../core/services/appointment-service';
 import { AccountService } from '../../../core/services/account-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { DoctorScheduleService, DoctorSchedule, HospitalOption, CreateScheduleRequest } from '../../../core/services/doctor-schedule-service';
-import { PrescriptionService, PrescriptionRequest, PatientMedicalProfile } from '../../../core/services/prescription-service';
+import { PrescriptionService, PrescriptionRequest, PrescriptionResponse, PatientMedicalProfile } from '../../../core/services/prescription-service';
 import { Appointment } from '../../../types/doctor';
 import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
 
@@ -61,7 +61,7 @@ export class DoctorDashboard implements OnInit {
   todayAppointments = signal<Appointment[]>([]);
   upcomingAppointments = signal<Appointment[]>([]);
   isLoading = signal(true);
-  activeTab = signal<'today' | 'upcoming' | 'all' | 'availability'>('today');
+  activeTab = signal<'today' | 'upcoming' | 'all' | 'availability' | 'prescriptions'>('today');
   
   // Prescription modal
   showPrescriptionModal = signal(false);
@@ -100,6 +100,14 @@ export class DoctorDashboard implements OnInit {
 
   // Store the actual doctor ID
   doctorId = signal<string | null>(null);
+
+  // My Prescriptions
+  myPrescriptions = signal<PrescriptionResponse[]>([]);
+  filteredPrescriptions = signal<PrescriptionResponse[]>([]);
+  isLoadingPrescriptions = signal(false);
+  prescriptionFilterStartDate = signal<string>('');
+  prescriptionFilterEndDate = signal<string>('');
+  prescriptionFilterPatient = signal<string>('');
 
   // Patient Medical Profile Modal
   medicalProfileModal = signal<MedicalProfileModal>({
@@ -204,10 +212,12 @@ export class DoctorDashboard implements OnInit {
     );
   }
 
-  setActiveTab(tab: 'today' | 'upcoming' | 'all' | 'availability'): void {
+  setActiveTab(tab: 'today' | 'upcoming' | 'all' | 'availability' | 'prescriptions'): void {
     this.activeTab.set(tab);
     if (tab === 'availability') {
       this.loadSchedules();
+    } else if (tab === 'prescriptions') {
+      this.loadMyPrescriptions();
     }
   }
 
@@ -348,6 +358,59 @@ export class DoctorDashboard implements OnInit {
   closePrescriptionModal(): void {
     this.showPrescriptionModal.set(false);
     this.selectedAppointment.set(null);
+  }
+
+  loadMyPrescriptions(): void {
+    const doctorId = this.doctorId();
+    if (!doctorId) {
+      this.toastService.error('Doctor ID not found');
+      return;
+    }
+
+    this.isLoadingPrescriptions.set(true);
+    this.prescriptionService.getPrescriptionsByDoctorId(doctorId).subscribe({
+      next: (prescriptions) => {
+        this.myPrescriptions.set(prescriptions);
+        this.applyPrescriptionFilters();
+        this.isLoadingPrescriptions.set(false);
+      },
+      error: (error) => {
+        this.toastService.error('Failed to load prescriptions');
+        this.isLoadingPrescriptions.set(false);
+      }
+    });
+  }
+
+  applyPrescriptionFilters(): void {
+    let filtered = [...this.myPrescriptions()];
+
+    // Filter by date range
+    const startDate = this.prescriptionFilterStartDate();
+    const endDate = this.prescriptionFilterEndDate();
+    if (startDate) {
+      filtered = filtered.filter(rx => new Date(rx.visitDate) >= new Date(startDate));
+    }
+    if (endDate) {
+      filtered = filtered.filter(rx => new Date(rx.visitDate) <= new Date(endDate));
+    }
+
+    // Filter by patient name
+    const patientSearch = this.prescriptionFilterPatient().toLowerCase();
+    if (patientSearch) {
+      filtered = filtered.filter(rx => 
+        rx.patientName?.toLowerCase().includes(patientSearch) ||
+        rx.patientId.toLowerCase().includes(patientSearch)
+      );
+    }
+
+    this.filteredPrescriptions.set(filtered);
+  }
+
+  clearPrescriptionFilters(): void {
+    this.prescriptionFilterStartDate.set('');
+    this.prescriptionFilterEndDate.set('');
+    this.prescriptionFilterPatient.set('');
+    this.applyPrescriptionFilters();
   }
 
   submitPrescription(): void {

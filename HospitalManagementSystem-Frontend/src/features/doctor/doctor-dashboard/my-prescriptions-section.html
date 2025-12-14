@@ -1,0 +1,62 @@
+<!-- My Prescriptions Tab -->
+@if (!isLoading() && activeTab() === 'prescriptions') {
+  <div class="prescriptions-section">
+    <div class="section-header">
+      <div>
+        <h2>My Prescriptions</h2>
+        <p class="section-description">All prescriptions you have issued</p>
+      </div>
+    </div>
+
+    @if (isLoadingPrescriptions()) {
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading prescriptions...</p>
+      </div>
+    } @else if (myPrescriptions().length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">💊</span>
+        <p>No prescriptions issued yet</p>
+      </div>
+    } @else {
+      <div class="prescriptions-table-container">
+        <table class="appointments-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Patient</th>
+              <th>Diagnosis</th>
+              <th>Prescription</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rx of myPrescriptions(); track rx.recordId) {
+              <tr>
+                <td>{{ formatDate(rx.visitDate) }}</td>
+                <td>{{ rx.patientName || rx.patientId }}</td>
+                <td>
+                  <div class="prescription-text">{{ rx.diagnosis }}</div>
+                </td>
+                <td>
+                  <div class="prescription-text">{{ rx.prescription }}</div>
+                </td>
+                <td>
+                  <div class="prescription-text">{{ rx.notes || 'N/A' }}</div>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn btn-info btn-xs" (click)="viewPrescriptionDetails(rx)">
+                      View
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

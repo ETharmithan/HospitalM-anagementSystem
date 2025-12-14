@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
 import { DoctorScheduleService } from '../../../core/services/doctor-schedule-service';
-import { EPrescriptionResponse, EPrescriptionService } from '../../../core/services/e-prescription-service';
+import { PatientService } from '../../../core/services/patient-service';
+import { PrescriptionService, PrescriptionResponse } from '../../../core/services/prescription-service';
 import { ToastService } from '../../../core/services/toast-service';
 
 @Component({
@@ -16,18 +17,20 @@ import { ToastService } from '../../../core/services/toast-service';
 })
 export class ShowEPrescription {
 
+  private router = inject(Router);
   private accountService = inject(AccountService);
   private scheduleService = inject(DoctorScheduleService);
-  private ePrescriptionService = inject(EPrescriptionService);
+  private patientService = inject(PatientService);
+  private prescriptionService = inject(PrescriptionService);
   private toast = inject(ToastService);
   private fb = inject(FormBuilder);
 
   role = signal<string>(this.accountService.currentUser()?.role ?? '');
   isLoading = signal(true);
-  items = signal<EPrescriptionResponse[]>([]);
+  items = signal<PrescriptionResponse[]>([]);
 
   // doctor-only edit
-  editing = signal<EPrescriptionResponse | null>(null);
+  editing = signal<PrescriptionResponse | null>(null);
   isSaving = signal(false);
   editForm = this.fb.group({
     visitDate: this.fb.control<string>('', { validators: [Validators.required] }),
@@ -46,7 +49,7 @@ export class ShowEPrescription {
     if (this.role() === 'Doctor') {
       this.scheduleService.getMyDoctorId().subscribe({
         next: (result) => {
-          this.ePrescriptionService.getByDoctorId(result.doctorId).subscribe({
+          this.prescriptionService.getPrescriptionsByDoctorId(result.doctorId).subscribe({
             next: (list) => {
               this.items.set(list);
               this.isLoading.set(false);
@@ -68,20 +71,48 @@ export class ShowEPrescription {
     }
 
     // Patient
-    this.ePrescriptionService.getMyPrescriptions().subscribe({
-      next: (list) => {
-        this.items.set(list);
-        this.isLoading.set(false);
+    const user = this.accountService.currentUser();
+    if (!user?.id) {
+      this.toast.error('User not found');
+      this.isLoading.set(false);
+      return;
+    }
+    
+    // Get patient record to get correct patientId
+    console.log('Loading prescriptions for user:', user.id);
+    this.patientService.getPatientByUserId(user.id).subscribe({
+      next: (patient) => {
+        console.log('Patient data retrieved:', patient);
+        if (!patient.patientId) {
+          console.error('No patientId found for user:', user.id);
+          this.toast.error('Patient record not found');
+          this.isLoading.set(false);
+          return;
+        }
+        
+        console.log('Fetching prescriptions for patientId:', patient.patientId);
+        this.prescriptionService.getPrescriptionsByPatientId(patient.patientId).subscribe({
+          next: (list) => {
+            console.log('Prescriptions received:', list);
+            this.items.set(list);
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            console.error('Error loading prescriptions:', err);
+            this.toast.error('Failed to load prescriptions');
+            this.isLoading.set(false);
+          },
+        });
       },
       error: (err) => {
-        console.error(err);
-        this.toast.error('Failed to load prescriptions');
+        console.error('Error loading patient data:', err);
+        this.toast.error('Failed to load patient data');
         this.isLoading.set(false);
       },
     });
   }
 
-  startEdit(item: EPrescriptionResponse): void {
+  startEdit(item: PrescriptionResponse): void {
     if (this.role() !== 'Doctor') return;
     this.editing.set(item);
 
@@ -110,14 +141,16 @@ export class ShowEPrescription {
     const value = this.editForm.getRawValue();
     this.isSaving.set(true);
 
-    this.ePrescriptionService.update(current.ePrescriptionId, {
+    this.prescriptionService.updatePrescription(current.recordId, {
       visitDate: value.visitDate!,
       diagnosis: value.diagnosis!,
       prescription: value.prescription!,
       notes: value.notes ?? '',
+      doctorId: current.doctorId,
+      patientId: current.patientId
     }).subscribe({
       next: (updated) => {
-        const nextList = this.items().map(x => x.ePrescriptionId === updated.ePrescriptionId ? updated : x);
+        const nextList = this.items().map(x => x.recordId === updated.recordId ? updated : x);
         this.items.set(nextList);
         this.toast.success('Prescription updated');
         this.isSaving.set(false);
@@ -131,14 +164,14 @@ export class ShowEPrescription {
     });
   }
 
-  delete(item: EPrescriptionResponse): void {
+  delete(item: PrescriptionResponse): void {
     if (this.role() !== 'Doctor') return;
     const ok = confirm('Delete this prescription?');
     if (!ok) return;
 
-    this.ePrescriptionService.delete(item.ePrescriptionId).subscribe({
+    this.prescriptionService.deletePrescription(item.recordId).subscribe({
       next: () => {
-        this.items.set(this.items().filter(x => x.ePrescriptionId !== item.ePrescriptionId));
+        this.items.set(this.items().filter(x => x.recordId !== item.recordId));
         this.toast.success('Prescription deleted');
       },
       error: (err) => {
@@ -148,24 +181,19 @@ export class ShowEPrescription {
     });
   }
 
-  download(item: EPrescriptionResponse): void {
-    if (this.role() !== 'Patient') return;
+  download(item: PrescriptionResponse): void {
+    // Download functionality removed - prescriptions are view-only
+    this.toast.info('Prescription details are displayed above');
+  }
 
-    this.ePrescriptionService.download(item.ePrescriptionId).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `e-prescription-${item.ePrescriptionId}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        console.error(err);
-        this.toast.error('Failed to download');
-      },
-    });
+  goBack(): void {
+    const role = this.role();
+    if (role === 'Patient') {
+      this.router.navigate(['/patient-dashboard']);
+    } else if (role === 'Doctor') {
+      this.router.navigate(['/doctor-dashboard']);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 }

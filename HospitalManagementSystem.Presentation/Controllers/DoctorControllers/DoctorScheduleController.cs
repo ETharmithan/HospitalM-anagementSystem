@@ -92,6 +92,38 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
             }
         }
 
+        // Debug endpoint: Get schedules for a specific date
+        [HttpGet("doctor/{doctorId}/date/{date}")]
+        public async Task<ActionResult<object>> GetByDoctorIdAndDate(Guid doctorId, DateTime date)
+        {
+            try
+            {
+                var schedules = await _doctorScheduleService.GetByDoctorIdAsync(doctorId);
+                var dateOnly = date.Date;
+                var dayOfWeek = date.DayOfWeek.ToString();
+                
+                var specificDateSchedule = schedules.FirstOrDefault(s => 
+                    s.ScheduleDate.HasValue && s.ScheduleDate.Value.Date == dateOnly);
+                var weeklySchedule = schedules.FirstOrDefault(s => 
+                    !string.IsNullOrEmpty(s.DayOfWeek) && 
+                    s.DayOfWeek.Equals(dayOfWeek, StringComparison.OrdinalIgnoreCase));
+                
+                return Ok(new
+                {
+                    requestedDate = dateOnly,
+                    dayOfWeek = dayOfWeek,
+                    allSchedules = schedules,
+                    specificDateSchedule = specificDateSchedule,
+                    weeklySchedule = weeklySchedule,
+                    hasScheduleForDate = specificDateSchedule != null || weeklySchedule != null
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         // Get a specific schedule by ID
         [HttpGet("{scheduleId}")]
         public async Task<ActionResult<DoctorScheduleResponseDto>> GetById(Guid scheduleId)

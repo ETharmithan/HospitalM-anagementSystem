@@ -154,7 +154,8 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             {
                 ScheduleId = Guid.NewGuid(),
                 ScheduleDate = doctorScheduleRequestDto.ScheduleDate,
-                DayOfWeek = doctorScheduleRequestDto.DayOfWeek,
+                DayOfWeek = doctorScheduleRequestDto.DayOfWeek ?? 
+                           (doctorScheduleRequestDto.ScheduleDate?.DayOfWeek.ToString()),
                 IsRecurring = doctorScheduleRequestDto.IsRecurring,
                 StartTime = doctorScheduleRequestDto.StartTime,
                 EndTime = doctorScheduleRequestDto.EndTime,

@@ -35,6 +35,7 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
         {
             return await _appDbContext.DoctorPatientRecords
                 .Include(r => r.Doctor)
+                .Include(r => r.Patient)
                 .Where(r => r.PatientId == patientId)
                 .OrderByDescending(r => r.VisitDate)
                 .ToListAsync();
@@ -44,6 +45,7 @@ namespace HospitalManagementSystem.Infrastructure.Repository.Doctor
         {
             return await _appDbContext.DoctorPatientRecords
                 .Include(r => r.Doctor)
+                .Include(r => r.Patient)
                 .Where(r => r.DoctorId == doctorId)
                 .OrderByDescending(r => r.VisitDate)
                 .ToListAsync();

@@ -22,6 +22,7 @@ namespace HospitalManagementSystem.Domain.Models.Doctors
         public Guid PatientId { get; set; }
 
         public Doctor Doctor { get; set; } = null!;
+        public Patient.Patient Patient { get; set; } = null!;
 
     }
 }

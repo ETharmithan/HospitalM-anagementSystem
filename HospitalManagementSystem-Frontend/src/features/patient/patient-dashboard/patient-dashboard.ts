@@ -5,7 +5,7 @@ import { AppointmentService } from '../../../core/services/appointment-service';
 import { DoctorService } from '../../../core/services/doctor-service';
 import { PatientService } from '../../../core/services/patient-service';
 import { AccountService } from '../../../core/services/account-service';
-import { EPrescriptionResponse, EPrescriptionService } from '../../../core/services/e-prescription-service';
+import { PrescriptionService, PrescriptionResponse } from '../../../core/services/prescription-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { Appointment, Doctor } from '../../../types/doctor';
 import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
@@ -29,7 +29,7 @@ export class PatientDashboard implements OnInit {
   private appointmentService = inject(AppointmentService);
   private doctorService = inject(DoctorService);
   private patientService = inject(PatientService);
-  private ePrescriptionService = inject(EPrescriptionService);
+  private prescriptionService = inject(PrescriptionService);
   accountService = inject(AccountService); // public for template access
   private toastService = inject(ToastService);
   private router = inject(Router);
@@ -55,16 +55,16 @@ export class PatientDashboard implements OnInit {
     cancelledAppointments: 0
   });
 
-  prescriptions = signal<EPrescriptionResponse[]>([]);
+  prescriptions = signal<PrescriptionResponse[]>([]);
   isLoadingPrescriptions = signal(false);
-  latestPrescription = computed<EPrescriptionResponse | null>(() => {
+  latestPrescription = computed<PrescriptionResponse | null>(() => {
     const list = this.prescriptions();
     if (!list || list.length === 0) return null;
 
     // Prefer visitDate; fallback to createdAt
     const sorted = [...list].sort((a, b) => {
-      const aDate = new Date(a.visitDate || a.createdAt).getTime();
-      const bDate = new Date(b.visitDate || b.createdAt).getTime();
+      const aDate = new Date(a.visitDate).getTime();
+      const bDate = new Date(b.visitDate).getTime();
       return bDate - aDate;
     });
 
@@ -78,7 +78,12 @@ export class PatientDashboard implements OnInit {
 
   loadMyPrescriptions(): void {
     this.isLoadingPrescriptions.set(true);
-    this.ePrescriptionService.getMyPrescriptions().subscribe({
+    const user = this.accountService.currentUser();
+    if (!user?.id) {
+      this.isLoadingPrescriptions.set(false);
+      return;
+    }
+    this.prescriptionService.getPrescriptionsByPatientId(user.id).subscribe({
       next: (items) => {
         this.prescriptions.set(items ?? []);
         this.isLoadingPrescriptions.set(false);
@@ -93,22 +98,9 @@ export class PatientDashboard implements OnInit {
     this.router.navigate(['/e-prescription']);
   }
 
-  downloadPrescription(p: EPrescriptionResponse): void {
-    this.ePrescriptionService.download(p.ePrescriptionId).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `e-prescription-${p.ePrescriptionId}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      },
-      error: () => {
-        this.toastService.error('Failed to download prescription');
-      },
-    });
+  downloadPrescription(p: PrescriptionResponse): void {
+    // Download functionality removed - prescriptions are view-only
+    this.toastService.info('View prescription details in E-Prescription page');
   }
 
   loadPatientData(): void {

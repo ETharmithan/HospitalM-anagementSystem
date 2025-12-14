@@ -70,6 +70,12 @@
       (click)="setActiveTab('availability')">
       My Availability
     </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab() === 'prescriptions'"
+      (click)="setActiveTab('prescriptions')">
+      My Prescriptions
+    </button>
   </div>
 
   <!-- Loading State -->
@@ -98,7 +104,7 @@
               </div>
               <div class="appointment-details">
                 <div class="patient-info">
-                  <strong>Patient ID:</strong> {{ apt.patientId }}
+                  <strong>Patient:</strong> {{ apt.patientName || apt.patientId }}
                 </div>
                 <div class="appointment-status">
                   <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
@@ -150,7 +156,7 @@
               </div>
               <div class="appointment-details">
                 <div class="patient-info">
-                  <strong>Patient ID:</strong> {{ apt.patientId }}
+                  <strong>Patient:</strong> {{ apt.patientName || apt.patientId }}
                 </div>
                 <div class="appointment-status">
                   <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
@@ -191,7 +197,7 @@
               <tr>
                 <th>Date</th>
                 <th>Time</th>
-                <th>Patient ID</th>
+                <th>Patient</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -201,7 +207,7 @@
                 <tr>
                   <td>{{ formatDate(apt.appointmentDate) }}</td>
                   <td>{{ apt.appointmentTime }}</td>
-                  <td>{{ apt.patientId }}</td>
+                  <td>{{ apt.patientName || apt.patientId }}</td>
                   <td>
                     <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
                       {{ apt.appointmentStatus }}
@@ -393,6 +399,104 @@
             }
           </div>
         }
+      }
+    </div>
+  }
+
+  <!-- My Prescriptions -->
+  @if (!isLoading() && activeTab() === 'prescriptions') {
+    <div class="prescriptions-section">
+      <div class="section-header">
+        <div>
+          <h2>My Prescriptions</h2>
+          <p class="section-description">All prescriptions you have issued</p>
+        </div>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="schedule-filters">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>From Date:</label>
+            <input 
+              type="date" 
+              [value]="prescriptionFilterStartDate()"
+              (change)="prescriptionFilterStartDate.set($any($event.target).value); applyPrescriptionFilters()"
+              class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>To Date:</label>
+            <input 
+              type="date" 
+              [value]="prescriptionFilterEndDate()"
+              (change)="prescriptionFilterEndDate.set($any($event.target).value); applyPrescriptionFilters()"
+              class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Patient Name:</label>
+            <input 
+              type="text" 
+              placeholder="Search by patient name..."
+              [value]="prescriptionFilterPatient()"
+              (input)="prescriptionFilterPatient.set($any($event.target).value); applyPrescriptionFilters()"
+              class="filter-input">
+          </div>
+          <button class="btn btn-secondary btn-sm" (click)="clearPrescriptionFilters()">
+            Clear Filters
+          </button>
+        </div>
+        <div class="filter-results">
+          Showing {{ filteredPrescriptions().length }} of {{ myPrescriptions().length }} prescription(s)
+        </div>
+      </div>
+
+      @if (isLoadingPrescriptions()) {
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Loading prescriptions...</p>
+        </div>
+      } @else if (myPrescriptions().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">💊</span>
+          <p>No prescriptions issued yet</p>
+        </div>
+      } @else if (filteredPrescriptions().length === 0) {
+        <div class="empty-state">
+          <span class="empty-icon">🔍</span>
+          <p>No prescriptions match your filters</p>
+          <button class="btn btn-secondary" (click)="clearPrescriptionFilters()">Clear Filters</button>
+        </div>
+      } @else {
+        <div class="prescriptions-table-container">
+          <table class="appointments-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Patient</th>
+                <th>Diagnosis</th>
+                <th>Prescription</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (rx of filteredPrescriptions(); track rx.recordId) {
+                <tr>
+                  <td>{{ formatDate(rx.visitDate) }}</td>
+                  <td>{{ rx.patientName || rx.patientId }}</td>
+                  <td>
+                    <div class="prescription-text">{{ rx.diagnosis }}</div>
+                  </td>
+                  <td>
+                    <div class="prescription-text">{{ rx.prescription }}</div>
+                  </td>
+                  <td>
+                    <div class="prescription-text">{{ rx.notes || 'N/A' }}</div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       }
     </div>
   }

@@ -17,6 +17,7 @@
     <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
       @for (slot of timeSlots; track slot.time) {
         <button
+          type="button"
           (click)="onTimeSelect(slot.time)"
           [disabled]="!slot.available"
           [class.bg-blue-600]="selectedTime === slot.time && slot.available"

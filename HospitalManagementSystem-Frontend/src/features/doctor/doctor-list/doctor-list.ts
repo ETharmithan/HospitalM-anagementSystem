@@ -14,7 +14,7 @@ import { Doctor, Department } from '../../../types/doctor';
 export class DoctorList implements OnInit {
   private doctorService = inject(DoctorService);
   private toastService = inject(ToastService);
-  private router = inject(Router);
+  router = inject(Router);
 
   doctors = signal<Doctor[]>([]);
   departments = signal<Department[]>([]);

@@ -107,8 +107,14 @@ export class BookAppointment implements OnInit {
 
   onDateSelected(date: Date) {
     this.selectedDate.set(date);
+    // Format date as YYYY-MM-DD in local timezone (not UTC)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const localDateString = `${year}-${month}-${day}`;
+    
     this.appointmentForm.patchValue({ 
-      appointmentDate: date.toISOString().split('T')[0],
+      appointmentDate: localDateString,
       appointmentTime: '' // Reset time when date changes
     });
     

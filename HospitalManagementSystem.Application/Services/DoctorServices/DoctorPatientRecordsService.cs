@@ -69,8 +69,11 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
 
         public async Task<IEnumerable<DoctorPatientRecordsResponseDto>> GetByPatientIdAsync(Guid patientId)
         {
+            Console.WriteLine($"[DEBUG] GetByPatientIdAsync called with patientId: {patientId}");
             var list = await _doctorPatientRecordsRepository.GetByPatientIdAsync(patientId);
-            return list.Select(r => new DoctorPatientRecordsResponseDto
+            Console.WriteLine($"[DEBUG] Found {list.Count()} records for patientId: {patientId}");
+            
+            var result = list.Select(r => new DoctorPatientRecordsResponseDto
             {
                 RecordId = r.TreatmentId,
                 Diagnosis = r.Diagnosis,
@@ -79,8 +82,12 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 VisitDate = r.VisitDate,
                 DoctorId = r.DoctorId,
                 DoctorName = r.Doctor?.Name,
-                PatientId = r.PatientId
-            });
+                PatientId = r.PatientId,
+                PatientName = r.Patient != null ? $"{r.Patient.FirstName} {r.Patient.LastName}" : null
+            }).ToList();
+            
+            Console.WriteLine($"[DEBUG] Returning {result.Count} prescription DTOs");
+            return result;
         }
 
         public async Task<IEnumerable<DoctorPatientRecordsResponseDto>> GetByDoctorIdAsync(Guid doctorId)
@@ -95,7 +102,8 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 VisitDate = r.VisitDate,
                 DoctorId = r.DoctorId,
                 DoctorName = r.Doctor?.Name,
-                PatientId = r.PatientId
+                PatientId = r.PatientId,
+                PatientName = r.Patient != null ? $"{r.Patient.FirstName} {r.Patient.LastName}" : null
             });
         }
 

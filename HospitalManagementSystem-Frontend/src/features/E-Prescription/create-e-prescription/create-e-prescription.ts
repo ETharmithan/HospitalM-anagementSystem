@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DoctorScheduleService } from '../../../core/services/doctor-schedule-service';
-import { EPrescriptionService } from '../../../core/services/e-prescription-service';
+import { PrescriptionService } from '../../../core/services/prescription-service';
 import { ToastService } from '../../../core/services/toast-service';
 
 @Component({
@@ -16,7 +16,7 @@ export class CreateEPrescription {
 
   private fb = inject(FormBuilder);
   private scheduleService = inject(DoctorScheduleService);
-  private ePrescriptionService = inject(EPrescriptionService);
+  private prescriptionService = inject(PrescriptionService);
   private toast = inject(ToastService);
 
   isLoadingDoctor = signal(true);
@@ -68,7 +68,7 @@ export class CreateEPrescription {
 
     this.isSubmitting.set(true);
 
-    this.ePrescriptionService.create({
+    this.prescriptionService.createPrescription({
       doctorId: raw.doctorId!,
       patientId: raw.patientId!,
       visitDate: raw.visitDate!,

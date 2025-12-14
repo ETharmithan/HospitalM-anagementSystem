@@ -1,11 +1,19 @@
-<div class="min-h-screen bg-background-light dark:bg-background-dark px-4 py-8">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-8">
   <div class="max-w-5xl mx-auto">
-    <div class="bg-white/80 dark:bg-white/5 backdrop-blur rounded-2xl shadow-xl border border-white/20 p-6">
+    <div class="mb-8">
+      <button
+        (click)="goBack()"
+        class="text-blue-600 hover:text-blue-700 dark:text-blue-400 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back
+      </button>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
       <div class="flex items-start justify-between gap-4">
         <div>
           <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">E-Prescriptions</h2>
-          <p class="text-sm text-gray-600 dark:text-white/70 mt-1" *ngIf="role() === 'Doctor'">Manage your prescriptions</p>
-          <p class="text-sm text-gray-600 dark:text-white/70 mt-1" *ngIf="role() === 'Patient'">View and download your prescriptions</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" *ngIf="role() === 'Doctor'">Manage your prescriptions</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" *ngIf="role() === 'Patient'">View and download your prescriptions</p>
         </div>
 
         <a *ngIf="role() === 'Doctor'" class="btn btn-primary" routerLink="/e-prescription/create">Create</a>

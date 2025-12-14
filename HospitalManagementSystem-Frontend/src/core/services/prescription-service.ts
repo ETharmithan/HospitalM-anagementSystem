@@ -132,10 +132,15 @@ export class PrescriptionService {
 
   // Get prescriptions by patient ID
   getPrescriptionsByPatientId(patientId: string): Observable<PrescriptionResponse[]> {
-    return this.http.get<PrescriptionResponse[]>(`${this.baseUrl}/patient/${patientId}`).pipe(
+    const url = `${this.baseUrl}/patient/${patientId}`;
+    console.log('Making API call to:', url);
+    return this.http.get<PrescriptionResponse[]>(url).pipe(
       timeout(10000),
       catchError(error => {
         console.error('Error fetching patient prescriptions:', error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.error);
         return throwError(() => new Error('Failed to fetch patient prescriptions.'));
       })
     );
