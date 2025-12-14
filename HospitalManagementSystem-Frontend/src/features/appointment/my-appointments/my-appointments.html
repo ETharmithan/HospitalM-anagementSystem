@@ -79,12 +79,17 @@
 
               <!-- Actions -->
               <div class="flex gap-2">
-                @if (isUpcoming(appointment.appointmentDate, appointment.appointmentTime) && appointment.appointmentStatus.toLowerCase() !== 'cancelled') {
+                @if (isUpcoming(appointment.appointmentDate, appointment.appointmentTime) && appointment.appointmentStatus.toLowerCase() !== 'cancelled' && appointment.appointmentStatus.toLowerCase() !== 'cancellationrequested') {
                   <button
-                    (click)="cancelAppointment(appointment.appointmentId)"
+                    (click)="cancelAppointment(appointment.appointmentId, appointment.appointmentDate, appointment.appointmentTime)"
                     class="px-4 py-2 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 font-medium">
-                    Cancel
+                    Request Cancellation
                   </button>
+                }
+                @if (appointment.appointmentStatus.toLowerCase() === 'cancellationrequested') {
+                  <span class="px-3 py-2 bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded-lg text-sm font-medium">
+                    Cancellation Requested
+                  </span>
                 }
                 <button
                   class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">

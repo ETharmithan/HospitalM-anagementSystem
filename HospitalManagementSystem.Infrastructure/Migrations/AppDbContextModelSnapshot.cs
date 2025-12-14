@@ -481,6 +481,8 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
 
                     b.HasIndex("DoctorId");
 
+                    b.HasIndex("PatientId");
+
                     b.ToTable("DoctorPatientRecords");
                 });
 
@@ -542,41 +544,6 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.HasIndex("HospitalId");
 
                     b.ToTable("DoctorSchedules");
-                });
-
-            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.EPrescription", b =>
-                {
-                    b.Property<Guid>("EPrescriptionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Diagnosis")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("DoctorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PatientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Prescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("VisitDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("EPrescriptionId");
-
-                    b.ToTable("EPrescriptions");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Hospital", b =>
@@ -1136,7 +1103,15 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.DoctorSalary", b =>

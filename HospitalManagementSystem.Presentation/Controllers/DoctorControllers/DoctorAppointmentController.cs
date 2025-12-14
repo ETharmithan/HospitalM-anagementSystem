@@ -118,7 +118,83 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
             return Ok(new { message = "Appointment cancelled successfully" });
         }
 
+        [HttpPost("request-cancellation/{id:guid}")]
+        [Authorize]
+        public async Task<IActionResult> RequestCancellation(Guid id, [FromBody] CancellationRequestDto request)
+        {
+            try
+            {
+                var success = await _doctorAppointmentService.RequestCancellationAsync(id, request.CancellationReason);
+                if (!success) return NotFound();
+                return Ok(new { message = "Cancellation request submitted successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("approve-cancellation/{id:guid}")]
+        [Authorize(Roles = "Doctor,Admin")]
+        public async Task<IActionResult> ApproveCancellation(Guid id, [FromBody] ApproveCancellationDto request)
+        {
+            try
+            {
+                // Get current user ID from claims
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { message = "User not authenticated" });
+
+                var approvedBy = Guid.Parse(userIdClaim);
+                var success = await _doctorAppointmentService.ApproveCancellationAsync(id, approvedBy, request.Note);
+                if (!success) return NotFound();
+                return Ok(new { message = "Cancellation approved successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("reject-cancellation/{id:guid}")]
+        [Authorize(Roles = "Doctor,Admin")]
+        public async Task<IActionResult> RejectCancellation(Guid id, [FromBody] RejectCancellationDto request)
+        {
+            try
+            {
+                // Get current user ID from claims
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim))
+                    return Unauthorized(new { message = "User not authenticated" });
+
+                var rejectedBy = Guid.Parse(userIdClaim);
+                var success = await _doctorAppointmentService.RejectCancellationAsync(id, rejectedBy, request.Reason);
+                if (!success) return NotFound();
+                return Ok(new { message = "Cancellation request rejected" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         public class CancelAppointmentRequest
+        {
+            public string? Reason { get; set; }
+        }
+
+        public class CancellationRequestDto
+        {
+            public Guid AppointmentId { get; set; }
+            public string CancellationReason { get; set; } = string.Empty;
+        }
+
+        public class ApproveCancellationDto
+        {
+            public string? Note { get; set; }
+        }
+
+        public class RejectCancellationDto
         {
             public string? Reason { get; set; }
         }

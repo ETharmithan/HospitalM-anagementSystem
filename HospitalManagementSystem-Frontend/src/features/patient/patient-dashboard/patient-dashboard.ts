@@ -10,6 +10,7 @@ import { ToastService } from '../../../core/services/toast-service';
 import { Appointment, Doctor } from '../../../types/doctor';
 import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
 import { Nav } from '../../../layout/nav/nav';
+import { HospitalService, Hospital } from '../../../core/services/hospital-service';
 
 interface PatientStats {
   totalAppointments: number;
@@ -30,6 +31,7 @@ export class PatientDashboard implements OnInit {
   private doctorService = inject(DoctorService);
   private patientService = inject(PatientService);
   private prescriptionService = inject(PrescriptionService);
+  private hospitalService = inject(HospitalService);
   accountService = inject(AccountService); // public for template access
   private toastService = inject(ToastService);
   private router = inject(Router);
@@ -43,9 +45,11 @@ export class PatientDashboard implements OnInit {
   upcomingAppointments = signal<Appointment[]>([]);
   pastAppointments = signal<Appointment[]>([]);
   doctors = signal<Doctor[]>([]);
+  hospitals = signal<Hospital[]>([]);
   patientId = signal<string | null>(null);
   isLoading = signal(true);
   isLoadingDoctors = signal(false);
+  isLoadingHospitals = signal(false);
   activeTab = signal<'upcoming' | 'past' | 'doctors' | 'hospitals'>('upcoming');
 
   stats = signal<PatientStats>({
@@ -194,10 +198,28 @@ export class PatientDashboard implements OnInit {
     });
   }
 
+  loadHospitals(): void {
+    if (this.hospitals().length > 0) return;
+    
+    this.isLoadingHospitals.set(true);
+    this.hospitalService.getPublicHospitals().subscribe({
+      next: (hospitals) => {
+        this.hospitals.set(hospitals);
+        this.isLoadingHospitals.set(false);
+      },
+      error: () => {
+        this.toastService.error('Failed to load hospitals');
+        this.isLoadingHospitals.set(false);
+      }
+    });
+  }
+
   setActiveTab(tab: 'upcoming' | 'past' | 'doctors' | 'hospitals'): void {
     this.activeTab.set(tab);
     if (tab === 'doctors') {
       this.loadDoctors();
+    } else if (tab === 'hospitals') {
+      this.loadHospitals();
     }
   }
 

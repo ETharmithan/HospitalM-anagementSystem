@@ -56,6 +56,57 @@ namespace HospitalManagementSystem.Application.Services
             await _notificationRepository.CreateAsync(notification);
         }
 
+        public async Task CreateCancellationRequestNotificationAsync(Guid doctorId, string doctorName, DateTime appointmentDate, string appointmentTime, string patientName, string? reason, string appointmentId)
+        {
+            var notification = new Notification
+            {
+                UserId = doctorId,
+                UserType = "Doctor",
+                Title = "Cancellation Request Received 🔔",
+                Message = $"{patientName} has requested to cancel their appointment on {appointmentDate:MMM dd, yyyy} at {appointmentTime}. Reason: {reason ?? "Not provided"}",
+                Type = "Warning",
+                RelatedEntityId = appointmentId,
+                RelatedEntityType = "Appointment",
+                ActionUrl = "/doctor-appointments"
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+
+        public async Task CreateCancellationApprovalNotificationAsync(Guid patientId, DateTime appointmentDate, string appointmentTime, string appointmentId)
+        {
+            var notification = new Notification
+            {
+                UserId = patientId,
+                UserType = "Patient",
+                Title = "Cancellation Approved ✅",
+                Message = $"Your cancellation request for the appointment on {appointmentDate:MMM dd, yyyy} at {appointmentTime} has been approved.",
+                Type = "Success",
+                RelatedEntityId = appointmentId,
+                RelatedEntityType = "Appointment",
+                ActionUrl = "/my-appointments"
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+
+        public async Task CreateCancellationRejectionNotificationAsync(Guid patientId, DateTime appointmentDate, string appointmentTime, string? reason, string appointmentId)
+        {
+            var notification = new Notification
+            {
+                UserId = patientId,
+                UserType = "Patient",
+                Title = "Cancellation Request Rejected ❌",
+                Message = $"Your cancellation request for the appointment on {appointmentDate:MMM dd, yyyy} at {appointmentTime} has been rejected. {(reason != null ? $"Reason: {reason}" : "")}",
+                Type = "Warning",
+                RelatedEntityId = appointmentId,
+                RelatedEntityType = "Appointment",
+                ActionUrl = "/my-appointments"
+            };
+
+            await _notificationRepository.CreateAsync(notification);
+        }
+
         public async Task CreatePrescriptionNotificationAsync(Guid patientId, string doctorName, string diagnosis, string recordId)
         {
             var notification = new Notification

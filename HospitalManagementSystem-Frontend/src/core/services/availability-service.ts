@@ -39,8 +39,13 @@ export class AvailabilityService {
 
   // Get available time slots for a specific date
   getAvailability(doctorId: string, date: Date): Observable<AvailabilityResponse> {
-    const dateStr = date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    return this.http.get<AvailabilityResponse>(`${this.baseUrl}/availability/doctor/${doctorId}/date/${dateStr}`).pipe(
+    // Format date as YYYY-MM-DD in local timezone to avoid UTC issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const localDateString = `${year}-${month}-${day}`;
+    
+    return this.http.get<AvailabilityResponse>(`${this.baseUrl}/availability/doctor/${doctorId}/date/${localDateString}`).pipe(
       timeout(10000),
       catchError(error => {
         console.error('Error fetching availability:', error);
@@ -55,9 +60,17 @@ export class AvailabilityService {
     const end = endDate || new Date();
     end.setMonth(end.getMonth() + 3); // 3 months ahead
 
+    // Format dates as YYYY-MM-DD in local timezone to avoid UTC issues
+    const formatDateLocal = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     const params = new HttpParams()
-      .set('startDate', start.toISOString().split('T')[0])
-      .set('endDate', end.toISOString().split('T')[0]);
+      .set('startDate', formatDateLocal(start))
+      .set('endDate', formatDateLocal(end));
 
     return this.http.get<AvailableDatesResponse>(`${this.baseUrl}/availability/doctor/${doctorId}/dates`, { params }).pipe(
       timeout(10000),
@@ -70,8 +83,14 @@ export class AvailabilityService {
 
   // Check if a specific slot is available
   checkSlotAvailability(doctorId: string, date: Date, time: string): Observable<{ available: boolean }> {
+    // Format date as YYYY-MM-DD in local timezone to avoid UTC issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const localDateString = `${year}-${month}-${day}`;
+    
     return this.http.post<{ available: boolean }>(`${this.baseUrl}/availability/doctor/${doctorId}/check`, {
-      date: date.toISOString().split('T')[0],
+      date: localDateString,
       time: time
     }).pipe(
       timeout(10000),
