@@ -7,10 +7,11 @@ import { PatientService } from '../../../core/services/patient-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { AccountService } from '../../../core/services/account-service';
 import { Appointment, Doctor } from '../../../types/doctor';
+import { Nav } from '../../../layout/nav/nav';
 
 @Component({
   selector: 'app-my-appointments',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, Nav],
   templateUrl: './my-appointments.html',
   styleUrl: './my-appointments.css',
 })

@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { PatientService } from '../../../core/services/patient-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { ToastService } from '../../../core/services/toast-service';
+import { Nav } from '../../../layout/nav/nav';
 
 @Component({
   selector: 'app-patient-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Nav],
   templateUrl: './patient-profile.html',
   styleUrl: './patient-profile.css',
 })
@@ -172,6 +173,6 @@ export class PatientProfile implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/patient-dashboard']);
+    this.router.navigate(['/patient/dashboard']);
   }
 }

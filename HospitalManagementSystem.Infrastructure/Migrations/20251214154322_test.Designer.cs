@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HospitalManagementSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251204163737_AddHospitalManagement")]
-    partial class AddHospitalManagement
+    [Migration("20251214154322_test")]
+    partial class test
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,204 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.ChatMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AttachmentName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AttachmentUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SenderType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.ChatRequest", b =>
+                {
+                    b.Property<Guid>("RequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeclineReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("DoctorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RequestType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RequestId");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("ChatRequests");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.ChatSession", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AppointmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("DoctorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("EndedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastMessageAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SessionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SessionId");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("ChatSessions");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.DoctorChatAvailability", b =>
+                {
+                    b.Property<Guid>("AvailabilityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConnectionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CurrentActiveChatCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("DoctorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsAvailableForChat")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAvailableForVideo")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastOnlineAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MaxConcurrentChats")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StatusMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("AvailabilityId");
+
+                    b.HasIndex("DoctorId")
+                        .IsUnique();
+
+                    b.ToTable("DoctorChatAvailabilities");
+                });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.Department", b =>
                 {
@@ -88,6 +286,9 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProfileImage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Qualification")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -112,6 +313,9 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.Property<DateTime>("AppointmentDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("AppointmentEndTime")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AppointmentStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -120,10 +324,37 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CancellationApprovalNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CancellationApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("CancellationApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CancellationApprovedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CancellationReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CancellationRequested")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("CancellationRequestedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("DoctorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("HospitalId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("PatientId")
@@ -133,6 +364,10 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
 
                     b.HasIndex("DoctorId");
 
+                    b.HasIndex("HospitalId");
+
+                    b.HasIndex("PatientId");
+
                     b.ToTable("DoctorAppointments");
                 });
 
@@ -140,6 +375,9 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                 {
                     b.Property<Guid>("AvailabilityId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
@@ -155,14 +393,23 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("HospitalId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
+
+                    b.Property<int>("MaxAppointments")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Reason")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SlotDurationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<string>("StartTime")
                         .IsRequired()
@@ -237,6 +484,8 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
 
                     b.HasIndex("DoctorId");
 
+                    b.HasIndex("PatientId");
+
                     b.ToTable("DoctorPatientRecords");
                 });
 
@@ -269,7 +518,6 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DayOfWeek")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("DoctorId")
@@ -279,6 +527,15 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("HospitalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ScheduleDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("StartTime")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -286,6 +543,8 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.HasKey("ScheduleId");
 
                     b.HasIndex("DoctorId");
+
+                    b.HasIndex("HospitalId");
 
                     b.ToTable("DoctorSchedules");
                 });
@@ -363,6 +622,9 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ProfileImage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -378,11 +640,65 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.ToTable("HospitalAdmins");
                 });
 
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Notification", b =>
+                {
+                    b.Property<Guid>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActionUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RelatedEntityId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RelatedEntityType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NotificationId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Patient.Patient", b =>
                 {
                     b.Property<Guid>("PatientId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AdditionalInfoCompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("AdditionalInfoReminderSent")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("AdditionalInfoReminderSentAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
@@ -394,6 +710,9 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasCompletedAdditionalInfo")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -596,9 +915,24 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OtpAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("OtpExpiryTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<byte[]>("PasswordSalt")
                         .IsRequired()
@@ -612,9 +946,88 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("VerificationOtp")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.ChatMessage", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Chat.ChatSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.ChatRequest", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.User", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId");
+
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Doctors.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Chat.ChatSession", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId");
+
+                    b.Navigation("Admin");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.ChatSession", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.User", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId");
+
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Doctors.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.DoctorChatAvailability", b =>
+                {
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Doctors.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.Department", b =>
@@ -646,7 +1059,21 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Hospital", "Hospital")
+                        .WithMany()
+                        .HasForeignKey("HospitalId");
+
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Doctor");
+
+                    b.Navigation("Hospital");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.DoctorAvailability", b =>
@@ -679,7 +1106,15 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Patient.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.DoctorSalary", b =>
@@ -701,7 +1136,14 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("HospitalManagementSystem.Domain.Models.Hospital", "Hospital")
+                        .WithMany()
+                        .HasForeignKey("HospitalId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Doctor");
+
+                    b.Navigation("Hospital");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.HospitalAdmin", b =>
@@ -798,6 +1240,11 @@ namespace HospitalManagementSystem.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Chat.ChatSession", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("HospitalManagementSystem.Domain.Models.Doctors.Department", b =>

@@ -1,100 +1,130 @@
-<nav class="w-full top-0 z-[30] bg-gradient-to-r from-emerald-500 to-sky-500 dark:from-slate-800 dark:to-slate-900 shadow-lg">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<nav class="w-full top-0 z-[100] relative overflow-visible">
+  <!-- Custom Color Gradient Background -->
+  <div class="absolute inset-0 bg-gradient-to-r from-[#300934] via-[#941B6D] to-[#300934] animate-gradient pointer-events-none"></div>
+  <div class="absolute inset-0 bg-gradient-to-r from-[#82EAEA]/20 via-[#941B6D]/20 to-[#300934]/20 animate-gradient pointer-events-none" style="animation-delay: 2s"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,_rgba(148,27,109,0.4)_0%,_transparent_50%)] pointer-events-none"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,_rgba(130,234,234,0.3)_0%,_transparent_50%)] pointer-events-none"></div>
+  
+  <!-- Glass Effect Overlay -->
+  <div class="absolute inset-0 bg-white/10 backdrop-blur-md pointer-events-none"></div>
+  
+  <!-- Animated Border Effect -->
+  <div class="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#82EAEA]/60 to-transparent pointer-events-none"></div>
+  
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between gap-4 h-16 md:h-20">
       <div class="flex items-center gap-3">
-        <a routerLink="/" class="flex items-center gap-3 group relative overflow-hidden">
+        <a [routerLink]="getHomeRoute()" class="flex items-center gap-3 group relative overflow-hidden">
+          <!-- Modern Logo with Custom Colors -->
           <div 
-            class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center text-white font-bold shadow-md transform group-hover:scale-110 transition-all duration-300 group-active:scale-95"
+            class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#941B6D] via-[#300934] to-[#82EAEA] flex items-center justify-center text-white font-bold shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 group-active:scale-95 relative overflow-hidden"
           >
-            <span class="group-hover:scale-110 transition-transform duration-300">MB</span>
+            <div class="absolute inset-0 bg-gradient-to-br from-[#82EAEA]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <span class="relative z-10 text-xl group-hover:scale-110 transition-transform duration-300">MB</span>
           </div>
-          <span class="text-lg font-semibold text-white tracking-wide">MediBridge</span>
-          <div class="hidden sm:block">
-            <span class="block font-bold text-lg text-white"
-              >MyBrand</span
-            >
-            <span class="text-xs text-white/70"
-              >Caring for Life</span
-            >
+          
+          <!-- Brand Text with Custom Gradient -->
+          <div class="flex flex-col">
+            <span class="text-xl font-bold bg-gradient-to-r from-white to-[#82EAEA] bg-clip-text text-transparent tracking-wide">MediBridge</span>
+            <div class="hidden sm:block">
+              <span class="block font-semibold text-sm text-white/90">Healthcare</span>
+              <span class="text-xs text-white/70">Caring for Life</span>
+            </div>
           </div>
+          
+          <!-- Hover Glow Effect -->
+          <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/20 to-[#82EAEA]/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
         </a>
       </div>
 
       <div class="flex-1 flex items-center justify-center">
-        <div class="hidden md:flex items-center space-x-1 bg-white/10 dark:bg-slate-800/30 backdrop-blur-md p-1 rounded-full shadow-inner">
+        <div class="hidden md:flex items-center space-x-1 bg-white/10 backdrop-blur-lg p-2 rounded-2xl shadow-2xl border border-white/20">
           <a
-            routerLink="/"
-            routerLinkActive="text-white font-semibold"
+            [routerLink]="getHomeRoute()"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
             [routerLinkActiveOptions]="{exact: true}"
-            class="nav-link group relative px-4 py-2 font-medium text-white/90 hover:text-white transition-all duration-300 rounded-full hover:bg-white/10 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+            class="nav-link group relative px-4 py-2.5 font-medium text-white/90 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
           >
-            <span class="relative z-10">
-              Home
-            </span>
+            <span class="relative z-10">Home</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
           
           <a 
             *ngIf="currentUser?.role === 'Patient'"
             routerLink="/doctors"
-            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
-            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
           >
-            <span class="relative z-10">
-              Doctors
-            </span>
+            <span class="relative z-10">Doctors</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
           
           <a 
             *ngIf="currentUser?.role === 'Patient'"
             routerLink="/hospitals"
-            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
-            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
           >
-            <span class="relative z-10">
-              Hospitals
-            </span>
+            <span class="relative z-10">Hospitals</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
           
           <a 
             *ngIf="currentUser?.role === 'Patient'"
             routerLink="/chat"
-            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
-            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
           >
-            <span class="relative z-10">
-              Chat
-            </span>
+            <span class="relative z-10">Chat</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </a>
+
+          <a 
+            *ngIf="currentUser?.role === 'Doctor'"
+            routerLink="/chat"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
+          >
+            <span class="relative z-10">Chat</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
           
           <a
             *ngIf="currentUser?.role === 'Patient'"
             routerLink="/e-prescription"
-            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
-            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
           >
-            <span class="relative z-10">
-              E-Prescriptions
-            </span>
+            <span class="relative z-10">E-Prescriptions</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </a>
+
+          <a
+            *ngIf="currentUser?.role === 'Doctor'"
+            routerLink="/e-prescription/create"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
+          >
+            <span class="relative z-10">E-Prescription</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
           
           <a
-            routerLink="/services"
-            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
-            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+            routerLink="/terms"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
           >
-            <span class="relative z-10">
-              Services
-            </span>
+            <span class="relative z-10">Terms</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
           
           <a
             routerLink="/contact"
-            routerLinkActive="bg-white/25 hover:bg-white/25 text-white font-semibold shadow-lg"
-            class="nav-link group relative px-5 py-2 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-full hover:bg-white/15 hover:shadow-md hover:shadow-black/10 active:scale-[0.98]"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
           >
-            <span class="relative z-10">
-              Contact
-            </span>
+            <span class="relative z-10">Contact</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
         </div>
       </div>
@@ -106,7 +136,7 @@
             class="relative hidden sm:inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-slate-900 font-semibold shadow-lg hover:shadow-xl hover:shadow-black/20 transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-105 active:scale-95 group overflow-hidden border border-white/20"
           >
             <span class="relative z-10 flex items-center gap-2">
-              <span class="group-hover:translate-x-0.5 transition-transform duration-300">Login / Register</span>
+              <span class="group-hover:translate-x-0.5 transition-transform duration-300">Login</span>
               <span class="group-hover:translate-x-0.5 transition-transform duration-300">🚀</span>
             </span>
             <span class="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -204,33 +234,19 @@
               👤 Profile
             </a>
             <a
-              *ngIf="currentUser?.role !== 'Patient'"
-              routerLink="/profile"
-              (click)="showUserMenu = false"
-              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-            >
-              👤 Profile
-            </a>
-            <a
-              routerLink="/dashboard"
+              [routerLink]="getHomeRoute()"
               (click)="showUserMenu = false"
               class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
               📊 Dashboard
             </a>
             <a
+              *ngIf="currentUser?.role === 'Patient'"
               routerLink="/my-appointments"
               (click)="showUserMenu = false"
               class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
-              � My Appointments
-            </a>
-            <a
-              routerLink="/settings"
-              (click)="showUserMenu = false"
-              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-            >
-              ⚙️ Settings
+              📅 My Appointments
             </a>
             <a
               (click)="logout(); showUserMenu = false"
@@ -285,11 +301,11 @@
   <div class="fixed inset-0 z-40" *ngIf="isMenuOpen">
     <div
       (click)="closeMenu()"
-      class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+      class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity z-0"
     ></div>
 
     <aside
-      class="absolute right-4 top-[84px] w-[92%] max-w-sm bg-white/95 dark:bg-slate-900/95 rounded-xl shadow-2xl border border-white/30 dark:border-slate-700/40 p-4 transform transition duration-300"
+      class="absolute right-4 top-[84px] w-[92%] max-w-sm bg-white/95 dark:bg-slate-900/95 rounded-xl shadow-2xl border border-white/30 dark:border-slate-700/40 p-4 transform transition duration-300 max-h-[calc(100vh-120px)] overflow-y-auto overscroll-contain z-10 pointer-events-auto"
     >
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
@@ -332,8 +348,8 @@
       <nav class="flex flex-col gap-2 border-b border-slate-200/50 dark:border-slate-700/50 pb-3 mb-3">
         <a
           (click)="closeMenu()"
-          routerLink="/"
-          routerLinkActive="active-mobile-link-style"
+          [routerLink]="getHomeRoute()"
+          routerLinkActive="active-mobile-link"
           class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
           >🏠 Home</a
         >
@@ -341,37 +357,69 @@
         *ngIf= "currentUser?.role === 'Patient'"
           (click)="closeMenu()"
           routerLink="/doctors"
-          routerLinkActive="active-mobile-link-style"
+          routerLinkActive="active-mobile-link"
           class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
           >🩺 Doctors</a
         >
+
         <a
-        *ngIf= "currentUser?.role === 'Patient'"
+          *ngIf="currentUser?.role === 'Patient'"
           (click)="closeMenu()"
-          routerLink="/departments"
-          routerLinkActive="active-mobile-link-style"
+          routerLink="/hospitals"
+          routerLinkActive="active-mobile-link"
           class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
-          >🏥 Departments</a
+          >🏥 Hospitals</a
         >
 
         <a
+          *ngIf="currentUser?.role === 'Patient'"
           (click)="closeMenu()"
-          routerLink="/about"
-          routerLinkActive="active-mobile-link-style"
+          routerLink="/chat"
+          routerLinkActive="active-mobile-link"
           class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
-          >ℹ️ About</a
+          >💬 Chat</a
         >
+
+        <a
+          *ngIf="currentUser?.role === 'Doctor'"
+          (click)="closeMenu()"
+          routerLink="/chat"
+          routerLinkActive="active-mobile-link"
+          class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
+          >💬 Chat</a
+        >
+
+        <a
+          *ngIf="currentUser?.role === 'Patient'"
+          (click)="closeMenu()"
+          routerLink="/e-prescription"
+          routerLinkActive="active-mobile-link"
+          class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
+          >🧾 E-Prescription</a
+        >
+
+        <a
+          *ngIf="currentUser?.role === 'Doctor'"
+          (click)="closeMenu()"
+          routerLink="/e-prescription/create"
+          routerLinkActive="active-mobile-link"
+          class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
+          >🧾 Create E-Prescription</a
+        >
+     
+
         <a
           (click)="closeMenu()"
-          routerLink="/services"
-          routerLinkActive="active-mobile-link-style"
+          routerLink="/terms"
+          routerLinkActive="active-mobile-link"
           class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
-          >🏥 Services</a
+          >📄 Terms</a
         >
+        
         <a
           (click)="closeMenu()"
           routerLink="/contact"
-          routerLinkActive="active-mobile-link-style"
+          routerLinkActive="active-mobile-link"
           class="px-3 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition text-slate-700 dark:text-slate-200 font-medium"
           >📞 Contact</a
         >
@@ -426,7 +474,7 @@
 
         <div class="mt-4 space-y-2">
           <a
-            routerLink="/dashboard"
+            [routerLink]="getHomeRoute()"
             (click)="closeMenu()"
             class="block w-full text-center px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-md hover:scale-[1.01] transition"
           >
@@ -434,6 +482,7 @@
           </a>
 
           <a
+            *ngIf="currentUser?.role === 'Patient'"
             routerLink="/my-appointments"
             (click)="closeMenu()"
             class="block w-full text-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold shadow-md hover:scale-[1.01] transition"
@@ -448,22 +497,6 @@
             class="block w-full text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition"
           >
             👤 Profile
-          </a>
-          <a
-            *ngIf="currentUser?.role !== 'Patient'"
-            routerLink="/profile"
-            (click)="closeMenu()"
-            class="block w-full text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-          >
-            👤 Profile
-          </a>
-
-          <a
-            routerLink="/settings"
-            (click)="closeMenu()"
-            class="block w-full text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-          >
-            ⚙️ Settings
           </a>
           <a
             (click)="logout(); closeMenu()"

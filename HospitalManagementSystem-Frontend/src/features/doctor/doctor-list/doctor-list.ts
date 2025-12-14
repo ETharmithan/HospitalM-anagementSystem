@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { DoctorService } from '../../../core/services/doctor-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { Doctor, Department } from '../../../types/doctor';
+import { Nav } from '../../../layout/nav/nav';
 
 @Component({
   selector: 'app-doctor-list',

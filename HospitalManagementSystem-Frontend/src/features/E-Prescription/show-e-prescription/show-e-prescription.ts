@@ -7,11 +7,12 @@ import { DoctorScheduleService } from '../../../core/services/doctor-schedule-se
 import { PatientService } from '../../../core/services/patient-service';
 import { PrescriptionService, PrescriptionResponse } from '../../../core/services/prescription-service';
 import { ToastService } from '../../../core/services/toast-service';
+import { Nav } from '../../../layout/nav/nav';
 
 @Component({
   selector: 'app-show-e-prescription',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, Nav],
   templateUrl: './show-e-prescription.html',
   styleUrl: './show-e-prescription.css',
 })
@@ -189,11 +190,11 @@ export class ShowEPrescription {
   goBack(): void {
     const role = this.role();
     if (role === 'Patient') {
-      this.router.navigate(['/patient-dashboard']);
+      this.router.navigate(['/patient/dashboard']);
     } else if (role === 'Doctor') {
-      this.router.navigate(['/doctor-dashboard']);
+      this.router.navigate(['/doctor/dashboard']);
     } else {
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
     }
   }
 }

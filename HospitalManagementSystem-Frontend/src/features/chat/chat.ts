@@ -13,7 +13,7 @@ import { Nav } from '../../layout/nav/nav';
   standalone: true,
   imports: [CommonModule, FormsModule, Nav],
   templateUrl: './chat.html',
-  styleUrls: ['./chat.css', './chat-theme-green.css']
+  styleUrls: ['./chat-theme-green.css', './chat.css']
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private chatService = inject(ChatService);

@@ -1,298 +1,397 @@
 <app-nav></app-nav>
 
 
-<div class="dashboard-container">
-  
-
-  <!-- Stats Cards -->
-  <div class="stats-grid">
-    <div class="stat-card upcoming">
-      <div class="stat-icon">📅</div>
-      <div class="stat-info">
-        <span class="stat-value">{{ stats().upcomingAppointments }}</span>
-        <span class="stat-label">Upcoming Appointments</span>
-      </div>
-    </div>
-    <div class="stat-card completed">
-      <div class="stat-icon">✅</div>
-      <div class="stat-info">
-        <span class="stat-value">{{ stats().completedAppointments }}</span>
-        <span class="stat-label">Completed</span>
-      </div>
-    </div>
-    <div class="stat-card cancelled">
-      <div class="stat-icon">❌</div>
-      <div class="stat-info">
-        <span class="stat-value">{{ stats().cancelledAppointments }}</span>
-        <span class="stat-label">Cancelled</span>
-      </div>
-    </div>
-    <div class="stat-card total">
-      <div class="stat-icon">📊</div>
-      <div class="stat-info">
-        <span class="stat-value">{{ stats().totalAppointments }}</span>
-        <span class="stat-label">Total Appointments</span>
-      </div>
-    </div>
+<div class="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#82EAEA]/30 blur-3xl"></div>
+    <div class="absolute top-40 -right-24 h-72 w-72 rounded-full bg-[#941B6D]/30 blur-3xl"></div>
+    <div class="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-[#300934]/25 blur-3xl"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-white/30 dark:from-white/5 dark:to-white/0"></div>
   </div>
 
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <h2>Quick Actions</h2>
-    <div class="action-buttons">
-      <button class="action-btn" routerLink="/doctors">
-        <span class="action-icon">👨‍⚕️</span>
-        <span>Find a Doctor</span>
-      </button>
-      <button class="action-btn" routerLink="/hospitals">
-        <span class="action-icon">🏥</span>
-        <span>View Hospitals</span>
-      </button>
-      <button class="action-btn" routerLink="/chat">
-        <span class="action-icon">💬</span>
-        <span>Messages</span>
-      </button>
-      <button class="action-btn" (click)="setActiveTab('upcoming')">
-        <span class="action-icon">📋</span>
-        <span>My Appointments</span>
-      </button>
-
-      <button class="action-btn" routerLink="/e-prescription">
-        <span class="action-icon">🧾</span>
-        <span>My Prescriptions</span>
-      </button>
-    </div>
-  </div>
-
-  <div class="content-section" style="padding-top: 0;">
-    <div class="prescription-card">
-      <div class="prescription-card-header">
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col gap-8">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
         <div>
-          <h2 style="margin: 0;">Latest Prescription</h2>
-          <p class="prescription-subtitle">Your most recent e-prescription</p>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Welcome, {{ userName }}
+          </h1>
+          <p class="mt-1 text-slate-600 dark:text-slate-400">Your health, organized in one place.</p>
         </div>
-        <button class="btn btn-outline btn-sm" type="button" (click)="openPrescriptionHistory()">View all</button>
+        <div class="flex items-center gap-3">
+          <app-chat-notification-bell></app-chat-notification-bell>
+        </div>
       </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-5 hover:shadow-xl transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-bold text-slate-600 dark:text-slate-400">Upcoming</div>
+              <div class="mt-1 text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats().upcomingAppointments }}</div>
+            </div>
+            <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#82EAEA] to-[#941B6D] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[22px]">event</span>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-slate-500 dark:text-slate-500">Upcoming Appointments</div>
+        </div>
+
+        <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-5 hover:shadow-xl transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-bold text-slate-600 dark:text-slate-400">Completed</div>
+              <div class="mt-1 text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats().completedAppointments }}</div>
+            </div>
+            <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#941B6D] to-[#300934] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[22px]">task_alt</span>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-slate-500 dark:text-slate-500">Completed visits</div>
+        </div>
+
+        <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-5 hover:shadow-xl transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-bold text-slate-600 dark:text-slate-400">Cancelled</div>
+              <div class="mt-1 text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats().cancelledAppointments }}</div>
+            </div>
+            <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#300934] to-[#941B6D] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[22px]">event_busy</span>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-slate-500 dark:text-slate-500">Cancelled bookings</div>
+        </div>
+
+        <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-5 hover:shadow-xl transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-bold text-slate-600 dark:text-slate-400">Total</div>
+              <div class="mt-1 text-3xl font-extrabold text-slate-900 dark:text-white">{{ stats().totalAppointments }}</div>
+            </div>
+            <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#82EAEA] to-[#300934] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[22px]">analytics</span>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-slate-500 dark:text-slate-500">All time</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-6">
+        <div class="flex items-center justify-between gap-4">
+          <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Quick Actions</h2>
+          <div class="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <span class="h-2 w-2 rounded-full bg-[#82EAEA]"></span>
+            Fast navigation
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <a routerLink="/doctors" class="group rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div class="font-extrabold text-slate-900 dark:text-white">Doctors</div>
+              <span class="material-symbols-outlined text-[#941B6D] group-hover:translate-x-0.5 transition">medical_services</span>
+            </div>
+            <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">Find a doctor</div>
+          </a>
+
+          <a routerLink="/hospitals" class="group rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div class="font-extrabold text-slate-900 dark:text-white">Hospitals</div>
+              <span class="material-symbols-outlined text-[#82EAEA] group-hover:translate-x-0.5 transition">local_hospital</span>
+            </div>
+            <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">Browse network</div>
+          </a>
+
+          <a routerLink="/chat" class="group rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div class="font-extrabold text-slate-900 dark:text-white">Chat</div>
+              <span class="material-symbols-outlined text-[#941B6D] group-hover:translate-x-0.5 transition">chat</span>
+            </div>
+            <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">Message doctors</div>
+          </a>
+
+          <button type="button" (click)="setActiveTab('upcoming')" class="text-left group rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div class="font-extrabold text-slate-900 dark:text-white">Appointments</div>
+              <span class="material-symbols-outlined text-[#82EAEA] group-hover:translate-x-0.5 transition">event_available</span>
+            </div>
+            <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">View schedule</div>
+          </button>
+
+          <a routerLink="/e-prescription" class="group rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <div class="font-extrabold text-slate-900 dark:text-white">Prescriptions</div>
+              <span class="material-symbols-outlined text-[#941B6D] group-hover:translate-x-0.5 transition">description</span>
+            </div>
+            <div class="mt-1 text-xs text-slate-600 dark:text-slate-400">E-Prescription</div>
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+        <div class="p-6 md:p-8">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Latest Prescription</h2>
+              <p class="mt-1 text-slate-600 dark:text-slate-400">Your most recent e-prescription</p>
+            </div>
+            <button class="px-4 py-2 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-200 font-bold shadow-sm hover:shadow-md transition" type="button" (click)="openPrescriptionHistory()">View all</button>
+          </div>
 
       @if (isLoadingPrescriptions()) {
-        <div class="loading-container small">
-          <div class="spinner"></div>
-          <p>Loading prescriptions...</p>
+        <div class="mt-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-6 flex items-center justify-center gap-3">
+          <span class="h-5 w-5 rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-transparent animate-spin"></span>
+          <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Loading prescriptions...</p>
         </div>
       } @else {
         @if (!latestPrescription()) {
-          <div class="empty-inline">
-            <span class="empty-inline-icon">🧾</span>
+          <div class="mt-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-6 flex items-start gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#941B6D] to-[#82EAEA] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[22px]">description</span>
+            </div>
             <div>
-              <div class="empty-inline-title">No prescriptions yet</div>
-              <div class="empty-inline-text">When your doctor creates an e-prescription, it will appear here.</div>
+              <div class="font-extrabold text-slate-900 dark:text-white">No prescriptions yet</div>
+              <div class="text-sm text-slate-600 dark:text-slate-400">When your doctor creates an e-prescription, it will appear here.</div>
             </div>
           </div>
         } @else {
-          <div class="prescription-body">
-            <div class="prescription-meta">
-              <div class="meta-item">
-                <div class="meta-label">Visit Date</div>
-                <div class="meta-value">{{ latestPrescription()!.visitDate | date:'yyyy-MM-dd' }}</div>
+          <div class="mt-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4">
+                <div class="text-xs font-bold text-slate-500 dark:text-slate-400">Visit Date</div>
+                <div class="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{{ latestPrescription()!.visitDate | date:'yyyy-MM-dd' }}</div>
               </div>
-              <div class="meta-item">
-                <div class="meta-label">Diagnosis</div>
-                <div class="meta-value">{{ latestPrescription()!.diagnosis }}</div>
+              <div class="rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4">
+                <div class="text-xs font-bold text-slate-500 dark:text-slate-400">Diagnosis</div>
+                <div class="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{{ latestPrescription()!.diagnosis }}</div>
               </div>
             </div>
 
-            <div class="prescription-text">
-              <div class="meta-label">Prescription</div>
-              <div class="prescription-box">{{ latestPrescription()!.prescription }}</div>
+            <div class="rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4">
+              <div class="text-xs font-bold text-slate-500 dark:text-slate-400">Prescription</div>
+              <div class="mt-2 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{{ latestPrescription()!.prescription }}</div>
             </div>
 
-            <div class="prescription-actions">
-              <button class="btn btn-primary" type="button" (click)="downloadPrescription(latestPrescription()!)">Download</button>
-              <button class="btn btn-outline" type="button" (click)="openPrescriptionHistory()">Open history</button>
+            <div class="flex flex-wrap justify-end gap-3">
+              <button class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition" type="button" (click)="downloadPrescription(latestPrescription()!)">Download</button>
+              <button class="px-6 py-3 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-200 font-bold shadow-sm hover:shadow-md transition" type="button" (click)="openPrescriptionHistory()">Open history</button>
             </div>
           </div>
         }
       }
-    </div>
-  </div>
+        </div>
+      </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab() === 'upcoming'"
-      (click)="setActiveTab('upcoming')">
-      Upcoming Appointments
-    </button>
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab() === 'past'"
-      (click)="setActiveTab('past')">
-      Past Appointments
-    </button>
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab() === 'doctors'"
-      (click)="setActiveTab('doctors')">
-      Find Doctors
-    </button>
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab() === 'hospitals'"
-      (click)="setActiveTab('hospitals')">
-      Hospitals
-    </button>
-  </div>
+      <!-- Tabs -->
+      <div class="flex items-center gap-2 p-1 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/10 shadow-sm w-fit overflow-x-auto">
+        <button
+          type="button"
+          (click)="setActiveTab('upcoming')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition whitespace-nowrap"
+          [ngClass]="activeTab() === 'upcoming'
+            ? 'bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white shadow-lg'
+            : 'text-slate-700 dark:text-slate-200'"
+        >
+          Upcoming
+        </button>
+        <button
+          type="button"
+          (click)="setActiveTab('past')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition whitespace-nowrap"
+          [ngClass]="activeTab() === 'past'
+            ? 'bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white shadow-lg'
+            : 'text-slate-700 dark:text-slate-200'"
+        >
+          Past
+        </button>
+        <button
+          type="button"
+          (click)="setActiveTab('doctors')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition whitespace-nowrap"
+          [ngClass]="activeTab() === 'doctors'
+            ? 'bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white shadow-lg'
+            : 'text-slate-700 dark:text-slate-200'"
+        >
+          Doctors
+        </button>
+        <button
+          type="button"
+          (click)="setActiveTab('hospitals')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition whitespace-nowrap"
+          [ngClass]="activeTab() === 'hospitals'
+            ? 'bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white shadow-lg'
+            : 'text-slate-700 dark:text-slate-200'"
+        >
+          Hospitals
+        </button>
+      </div>
 
   <!-- Loading State -->
   @if (isLoading()) {
-    <div class="loading-container">
-      <div class="spinner"></div>
-      <p>Loading your dashboard...</p>
+    <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-12 flex items-center justify-center gap-3">
+      <span class="h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-transparent animate-spin"></span>
+      <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Loading your dashboard...</p>
     </div>
   }
 
   <!-- Upcoming Appointments -->
   @if (!isLoading() && activeTab() === 'upcoming') {
-    <div class="content-section">
-      <div class="section-header">
-        <h2>Upcoming Appointments</h2>
-        <button class="btn btn-primary btn-sm" routerLink="/doctors">
-          + Book New
-        </button>
-      </div>
+    <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+      <div class="p-6 md:p-8">
+        <div class="flex items-center justify-between gap-4">
+          <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Upcoming Appointments</h2>
+          <a class="px-4 py-2 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition" routerLink="/doctors">
+            + Book New
+          </a>
+        </div>
       
       @if (upcomingAppointments().length === 0) {
-        <div class="empty-state">
-          <span class="empty-icon">📅</span>
-          <h3>No Upcoming Appointments</h3>
-          <p>You don't have any scheduled appointments.</p>
-          <button class="btn btn-primary" routerLink="/doctors">
-            Book an Appointment
-          </button>
+        <div class="mt-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-8 text-center">
+          <span class="material-symbols-outlined text-5xl text-slate-400">event</span>
+          <h3 class="mt-3 text-lg font-extrabold text-slate-900 dark:text-white">No Upcoming Appointments</h3>
+          <p class="mt-1 text-slate-600 dark:text-slate-400">You don't have any scheduled appointments.</p>
+          <a class="mt-5 inline-flex px-6 py-3 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition" routerLink="/doctors">Book an Appointment</a>
         </div>
       } @else {
-        <div class="appointments-list">
+        <div class="mt-6 space-y-3">
           @for (apt of upcomingAppointments(); track apt.appointmentId) {
-            <div class="appointment-card">
-              <div class="appointment-date-time">
-                <div class="date">{{ formatDate(apt.appointmentDate) }}</div>
-                <div class="time">{{ apt.appointmentTime }}</div>
-              </div>
-              <div class="appointment-info">
-                <div class="doctor-name">
-                  <strong>Doctor ID:</strong> {{ apt.doctorId }}
+            <div class="rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="px-4 py-3 rounded-2xl bg-gradient-to-br from-[#82EAEA]/25 to-[#941B6D]/20 border border-white/50 dark:border-white/10">
+                  <div class="text-xs font-bold text-slate-600 dark:text-slate-400">Date</div>
+                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">{{ formatDate(apt.appointmentDate) }}</div>
+                  <div class="text-xs text-slate-600 dark:text-slate-400">{{ apt.appointmentTime }}</div>
                 </div>
-                <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
-                  {{ apt.appointmentStatus }}
-                </span>
+
+                <div>
+                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">Doctor ID: {{ apt.doctorId }}</div>
+                  <div class="mt-1">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatusClass(apt.appointmentStatus)">{{ apt.appointmentStatus }}</span>
+                  </div>
+                </div>
               </div>
-              <div class="appointment-actions">
+
+              <div class="flex items-center justify-end gap-2">
                 @if (apt.appointmentStatus === 'Scheduled' || apt.appointmentStatus === 'Pending') {
-                  <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt)">
-                    Cancel
-                  </button>
+                  <button class="px-4 py-2 rounded-2xl border border-red-300/70 dark:border-red-600/50 text-red-700 dark:text-red-400 bg-white/60 dark:bg-white/5 hover:bg-red-50 dark:hover:bg-red-900/20 transition font-bold" (click)="cancelAppointment(apt)">Cancel</button>
                 }
               </div>
             </div>
           }
         </div>
       }
+      </div>
     </div>
   }
 
   <!-- Past Appointments -->
   @if (!isLoading() && activeTab() === 'past') {
-    <div class="content-section">
-      <h2>Past Appointments</h2>
+    <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+      <div class="p-6 md:p-8">
+      <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Past Appointments</h2>
       
       @if (pastAppointments().length === 0) {
-        <div class="empty-state">
-          <span class="empty-icon">📋</span>
-          <h3>No Past Appointments</h3>
-          <p>Your appointment history will appear here.</p>
+        <div class="mt-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-8 text-center">
+          <span class="material-symbols-outlined text-5xl text-slate-400">history</span>
+          <h3 class="mt-3 text-lg font-extrabold text-slate-900 dark:text-white">No Past Appointments</h3>
+          <p class="mt-1 text-slate-600 dark:text-slate-400">Your appointment history will appear here.</p>
         </div>
       } @else {
-        <div class="appointments-list">
+        <div class="mt-6 space-y-3">
           @for (apt of pastAppointments(); track apt.appointmentId) {
-            <div class="appointment-card past">
-              <div class="appointment-date-time">
-                <div class="date">{{ formatDate(apt.appointmentDate) }}</div>
-                <div class="time">{{ apt.appointmentTime }}</div>
-              </div>
-              <div class="appointment-info">
-                <div class="doctor-name">
-                  <strong>Doctor ID:</strong> {{ apt.doctorId }}
+            <div class="rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 opacity-90">
+              <div class="flex items-center gap-4">
+                <div class="px-4 py-3 rounded-2xl bg-gradient-to-br from-[#300934]/15 to-[#82EAEA]/20 border border-white/50 dark:border-white/10">
+                  <div class="text-xs font-bold text-slate-600 dark:text-slate-400">Date</div>
+                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">{{ formatDate(apt.appointmentDate) }}</div>
+                  <div class="text-xs text-slate-600 dark:text-slate-400">{{ apt.appointmentTime }}</div>
                 </div>
-                <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
-                  {{ apt.appointmentStatus }}
-                </span>
+                <div>
+                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">Doctor ID: {{ apt.doctorId }}</div>
+                  <div class="mt-1">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatusClass(apt.appointmentStatus)">{{ apt.appointmentStatus }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           }
         </div>
       }
+      </div>
     </div>
   }
 
   <!-- Find Doctors -->
   @if (!isLoading() && activeTab() === 'doctors') {
-    <div class="content-section">
-      <div class="section-header">
-        <h2>Available Doctors</h2>
-        <a routerLink="/doctors" class="btn btn-outline btn-sm">View All</a>
+    <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+      <div class="p-6 md:p-8">
+      <div class="flex items-center justify-between gap-4">
+        <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Available Doctors</h2>
+        <a routerLink="/doctors" class="px-4 py-2 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-200 font-bold shadow-sm hover:shadow-md transition">View All</a>
       </div>
       
       @if (isLoadingDoctors()) {
-        <div class="loading-container small">
-          <div class="spinner"></div>
-          <p>Loading doctors...</p>
+        <div class="mt-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-6 flex items-center justify-center gap-3">
+          <span class="h-5 w-5 rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-transparent animate-spin"></span>
+          <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Loading doctors...</p>
         </div>
       } @else if (doctors().length === 0) {
-        <div class="empty-state">
-          <span class="empty-icon">👨‍⚕️</span>
-          <h3>No Doctors Available</h3>
-          <p>Please check back later.</p>
+        <div class="mt-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-8 text-center">
+          <span class="material-symbols-outlined text-5xl text-slate-400">medical_services</span>
+          <h3 class="mt-3 text-lg font-extrabold text-slate-900 dark:text-white">No Doctors Available</h3>
+          <p class="mt-1 text-slate-600 dark:text-slate-400">Please check back later.</p>
         </div>
       } @else {
-        <div class="doctors-grid">
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           @for (doctor of doctors().slice(0, 6); track doctor.doctorId) {
-            <div class="doctor-card">
-              <div class="doctor-avatar">
-                {{ doctor.name.charAt(0) }}
+            <div class="rounded-3xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-5 shadow-sm hover:shadow-md transition">
+              <div class="flex items-center gap-4">
+                <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#941B6D] to-[#82EAEA] flex items-center justify-center text-white font-extrabold shadow-lg">
+                  {{ doctor.name.charAt(0) }}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-base font-extrabold text-slate-900 dark:text-white truncate">{{ doctor.name }}</div>
+                  <div class="text-sm text-slate-600 dark:text-slate-400 truncate">{{ doctor.qualification }}</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-500 truncate">{{ doctor.departmentName || 'General' }}</div>
+                </div>
               </div>
-              <div class="doctor-info">
-                <h3>{{ doctor.name }}</h3>
-                <p class="qualification">{{ doctor.qualification }}</p>
-                <p class="department">{{ doctor.departmentName || 'General' }}</p>
+              <div class="mt-4 flex justify-end">
+                <button class="px-4 py-2 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition" (click)="bookAppointment(doctor.doctorId)">
+                  Book Now
+                </button>
               </div>
-              <button class="btn btn-primary btn-sm" (click)="bookAppointment(doctor.doctorId)">
-                Book Now
-              </button>
             </div>
           }
         </div>
         @if (doctors().length > 6) {
-          <div class="view-more">
-            <a routerLink="/doctors" class="btn btn-outline">
+          <div class="mt-6 flex justify-center">
+            <a routerLink="/doctors" class="px-6 py-3 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-200 font-bold shadow-sm hover:shadow-md transition">
               View All {{ doctors().length }} Doctors
             </a>
           </div>
         }
       }
+      </div>
     </div>
   }
 
   <!-- Hospitals -->
   @if (!isLoading() && activeTab() === 'hospitals') {
-    <div class="content-section">
-      <h2>Available Hospitals</h2>
-      <div class="coming-soon">
-        <span class="icon">🏥</span>
-        <h3>Hospital Directory</h3>
-        <p>Browse all available hospitals in our network</p>
-        <a routerLink="/hospitals" class="btn btn-primary">View Hospitals</a>
+    <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+      <div class="p-6 md:p-8">
+        <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Available Hospitals</h2>
+        <div class="mt-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/60 dark:border-white/10 p-8 text-center">
+          <span class="material-symbols-outlined text-5xl text-slate-400">local_hospital</span>
+          <h3 class="mt-3 text-lg font-extrabold text-slate-900 dark:text-white">Hospital Directory</h3>
+          <p class="mt-1 text-slate-600 dark:text-slate-400">Browse all available hospitals in our network</p>
+          <a routerLink="/hospitals" class="mt-5 inline-flex px-6 py-3 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition">View Hospitals</a>
+        </div>
       </div>
     </div>
   }
+    </div>
+  </div>
 </div>

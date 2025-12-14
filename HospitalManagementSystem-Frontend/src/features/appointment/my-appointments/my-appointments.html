@@ -1,35 +1,61 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <button
-        (click)="router.navigate(['/patient-dashboard'])"
-        class="text-blue-600 hover:text-blue-700 dark:text-blue-400 mb-4 flex items-center gap-2">
-        <span class="material-symbols-outlined">arrow_back</span>
-        Back to Dashboard
-      </button>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Appointments</h1>
-      <p class="text-gray-600 dark:text-gray-400">View and manage your scheduled appointments</p>
-    </div>
+<app-nav></app-nav>
+<div class="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#82EAEA]/30 blur-3xl"></div>
+    <div class="absolute top-40 -right-24 h-72 w-72 rounded-full bg-[#941B6D]/30 blur-3xl"></div>
+    <div class="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-[#300934]/25 blur-3xl"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-white/30 dark:from-white/5 dark:to-white/0"></div>
+  </div>
+
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-2">
+        <button
+          (click)="router.navigate(['/patient/dashboard'])"
+          class="inline-flex items-center gap-2 w-fit text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition"
+        >
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+          Back to Dashboard
+        </button>
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">My Appointments</h1>
+            <p class="mt-1 text-slate-600 dark:text-slate-400">View and manage your scheduled appointments</p>
+          </div>
+          <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/10 shadow-sm">
+            <span class="material-symbols-outlined text-[#82EAEA] text-[20px]">calendar_month</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">Upcoming & History</span>
+          </div>
+        </div>
+      </div>
 
     <!-- Loading State -->
     @if (isLoading()) {
-      <div class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-12 flex items-center justify-center gap-3">
+        <span class="h-6 w-6 rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-transparent animate-spin"></span>
+        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Loading appointments...</p>
       </div>
     }
 
     <!-- No Appointments -->
     @else if (appointments().length === 0 && !isLoading()) {
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
-        <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">event_busy</span>
-        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">No Appointments</h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">You don't have any appointments scheduled yet.</p>
-        <a
-          routerLink="/doctors"
-          class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
-          Book an Appointment
-        </a>
+      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-12 text-center overflow-hidden relative">
+        <div class="pointer-events-none absolute inset-0 opacity-60">
+          <div class="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-[#82EAEA]/30 blur-2xl"></div>
+          <div class="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-[#941B6D]/30 blur-2xl"></div>
+        </div>
+        <div class="relative">
+          <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">event_busy</span>
+          <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">No Appointments</h2>
+          <p class="text-slate-600 dark:text-slate-400 mb-6">You don't have any appointments scheduled yet.</p>
+          <a
+            routerLink="/doctors"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition"
+          >
+            <span class="material-symbols-outlined text-[20px]">add_circle</span>
+            Book an Appointment
+          </a>
+        </div>
       </div>
     }
 
@@ -37,19 +63,19 @@
     @else {
       <div class="space-y-4">
         @for (appointment of appointments(); track appointment.appointmentId) {
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+          <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg hover:shadow-xl transition overflow-hidden">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <!-- Doctor Info -->
               <div class="flex items-center gap-4 flex-1">
                 @if (getDoctor(appointment.doctorId); as doctor) {
-                  <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                  <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#941B6D] to-[#82EAEA] flex items-center justify-center text-white text-xl font-extrabold shadow-lg">
                     {{ doctor.name.charAt(0) }}
                   </div>
                   <div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ doctor.name }}</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ doctor.qualification }}</p>
+                    <h3 class="text-xl font-extrabold text-slate-900 dark:text-white">{{ doctor.name }}</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">{{ doctor.qualification }}</p>
                     @if (doctor.departmentName) {
-                      <p class="text-xs text-gray-500 dark:text-gray-500">{{ doctor.departmentName }}</p>
+                      <p class="text-xs text-slate-500 dark:text-slate-500">{{ doctor.departmentName }}</p>
                     }
                   </div>
                 } @else {
@@ -64,11 +90,11 @@
 
               <!-- Appointment Details -->
               <div class="flex flex-col md:flex-row md:items-center gap-4 flex-1">
-                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                   <span class="material-symbols-outlined">calendar_today</span>
                   <span>{{ formatDate(appointment.appointmentDate) }}</span>
                 </div>
-                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                   <span class="material-symbols-outlined">schedule</span>
                   <span>{{ formatTime(appointment.appointmentTime) }}</span>
                 </div>
@@ -82,12 +108,12 @@
                 @if (isUpcoming(appointment.appointmentDate, appointment.appointmentTime) && appointment.appointmentStatus.toLowerCase() !== 'cancelled') {
                   <button
                     (click)="cancelAppointment(appointment.appointmentId)"
-                    class="px-4 py-2 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 font-medium">
+                    class="px-4 py-2 rounded-2xl border border-red-300/70 dark:border-red-600/50 text-red-700 dark:text-red-400 bg-white/60 dark:bg-white/5 hover:bg-red-50 dark:hover:bg-red-900/20 transition font-bold">
                     Cancel
                   </button>
                 }
                 <button
-                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                  class="px-4 py-2 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition">
                   View Details
                 </button>
               </div>
@@ -96,6 +122,7 @@
         }
       </div>
     }
+    </div>
   </div>
 </div>
 

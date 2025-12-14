@@ -106,6 +106,6 @@ export class HospitalList implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/patient/dashboard']);
   }
 }

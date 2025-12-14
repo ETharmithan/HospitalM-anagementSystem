@@ -1,173 +1,278 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <div class="mb-8">
-      <button
-        (click)="goBack()"
-        class="text-blue-600 hover:text-blue-700 dark:text-blue-400 mb-4 flex items-center gap-2">
-        <span class="material-symbols-outlined">arrow_back</span>
-        Back to Dashboard
-      </button>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Profile</h1>
-      <p class="text-gray-600 dark:text-gray-400">Manage your personal information and settings</p>
-    </div>
-
-  <div class="tabs">
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab() === 'profile'"
-      (click)="setActiveTab('profile')">
-      Profile Information
-    </button>
-    <button 
-      class="tab-btn" 
-      [class.active]="activeTab() === 'password'"
-      (click)="setActiveTab('password')">
-      Change Password
-    </button>
+<app-nav></app-nav>
+<div class="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950">
+  <div class="pointer-events-none absolute inset-0">
+    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#941B6D]/30 blur-3xl"></div>
+    <div class="absolute top-32 -right-24 h-72 w-72 rounded-full bg-[#82EAEA]/30 blur-3xl"></div>
+    <div class="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-[#300934]/25 blur-3xl"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-white/30 dark:from-white/5 dark:to-white/0"></div>
   </div>
 
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-2">
+        <button
+          (click)="goBack()"
+          class="inline-flex items-center gap-2 w-fit text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition"
+        >
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+          Back to Dashboard
+        </button>
+
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+          <div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              My Profile
+            </h1>
+            <p class="mt-1 text-slate-600 dark:text-slate-400">
+              Manage your personal information and settings
+            </p>
+          </div>
+
+          <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/10 shadow-sm">
+            <span class="material-symbols-outlined text-[#941B6D] text-[20px]">verified_user</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">Secure Profile</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 p-1 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/10 shadow-sm w-fit">
+        <button
+          type="button"
+          (click)="setActiveTab('profile')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition"
+          [ngClass]="activeTab() === 'profile'
+            ? 'bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white shadow-lg'
+            : 'text-slate-700 dark:text-slate-200'"
+        >
+          Profile
+        </button>
+        <button
+          type="button"
+          (click)="setActiveTab('password')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition"
+          [ngClass]="activeTab() === 'password'
+            ? 'bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white shadow-lg'
+            : 'text-slate-700 dark:text-slate-200'"
+        >
+          Password
+        </button>
+      </div>
+
   @if (isLoading()) {
-    <div class="loading-container">
-      <div class="spinner"></div>
-      <p>Loading profile...</p>
+    <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-10 flex items-center justify-center gap-3">
+      <span class="h-5 w-5 rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-transparent animate-spin"></span>
+      <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Loading profile...</p>
     </div>
   }
 
   @if (!isLoading() && activeTab() === 'profile') {
-    <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="profile-form">
-      <div class="form-section">
-        <h2>Contact Information</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="phoneNumber">Phone Number</label>
-            <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="+1 234 567 8900">
-            @if (profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched) {
-              <span class="error-text">Please enter a valid phone number</span>
-            }
+    <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="space-y-6">
+      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+        <div class="p-6 md:p-8">
+          <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Contact Information</h2>
+              <p class="text-sm text-slate-600 dark:text-slate-400">How we can reach you</p>
+            </div>
+            <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#941B6D] to-[#82EAEA] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[20px]">contact_phone</span>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="nationality">Nationality</label>
-            <input type="text" id="nationality" formControlName="nationality" placeholder="Your nationality">
-          </div>
-        </div>
 
-        <div class="form-group">
-          <label for="addressLine1">Address Line 1</label>
-          <input type="text" id="addressLine1" formControlName="addressLine1" placeholder="Street address">
-        </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="phoneNumber" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Phone Number</label>
+              <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="+1 234 567 8900"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+              @if (profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched) {
+                <span class="mt-1 block text-xs font-semibold text-red-600">Please enter a valid phone number</span>
+              }
+            </div>
 
-        <div class="form-group">
-          <label for="addressLine2">Address Line 2</label>
-          <input type="text" id="addressLine2" formControlName="addressLine2" placeholder="Apartment, suite, etc. (optional)">
-        </div>
+            <div>
+              <label for="nationality" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Nationality</label>
+              <input type="text" id="nationality" formControlName="nationality" placeholder="Your nationality"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+            </div>
+          </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="city">City</label>
-            <input type="text" id="city" formControlName="city" placeholder="City">
+          <div class="mt-4">
+            <label for="addressLine1" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Address Line 1</label>
+            <input type="text" id="addressLine1" formControlName="addressLine1" placeholder="Street address"
+              class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
           </div>
-          <div class="form-group">
-            <label for="state">State/Province</label>
-            <input type="text" id="state" formControlName="state" placeholder="State or Province">
-          </div>
-        </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="postalCode">Postal Code</label>
-            <input type="text" id="postalCode" formControlName="postalCode" placeholder="Postal code">
+          <div class="mt-4">
+            <label for="addressLine2" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Address Line 2</label>
+            <input type="text" id="addressLine2" formControlName="addressLine2" placeholder="Apartment, suite, etc. (optional)"
+              class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
           </div>
-          <div class="form-group">
-            <label for="country">Country</label>
-            <input type="text" id="country" formControlName="country" placeholder="Country">
-          </div>
-        </div>
-      </div>
 
-      <div class="form-section">
-        <h2>Personal Information</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="dateOfBirth">Date of Birth</label>
-            <input type="date" id="dateOfBirth" formControlName="dateOfBirth">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label for="city" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">City</label>
+              <input type="text" id="city" formControlName="city" placeholder="City"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+            </div>
+            <div>
+              <label for="state" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">State/Province</label>
+              <input type="text" id="state" formControlName="state" placeholder="State or Province"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+            </div>
           </div>
-          <div class="form-group">
-            <label for="gender">Gender</label>
-            <select id="gender" formControlName="gender">
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
-      <div class="form-section">
-        <h2>Medical Information</h2>
-        <div class="form-group">
-          <label for="bloodType">Blood Type</label>
-          <select id="bloodType" formControlName="bloodType">
-            <option value="">Select blood type</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="allergies">Allergies</label>
-          <textarea id="allergies" formControlName="allergies" rows="3" placeholder="List any allergies (e.g., medications, food, environmental)"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="chronicConditions">Chronic Conditions</label>
-          <textarea id="chronicConditions" formControlName="chronicConditions" rows="3" placeholder="List any chronic conditions or ongoing health issues"></textarea>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <h2>Emergency Contact</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="emergencyContactName">Contact Name</label>
-            <input type="text" id="emergencyContactName" formControlName="emergencyContactName" placeholder="Full name">
-          </div>
-          <div class="form-group">
-            <label for="emergencyContactRelationship">Relationship</label>
-            <input type="text" id="emergencyContactRelationship" formControlName="emergencyContactRelationship" placeholder="e.g., Spouse, Parent, Sibling">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="emergencyContactPhone">Contact Phone</label>
-            <input type="tel" id="emergencyContactPhone" formControlName="emergencyContactPhone" placeholder="+1 234 567 8900">
-            @if (profileForm.get('emergencyContactPhone')?.invalid && profileForm.get('emergencyContactPhone')?.touched) {
-              <span class="error-text">Please enter a valid phone number</span>
-            }
-          </div>
-          <div class="form-group">
-            <label for="emergencyContactEmail">Contact Email</label>
-            <input type="email" id="emergencyContactEmail" formControlName="emergencyContactEmail" placeholder="email@example.com">
-            @if (profileForm.get('emergencyContactEmail')?.invalid && profileForm.get('emergencyContactEmail')?.touched) {
-              <span class="error-text">Please enter a valid email</span>
-            }
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label for="postalCode" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Postal Code</label>
+              <input type="text" id="postalCode" formControlName="postalCode" placeholder="Postal code"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+            </div>
+            <div>
+              <label for="country" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Country</label>
+              <input type="text" id="country" formControlName="country" placeholder="Country"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="goBack()">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+          <div class="p-6 md:p-8">
+            <div class="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Personal Information</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Basics about you</p>
+              </div>
+              <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#300934] to-[#941B6D] flex items-center justify-center text-white shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">person</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="dateOfBirth" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Date of Birth</label>
+                <input type="date" id="dateOfBirth" formControlName="dateOfBirth"
+                  class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+              </div>
+              <div>
+                <label for="gender" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Gender</label>
+                <select id="gender" formControlName="gender"
+                  class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition">
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+          <div class="p-6 md:p-8">
+            <div class="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Medical Information</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Helpful details for care</p>
+              </div>
+              <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#941B6D] to-[#300934] flex items-center justify-center text-white shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">favorite</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="bloodType" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Blood Type</label>
+              <select id="bloodType" formControlName="bloodType"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition">
+                <option value="">Select blood type</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+
+            <div class="mt-4">
+              <label for="allergies" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Allergies</label>
+              <textarea id="allergies" formControlName="allergies" rows="3" placeholder="List any allergies (e.g., medications, food, environmental)"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition"></textarea>
+            </div>
+
+            <div class="mt-4">
+              <label for="chronicConditions" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Chronic Conditions</label>
+              <textarea id="chronicConditions" formControlName="chronicConditions" rows="3" placeholder="List any chronic conditions or ongoing health issues"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+        <div class="p-6 md:p-8">
+          <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Emergency Contact</h2>
+              <p class="text-sm text-slate-600 dark:text-slate-400">Who to reach in urgent situations</p>
+            </div>
+            <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#82EAEA] to-[#941B6D] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[20px]">emergency</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="emergencyContactName" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Contact Name</label>
+              <input type="text" id="emergencyContactName" formControlName="emergencyContactName" placeholder="Full name"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+            </div>
+            <div>
+              <label for="emergencyContactRelationship" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Relationship</label>
+              <input type="text" id="emergencyContactRelationship" formControlName="emergencyContactRelationship" placeholder="e.g., Spouse, Parent, Sibling"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label for="emergencyContactPhone" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Contact Phone</label>
+              <input type="tel" id="emergencyContactPhone" formControlName="emergencyContactPhone" placeholder="+1 234 567 8900"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+              @if (profileForm.get('emergencyContactPhone')?.invalid && profileForm.get('emergencyContactPhone')?.touched) {
+                <span class="mt-1 block text-xs font-semibold text-red-600">Please enter a valid phone number</span>
+              }
+            </div>
+            <div>
+              <label for="emergencyContactEmail" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Contact Email</label>
+              <input type="email" id="emergencyContactEmail" formControlName="emergencyContactEmail" placeholder="email@example.com"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+              @if (profileForm.get('emergencyContactEmail')?.invalid && profileForm.get('emergencyContactEmail')?.touched) {
+                <span class="mt-1 block text-xs font-semibold text-red-600">Please enter a valid email</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+        <button
+          type="button"
+          (click)="goBack()"
+          class="inline-flex justify-center items-center gap-2 px-6 py-3 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-200 font-bold shadow-sm hover:shadow-md transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="isSaving()"
+          class="inline-flex justify-center items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
           @if (isSaving()) {
-            <span class="spinner-small"></span>
+            <span class="h-4 w-4 rounded-full border-2 border-white/60 border-t-transparent animate-spin"></span>
             Saving...
           } @else {
             Save Changes
@@ -178,41 +283,65 @@
   }
 
   @if (!isLoading() && activeTab() === 'password') {
-    <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="password-form">
-      <div class="form-section">
-        <h2>Change Password</h2>
-        <p class="section-description">Update your password to keep your account secure</p>
+    <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="space-y-6">
+      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg overflow-hidden">
+        <div class="p-6 md:p-8">
+          <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">Change Password</h2>
+              <p class="text-sm text-slate-600 dark:text-slate-400">Update your password to keep your account secure</p>
+            </div>
+            <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#300934] to-[#82EAEA] flex items-center justify-center text-white shadow-lg">
+              <span class="material-symbols-outlined text-[20px]">lock</span>
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label for="currentPassword">Current Password</label>
-          <input type="password" id="currentPassword" formControlName="currentPassword" placeholder="Enter current password">
-          @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
-            <span class="error-text">Current password is required</span>
-          }
-        </div>
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label for="currentPassword" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Current Password</label>
+              <input type="password" id="currentPassword" formControlName="currentPassword" placeholder="Enter current password"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+              @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
+                <span class="mt-1 block text-xs font-semibold text-red-600">Current password is required</span>
+              }
+            </div>
 
-        <div class="form-group">
-          <label for="newPassword">New Password</label>
-          <input type="password" id="newPassword" formControlName="newPassword" placeholder="Enter new password (min 6 characters)">
-          @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
-            <span class="error-text">Password must be at least 6 characters</span>
-          }
-        </div>
+            <div>
+              <label for="newPassword" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">New Password</label>
+              <input type="password" id="newPassword" formControlName="newPassword" placeholder="Enter new password (min 6 characters)"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+              @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+                <span class="mt-1 block text-xs font-semibold text-red-600">Password must be at least 6 characters</span>
+              }
+            </div>
 
-        <div class="form-group">
-          <label for="confirmNewPassword">Confirm New Password</label>
-          <input type="password" id="confirmNewPassword" formControlName="confirmNewPassword" placeholder="Confirm new password">
-          @if (passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmNewPassword')?.touched) {
-            <span class="error-text">Passwords do not match</span>
-          }
+            <div>
+              <label for="confirmNewPassword" class="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" formControlName="confirmNewPassword" placeholder="Confirm new password"
+                class="w-full rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 px-4 py-3 text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition" />
+              @if (passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmNewPassword')?.touched) {
+                <span class="mt-1 block text-xs font-semibold text-red-600">Passwords do not match</span>
+              }
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="goBack()">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="isChangingPassword()">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+        <button
+          type="button"
+          (click)="goBack()"
+          class="inline-flex justify-center items-center gap-2 px-6 py-3 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 text-slate-900 dark:text-slate-200 font-bold shadow-sm hover:shadow-md transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="isChangingPassword()"
+          class="inline-flex justify-center items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#941B6D] to-[#82EAEA] text-white font-extrabold shadow-lg hover:shadow-xl transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
           @if (isChangingPassword()) {
-            <span class="spinner-small"></span>
+            <span class="h-4 w-4 rounded-full border-2 border-white/60 border-t-transparent animate-spin"></span>
             Changing...
           } @else {
             Change Password
