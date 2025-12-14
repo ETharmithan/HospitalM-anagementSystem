@@ -11,6 +11,8 @@ export interface Hospital {
   state?: string;
   country?: string;
   postalCode?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   phoneNumber?: string;
   email?: string;
   website?: string;
@@ -35,6 +37,8 @@ export interface CreateHospitalRequest {
   state: string;
   country: string;
   postalCode: string;
+  latitude?: number | null;
+  longitude?: number | null;
   phoneNumber: string;
   email: string;
   website?: string;

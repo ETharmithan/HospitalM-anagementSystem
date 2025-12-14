@@ -25,6 +25,10 @@ namespace HospitalManagementSystem.Application.DTOs.HospitalDto.Request_Dto
         public string? Website { get; set; }
         public string? Description { get; set; }
 
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
+
         // Admin fields
         [Required]
         [EmailAddress]

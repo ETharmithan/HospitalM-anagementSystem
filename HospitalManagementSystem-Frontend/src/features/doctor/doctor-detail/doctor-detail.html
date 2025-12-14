@@ -62,9 +62,14 @@
                   <div>✉️ {{ hospital.email }}</div>
                 </div>
               </div>
-              <a [routerLink]="['/hospital-detail', hospital.hospitalId]" class="btn btn-outline btn-sm">
-                View Hospital
-              </a>
+              <div class="doctor-actions">
+                <a [routerLink]="['/hospital-detail', hospital.hospitalId]" class="btn btn-outline btn-sm">
+                  View Hospital
+                </a>
+                <a [href]="getHospitalMapsUrl(hospital)" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">
+                  View on Map
+                </a>
+              </div>
             </div>
           }
         </div>

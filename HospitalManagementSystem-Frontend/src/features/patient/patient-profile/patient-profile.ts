@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { PatientService } from '../../../core/services/patient-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { ToastService } from '../../../core/services/toast-service';
@@ -20,6 +21,7 @@ export class PatientProfile implements OnInit {
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
 
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
@@ -29,9 +31,28 @@ export class PatientProfile implements OnInit {
   patientId = signal<string | null>(null);
   activeTab = signal<'profile' | 'password'>('profile');
 
+  locationQuery = signal('');
+
+  mapsEmbedUrl = computed<SafeResourceUrl | null>(() => {
+    const query = this.locationQuery();
+    if (!query) return null;
+    const url = `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
+
+  mapsSearchUrl = computed(() => {
+    const query = this.locationQuery();
+    if (!query) return '';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  });
+
   ngOnInit(): void {
     this.initializeForms();
     this.loadPatientProfile();
+
+    this.profileForm.valueChanges.subscribe(() => {
+      this.updateLocationQuery();
+    });
   }
 
   initializeForms(): void {
@@ -109,6 +130,17 @@ export class PatientProfile implements OnInit {
       emergencyContactPhone: patient.emergencyContact?.contactPhone || '',
       emergencyContactRelationship: patient.emergencyContact?.relationshipToPatient || ''
     });
+
+    this.updateLocationQuery();
+  }
+
+  private updateLocationQuery(): void {
+    const v = this.profileForm?.value;
+    const parts = [v?.addressLine1, v?.addressLine2, v?.city, v?.state, v?.postalCode, v?.country]
+      .filter(Boolean)
+      .map((x: any) => String(x).trim())
+      .filter((x: string) => x.length > 0);
+    this.locationQuery.set(parts.join(', '));
   }
 
   onSaveProfile(): void {

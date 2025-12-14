@@ -15,6 +15,10 @@ namespace HospitalManagementSystem.Application.DTOs.HospitalDto.Response_Dto
         public required string Email { get; set; }
         public string? Website { get; set; }
         public string? Description { get; set; }
+
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

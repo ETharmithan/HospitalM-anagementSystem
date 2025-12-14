@@ -73,6 +73,15 @@ export class DoctorDetail implements OnInit {
     }
   }
 
+  getHospitalMapsUrl(hospital: Hospital): string {
+    const parts = [hospital.name, hospital.address, hospital.city, hospital.state, hospital.country, hospital.postalCode]
+      .filter(Boolean)
+      .map(v => String(v).trim())
+      .filter(v => v.length > 0);
+    const query = parts.join(', ');
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  }
+
   goBack(): void {
     this.router.navigate(['/doctors']);
   }

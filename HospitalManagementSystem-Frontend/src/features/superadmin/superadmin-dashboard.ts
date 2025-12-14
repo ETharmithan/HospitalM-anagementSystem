@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AdminDashboardService } from '../../core/services/admin-dashboard-service';
 import { HospitalService, Hospital, CreateHospitalRequest, Admin, CreateAdminDto, UpdateAdminDto, Patient, SystemUser } from '../../core/services/hospital-service';
+import { LocationSearchResult, LocationService } from '../../core/services/location-service';
 import { UserManagementService, UserInfo, CreateUserRequest } from '../../core/services/user-management-service';
 import { AccountService } from '../../core/services/account-service';
 import { ToastService } from '../../core/services/toast-service';
@@ -19,10 +21,19 @@ import { AdminOverview } from '../../types/admin-overview';
 export class SuperAdminDashboard implements OnInit {
   private dashboardService = inject(AdminDashboardService);
   private hospitalService = inject(HospitalService);
+  private locationService = inject(LocationService);
   private userService = inject(UserManagementService);
   private accountService = inject(AccountService);
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
+
+  locationSearchQuery = signal<string>('');
+  locationSearchResults = signal<LocationSearchResult[]>([]);
+  isSearchingLocation = signal(false);
+  isUsingCurrentLocation = signal(false);
+  showLocationResults = signal(false);
+  private locationSearchDebounce: any = null;
 
   // Overview data
   overview = signal<AdminOverview | null>(null);
@@ -137,6 +148,8 @@ export class SuperAdminDashboard implements OnInit {
     state: '',
     country: 'Sri Lanka',
     postalCode: '',
+    latitude: null,
+    longitude: null,
     phoneNumber: '',
     email: '',
     website: '',
@@ -266,6 +279,8 @@ export class SuperAdminDashboard implements OnInit {
       state: hospital.state || '',
       country: hospital.country || 'Sri Lanka',
       postalCode: hospital.postalCode || '',
+      latitude: hospital.latitude ?? null,
+      longitude: hospital.longitude ?? null,
       phoneNumber: hospital.phoneNumber || '',
       email: hospital.email || '',
       website: hospital.website || '',
@@ -277,6 +292,7 @@ export class SuperAdminDashboard implements OnInit {
   closeHospitalModal(): void {
     this.showHospitalModal.set(false);
     this.resetHospitalForm();
+    this.clearLocationSearch();
   }
 
   resetHospitalForm(): void {
@@ -287,6 +303,8 @@ export class SuperAdminDashboard implements OnInit {
       state: '',
       country: 'Sri Lanka',
       postalCode: '',
+      latitude: null,
+      longitude: null,
       phoneNumber: '',
       email: '',
       website: '',
@@ -297,6 +315,160 @@ export class SuperAdminDashboard implements OnInit {
       displayName: '',
       password: ''
     };
+  }
+
+  onLocationSearchInput(value: string): void {
+    this.locationSearchQuery.set(value);
+    const query = (value || '').trim();
+    if (!query) {
+      this.locationSearchResults.set([]);
+      this.showLocationResults.set(false);
+      return;
+    }
+
+    this.showLocationResults.set(true);
+
+    if (this.locationSearchDebounce) {
+      clearTimeout(this.locationSearchDebounce);
+    }
+
+    this.locationSearchDebounce = setTimeout(() => {
+      this.searchLocation(query);
+    }, 350);
+  }
+
+  searchLocation(query: string): void {
+    const trimmed = (query || '').trim();
+    if (!trimmed) return;
+
+    this.isSearchingLocation.set(true);
+    this.locationService.search(trimmed, 10, undefined, true).subscribe({
+      next: (results) => {
+        this.locationSearchResults.set(results);
+        this.showLocationResults.set(true);
+        this.isSearchingLocation.set(false);
+      },
+      error: () => {
+        this.locationSearchResults.set([]);
+        this.isSearchingLocation.set(false);
+      }
+    });
+  }
+
+  selectLocationResult(result: LocationSearchResult): void {
+    if (!result) return;
+    this.hospitalForm.latitude = Number(result.lat);
+    this.hospitalForm.longitude = Number(result.lng);
+    this.applyAddressFromLocationResult(result);
+    this.locationSearchQuery.set(result.displayName);
+    this.showLocationResults.set(false);
+  }
+
+  clearLocationSearch(): void {
+    this.locationSearchQuery.set('');
+    this.locationSearchResults.set([]);
+    this.showLocationResults.set(false);
+    if (this.locationSearchDebounce) {
+      clearTimeout(this.locationSearchDebounce);
+      this.locationSearchDebounce = null;
+    }
+  }
+
+  useCurrentLocation(): void {
+    const isSecure = (window as any).isSecureContext === true;
+    if (!isSecure) {
+      this.toastService.error('Current location requires HTTPS or localhost');
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      this.toastService.error('Geolocation not supported in this browser');
+      return;
+    }
+
+    this.isUsingCurrentLocation.set(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        this.hospitalForm.latitude = lat;
+        this.hospitalForm.longitude = lng;
+
+        this.locationService.reverseGeocode(lat, lng).subscribe({
+          next: (result) => {
+            if (result) {
+              this.applyAddressFromLocationResult(result);
+              this.locationSearchQuery.set(result.displayName);
+            }
+            this.isUsingCurrentLocation.set(false);
+          },
+          error: () => {
+            this.isUsingCurrentLocation.set(false);
+          }
+        });
+      },
+      (err) => {
+        let msg = 'Unable to get your current location';
+        if (err?.code === 1) msg = 'Location permission denied. Allow location access in browser settings.';
+        if (err?.code === 2) msg = 'Location unavailable. Turn on GPS / Location services.';
+        if (err?.code === 3) msg = 'Location request timed out. Try again.';
+        this.toastService.error(msg);
+        this.isUsingCurrentLocation.set(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+    );
+  }
+
+  private applyAddressFromLocationResult(result: LocationSearchResult): void {
+    const a = result.address;
+
+    const street = [a?.houseNumber, a?.road]
+      .filter(Boolean)
+      .map(v => String(v).trim())
+      .filter(v => v.length > 0)
+      .join(' ');
+
+    const city = a?.city || a?.town || a?.village || '';
+
+    if (street) this.hospitalForm.address = street;
+    if (city) this.hospitalForm.city = city;
+    if (a?.state) this.hospitalForm.state = a.state;
+    if (a?.country) this.hospitalForm.country = a.country;
+    if (a?.postcode) this.hospitalForm.postalCode = a.postcode;
+  }
+
+  getHospitalMapQuery(): string {
+    if (this.hospitalForm.latitude != null && this.hospitalForm.longitude != null) {
+      return `${this.hospitalForm.latitude},${this.hospitalForm.longitude}`;
+    }
+
+    const parts = [
+      this.hospitalForm.name,
+      this.hospitalForm.address,
+      this.hospitalForm.city,
+      this.hospitalForm.state,
+      this.hospitalForm.country,
+      this.hospitalForm.postalCode
+    ]
+      .filter(Boolean)
+      .map(v => String(v).trim())
+      .filter(v => v.length > 0);
+
+    return parts.join(', ');
+  }
+
+  getHospitalMapsEmbedUrl(): SafeResourceUrl | null {
+    const query = this.getHospitalMapQuery();
+    if (!query) return null;
+    const url = `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getHospitalMapsSearchUrl(): string {
+    const query = this.getHospitalMapQuery();
+    if (!query) return '';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   }
 
   saveHospital(): void {

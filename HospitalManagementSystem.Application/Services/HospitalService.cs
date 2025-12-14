@@ -51,7 +51,9 @@ namespace HospitalManagementSystem.Application.Services
                 PhoneNumber = hospitalDto.PhoneNumber,
                 Email = hospitalDto.Email,
                 Website = hospitalDto.Website,
-                Description = hospitalDto.Description
+                Description = hospitalDto.Description,
+                Latitude = hospitalDto.Latitude,
+                Longitude = hospitalDto.Longitude
             };
 
             var result = await _hospitalRepository.CreateHospitalAsync(hospital);
@@ -71,7 +73,9 @@ namespace HospitalManagementSystem.Application.Services
                 PhoneNumber = hospitalDto.PhoneNumber,
                 Email = hospitalDto.Email,
                 Website = hospitalDto.Website,
-                Description = hospitalDto.Description
+                Description = hospitalDto.Description,
+                Latitude = hospitalDto.Latitude,
+                Longitude = hospitalDto.Longitude
             };
 
             var result = await _hospitalRepository.UpdateHospitalAsync(hospitalId, hospital);
@@ -123,6 +127,8 @@ namespace HospitalManagementSystem.Application.Services
                 Email = hospital.Email,
                 Website = hospital.Website,
                 Description = hospital.Description,
+                Latitude = hospital.Latitude,
+                Longitude = hospital.Longitude,
                 IsActive = hospital.IsActive,
                 CreatedAt = hospital.CreatedAt,
                 UpdatedAt = hospital.UpdatedAt,

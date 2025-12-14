@@ -387,7 +387,7 @@
   <!-- Hospital Modal -->
   @if (showHospitalModal()) {
     <div class="modal-overlay" (click)="closeHospitalModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal modal--wide" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>{{ editingHospital() ? 'Edit Hospital' : 'Add New Hospital' }}</h2>
           <button class="close-btn" (click)="closeHospitalModal()">×</button>
@@ -396,6 +396,44 @@
           <div class="form-group">
             <label>Hospital Name *</label>
             <input type="text" [(ngModel)]="hospitalForm.name" placeholder="Enter hospital name">
+          </div>
+
+          <div class="location-tools">
+            <div class="form-group location-search">
+              <label>Find Location</label>
+              <input
+                type="text"
+                [ngModel]="locationSearchQuery()"
+                (ngModelChange)="onLocationSearchInput($event)"
+                placeholder="Search place / address..."
+                autocomplete="off"
+              >
+
+              @if (showLocationResults()) {
+                <div class="location-results">
+                  @if (isSearchingLocation()) {
+                    <div class="location-result-item muted">Searching...</div>
+                  } @else if (locationSearchResults().length === 0) {
+                    <div class="location-result-item muted">No results</div>
+                  } @else {
+                    @for (r of locationSearchResults(); track r.displayName) {
+                      <button type="button" class="location-result-item" (click)="selectLocationResult(r)">
+                        {{ r.displayName }}
+                      </button>
+                    }
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="location-actions">
+              <button class="btn btn-outline" type="button" (click)="useCurrentLocation()" [disabled]="isUsingCurrentLocation()">
+                {{ isUsingCurrentLocation() ? 'Locating...' : 'Use Current Location' }}
+              </button>
+              <button class="btn btn-outline" type="button" (click)="clearLocationSearch()">
+                Clear
+              </button>
+            </div>
           </div>
           <div class="form-row">
             <div class="form-group">
@@ -415,6 +453,16 @@
             <div class="form-group">
               <label>Country *</label>
               <input type="text" [(ngModel)]="hospitalForm.country" placeholder="Country">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Latitude</label>
+              <input type="number" [(ngModel)]="hospitalForm.latitude" placeholder="e.g. 6.9271" step="any">
+            </div>
+            <div class="form-group">
+              <label>Longitude</label>
+              <input type="number" [(ngModel)]="hospitalForm.longitude" placeholder="e.g. 79.8612" step="any">
             </div>
           </div>
           <div class="form-row">
@@ -439,6 +487,26 @@
             <label>Description</label>
             <textarea [(ngModel)]="hospitalForm.description" placeholder="Brief description..." rows="3"></textarea>
           </div>
+
+          @if (getHospitalMapsEmbedUrl(); as mapUrl) {
+            <div class="map-preview">
+              <div class="map-preview-header">
+                <div class="map-preview-title">Location Preview</div>
+                <a class="btn btn-outline" [href]="getHospitalMapsSearchUrl()" target="_blank" rel="noopener noreferrer">
+                  Open in Google Maps
+                </a>
+              </div>
+              <div class="map-preview-frame">
+                <iframe
+                  [src]="mapUrl"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  allowfullscreen
+                  title="Hospital Location Preview"
+                ></iframe>
+              </div>
+            </div>
+          }
           
           <!-- Admin section for new hospital -->
           @if (!editingHospital()) {

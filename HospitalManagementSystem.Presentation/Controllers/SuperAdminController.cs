@@ -70,6 +70,8 @@ namespace HospitalManagementSystem.Presentation.Controllers
                     Email = dto.Email,
                     Website = dto.Website,
                     Description = dto.Description,
+                    Latitude = dto.Latitude,
+                    Longitude = dto.Longitude,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow

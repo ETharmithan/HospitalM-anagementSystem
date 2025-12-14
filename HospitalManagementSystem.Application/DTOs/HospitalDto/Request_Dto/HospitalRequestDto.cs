@@ -42,5 +42,9 @@ namespace HospitalManagementSystem.Application.DTOs.HospitalDto.Request_Dto
 
         [StringLength(1000)]
         public string? Description { get; set; }
+
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
     }
 }

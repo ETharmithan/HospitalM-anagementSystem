@@ -63,6 +63,8 @@ namespace HospitalManagementSystem.Infrastructure.Repositories
             existingHospital.Email = hospital.Email;
             existingHospital.Website = hospital.Website;
             existingHospital.Description = hospital.Description;
+            existingHospital.Latitude = hospital.Latitude;
+            existingHospital.Longitude = hospital.Longitude;
             existingHospital.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

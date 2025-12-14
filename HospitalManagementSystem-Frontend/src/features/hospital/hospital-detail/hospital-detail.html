@@ -39,6 +39,32 @@
       </div>
     </div>
 
+    @if (mapsEmbedUrl()) {
+      <div class="content-section map-section">
+        <div class="map-header">
+          <h2>Location</h2>
+          <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" type="button" (click)="openDirections()" [disabled]="isGettingDirections()">
+              {{ isGettingDirections() ? 'Getting location...' : 'Get Directions' }}
+            </button>
+            <a class="btn btn-outline btn-sm" [href]="mapsSearchUrl()" target="_blank" rel="noopener noreferrer">
+              Open in Google Maps
+            </a>
+          </div>
+        </div>
+
+        <div class="map-frame">
+          <iframe
+            [src]="mapsEmbedUrl()"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+            title="Hospital Location"
+          ></iframe>
+        </div>
+      </div>
+    }
+
     <!-- Doctors Section -->
     <div class="content-section">
       <h2>Available Doctors</h2>

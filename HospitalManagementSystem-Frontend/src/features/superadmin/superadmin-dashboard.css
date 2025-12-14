@@ -653,6 +653,10 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
+.modal.modal--wide {
+  max-width: 780px;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -736,6 +740,120 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+.location-tools {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.location-search {
+  flex: 1;
+  position: relative;
+}
+
+.location-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.location-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  background: #1e1e2f;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.location-result-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.location-result-item:hover {
+  background: rgba(102, 126, 234, 0.18);
+}
+
+.location-result-item.muted {
+  cursor: default;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.location-result-item.muted:hover {
+  background: transparent;
+}
+
+@media (max-width: 720px) {
+  .location-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .location-actions {
+    justify-content: flex-end;
+  }
+}
+
+.map-preview {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.map-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.map-preview-title {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.map-preview-frame {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.35);
+}
+
+.map-preview-frame iframe {
+  width: 100%;
+  height: 320px;
+  border: 0;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .modal.modal--wide {
+    max-width: 520px;
+  }
+
+  .map-preview-frame iframe {
+    height: 260px;
+  }
 }
 
 .form-hint {
