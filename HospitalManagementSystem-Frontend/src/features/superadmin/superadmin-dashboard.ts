@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Subject, of } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { AdminDashboardService } from '../../core/services/admin-dashboard-service';
 import { HospitalService, Hospital, CreateHospitalRequest, Admin, CreateAdminDto, UpdateAdminDto, Patient, SystemUser } from '../../core/services/hospital-service';
 import { LocationSearchResult, LocationService } from '../../core/services/location-service';
@@ -60,7 +62,9 @@ export class SuperAdminDashboard implements OnInit {
   isSearchingLocation = signal(false);
   isUsingCurrentLocation = signal(false);
   showLocationResults = signal(false);
-  private locationSearchDebounce: any = null;
+
+  private destroy$ = new Subject<void>();
+  private locationSearchInput$ = new Subject<string>();
 
   // Overview data
   overview = signal<AdminOverview | null>(null);
@@ -209,6 +213,41 @@ export class SuperAdminDashboard implements OnInit {
     this.loadAdmins();
     this.loadPatients();
     this.loadUsers();
+
+    this.locationSearchInput$
+      .pipe(
+        map((value) => (value || '').trim()),
+        debounceTime(350),
+        distinctUntilChanged(),
+        tap((query) => {
+          if (query.length < 3) {
+            this.isSearchingLocation.set(false);
+            this.locationSearchResults.set([]);
+            this.showLocationResults.set(false);
+          }
+        }),
+        switchMap((query) => {
+          if (query.length < 3) return of([] as LocationSearchResult[]);
+
+          this.isSearchingLocation.set(true);
+          this.showLocationResults.set(true);
+
+          return this.locationService.search(query, 10, undefined, true).pipe(
+            catchError(() => of([] as LocationSearchResult[])),
+            finalize(() => this.isSearchingLocation.set(false))
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((results) => {
+        this.locationSearchResults.set(results);
+        this.showLocationResults.set(true);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // Tab switching
@@ -346,40 +385,7 @@ export class SuperAdminDashboard implements OnInit {
 
   onLocationSearchInput(value: string): void {
     this.locationSearchQuery.set(value);
-    const query = (value || '').trim();
-    if (!query) {
-      this.locationSearchResults.set([]);
-      this.showLocationResults.set(false);
-      return;
-    }
-
-    this.showLocationResults.set(true);
-
-    if (this.locationSearchDebounce) {
-      clearTimeout(this.locationSearchDebounce);
-    }
-
-    this.locationSearchDebounce = setTimeout(() => {
-      this.searchLocation(query);
-    }, 350);
-  }
-
-  searchLocation(query: string): void {
-    const trimmed = (query || '').trim();
-    if (!trimmed) return;
-
-    this.isSearchingLocation.set(true);
-    this.locationService.search(trimmed, 10, undefined, true).subscribe({
-      next: (results) => {
-        this.locationSearchResults.set(results);
-        this.showLocationResults.set(true);
-        this.isSearchingLocation.set(false);
-      },
-      error: () => {
-        this.locationSearchResults.set([]);
-        this.isSearchingLocation.set(false);
-      }
-    });
+    this.locationSearchInput$.next(value);
   }
 
   selectLocationResult(result: LocationSearchResult): void {
@@ -395,10 +401,8 @@ export class SuperAdminDashboard implements OnInit {
     this.locationSearchQuery.set('');
     this.locationSearchResults.set([]);
     this.showLocationResults.set(false);
-    if (this.locationSearchDebounce) {
-      clearTimeout(this.locationSearchDebounce);
-      this.locationSearchDebounce = null;
-    }
+    this.isSearchingLocation.set(false);
+    this.locationSearchInput$.next('');
   }
 
   useCurrentLocation(): void {

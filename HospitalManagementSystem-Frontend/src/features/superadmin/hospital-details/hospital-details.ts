@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Subject, of } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { HospitalService } from '../../../core/services/hospital-service';
+import { LocationSearchResult, LocationService } from '../../../core/services/location-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { Doctor } from '../../../types/doctor';
 import { Nav } from '../../../layout/nav/nav';
@@ -56,12 +59,16 @@ interface Admin {
   templateUrl: './hospital-details.html',
   styleUrl: './hospital-details.css',
 })
-export class HospitalDetails implements OnInit {
+export class HospitalDetails implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private hospitalService = inject(HospitalService);
+  private locationService = inject(LocationService);
   private toastService = inject(ToastService);
   private sanitizer = inject(DomSanitizer);
+
+  private destroy$ = new Subject<void>();
+  private locationSearchInput$ = new Subject<string>();
 
   hospitalDetails = signal<HospitalDetailsData | null>(null);
   isLoading = signal(true);
@@ -70,6 +77,17 @@ export class HospitalDetails implements OnInit {
   doctors = signal<Doctor[]>([]);
   isLoadingDoctors = signal(false);
 
+  isEditingLocation = signal(false);
+  isSavingLocation = signal(false);
+
+  editLatitude = signal<number | null>(null);
+  editLongitude = signal<number | null>(null);
+
+  locationSearchQuery = signal<string>('');
+  locationSearchResults = signal<LocationSearchResult[]>([]);
+  isSearchingLocation = signal(false);
+  showLocationResults = signal(false);
+
   ngOnInit(): void {
     const hospitalId = this.route.snapshot.paramMap.get('id');
     if (hospitalId) {
@@ -77,6 +95,41 @@ export class HospitalDetails implements OnInit {
     } else {
       this.router.navigate(['/superadmin/dashboard']);
     }
+
+    this.locationSearchInput$
+      .pipe(
+        map((value) => (value || '').trim()),
+        debounceTime(350),
+        distinctUntilChanged(),
+        tap((query) => {
+          if (query.length < 3) {
+            this.isSearchingLocation.set(false);
+            this.locationSearchResults.set([]);
+            this.showLocationResults.set(false);
+          }
+        }),
+        switchMap((query) => {
+          if (query.length < 3) return of([] as LocationSearchResult[]);
+
+          this.isSearchingLocation.set(true);
+          this.showLocationResults.set(true);
+
+          return this.locationService.search(query, 10, undefined, true).pipe(
+            catchError(() => of([] as LocationSearchResult[])),
+            finalize(() => this.isSearchingLocation.set(false))
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((results) => {
+        this.locationSearchResults.set(results);
+        this.showLocationResults.set(true);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadHospitalDetails(hospitalId: string): void {
@@ -125,6 +178,94 @@ export class HospitalDetails implements OnInit {
       const id = this.hospitalDetails()?.hospitalId;
       if (id) this.loadHospitalDoctors(id);
     }
+  }
+
+  startEditLocation(): void {
+    const h = this.hospitalDetails();
+    if (!h) return;
+    this.isEditingLocation.set(true);
+    this.editLatitude.set(h.latitude ?? null);
+    this.editLongitude.set(h.longitude ?? null);
+    this.locationSearchQuery.set('');
+    this.locationSearchResults.set([]);
+    this.showLocationResults.set(false);
+  }
+
+  cancelEditLocation(): void {
+    this.isEditingLocation.set(false);
+    this.locationSearchQuery.set('');
+    this.locationSearchResults.set([]);
+    this.showLocationResults.set(false);
+  }
+
+  onLocationSearchInput(value: string): void {
+    this.locationSearchQuery.set(value);
+    this.locationSearchInput$.next(value);
+  }
+
+  selectLocationResult(result: LocationSearchResult): void {
+    if (!result) return;
+    this.editLatitude.set(Number(result.lat));
+    this.editLongitude.set(Number(result.lng));
+    this.locationSearchQuery.set(result.displayName);
+    this.showLocationResults.set(false);
+  }
+
+  clearLocationSearch(): void {
+    this.locationSearchQuery.set('');
+    this.locationSearchResults.set([]);
+    this.showLocationResults.set(false);
+    this.isSearchingLocation.set(false);
+    this.locationSearchInput$.next('');
+  }
+
+  saveLocation(): void {
+    const h = this.hospitalDetails();
+    if (!h) return;
+
+    const hospitalId = h.hospitalId;
+    const latitude = this.editLatitude();
+    const longitude = this.editLongitude();
+
+    if ((latitude == null) !== (longitude == null)) {
+      this.toastService.error('Please provide both Latitude and Longitude');
+      return;
+    }
+
+    this.isSavingLocation.set(true);
+
+    this.hospitalService.updateHospital(hospitalId, {
+      name: h.name,
+      address: h.address,
+      city: h.city,
+      state: h.state,
+      country: h.country,
+      postalCode: h.postalCode,
+      latitude: latitude ?? null,
+      longitude: longitude ?? null,
+      phoneNumber: h.phoneNumber,
+      email: h.email,
+      website: h.website,
+      description: h.description,
+    }).subscribe({
+      next: () => {
+        this.toastService.success('Location updated');
+        this.isSavingLocation.set(false);
+        this.isEditingLocation.set(false);
+        this.loadHospitalDetails(hospitalId);
+      },
+      error: (err: any) => {
+        const message = err?.message || err?.error?.message || 'Failed to update location';
+        this.toastService.error(message);
+        this.isSavingLocation.set(false);
+      }
+    });
+  }
+
+  clearPin(): void {
+    this.editLatitude.set(null);
+    this.editLongitude.set(null);
+    this.saveLocation();
   }
 
   goBack(): void {

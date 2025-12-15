@@ -150,9 +150,14 @@
           <div class="info-card location-card">
             <div class="location-header">
               <h2>Location</h2>
-              <a class="map-link" [href]="getHospitalMapsSearchUrl()" target="_blank" rel="noopener">
-                Open in Google Maps
-              </a>
+              <div class="location-header-actions">
+                <a class="map-link" [href]="getHospitalMapsSearchUrl()" target="_blank" rel="noopener">
+                  Open in Google Maps
+                </a>
+                @if (!isEditingLocation()) {
+                  <button class="location-btn" type="button" (click)="startEditLocation()">Edit</button>
+                }
+              </div>
             </div>
 
             <div class="location-address">
@@ -168,6 +173,57 @@
                   allowfullscreen
                   title="Hospital Location"
                 ></iframe>
+              </div>
+            }
+
+            @if (isEditingLocation()) {
+              <div class="location-editor">
+                <div class="location-search">
+                  <label>Search Location</label>
+                  <input
+                    type="text"
+                    [ngModel]="locationSearchQuery()"
+                    (ngModelChange)="onLocationSearchInput($event)"
+                    placeholder="Search place / address..."
+                    autocomplete="off"
+                  >
+
+                  @if (showLocationResults()) {
+                    <div class="location-results">
+                      @if (isSearchingLocation()) {
+                        <div class="location-result-item muted">Searching...</div>
+                      } @else if (locationSearchResults().length === 0) {
+                        <div class="location-result-item muted">No results</div>
+                      } @else {
+                        @for (r of locationSearchResults(); track r.displayName) {
+                          <button type="button" class="location-result-item" (click)="selectLocationResult(r)">
+                            {{ r.displayName }}
+                          </button>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="location-editor-row">
+                  <div class="form-group">
+                    <label>Latitude</label>
+                    <input type="number" [ngModel]="editLatitude()" (ngModelChange)="editLatitude.set($event)" step="any" placeholder="e.g. 6.9271">
+                  </div>
+                  <div class="form-group">
+                    <label>Longitude</label>
+                    <input type="number" [ngModel]="editLongitude()" (ngModelChange)="editLongitude.set($event)" step="any" placeholder="e.g. 79.8612">
+                  </div>
+                </div>
+
+                <div class="location-editor-actions">
+                  <button class="location-btn" type="button" (click)="clearLocationSearch()">Clear Search</button>
+                  <button class="location-btn location-btn--danger" type="button" (click)="clearPin()" [disabled]="isSavingLocation()">Clear Pin</button>
+                  <button class="location-btn" type="button" (click)="cancelEditLocation()" [disabled]="isSavingLocation()">Cancel</button>
+                  <button class="location-btn location-btn--primary" type="button" (click)="saveLocation()" [disabled]="isSavingLocation()">
+                    {{ isSavingLocation() ? 'Saving...' : 'Save' }}
+                  </button>
+                </div>
               </div>
             }
           </div>
