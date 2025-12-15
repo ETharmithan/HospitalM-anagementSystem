@@ -3,6 +3,7 @@ using HospitalManagementSystem.Application.IServices.DoctorIServices;
 using HospitalManagementSystem.Application.DTOs.HospitalDto.Request_Dto;
 using HospitalManagementSystem.Application.DTOs.HospitalDto.Response_Dto;
 using HospitalManagementSystem.Application.DTOs.AdminDto;
+using HospitalManagementSystem.Application.DTOs.DoctorDto.Response_Dto;
 using HospitalManagementSystem.Domain.IRepository;
 using HospitalManagementSystem.Domain.Models;
 using HospitalManagementSystem.Infrastructure.Data;
@@ -183,6 +184,38 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             var departments = await _hospitalService.GetHospitalDepartmentsAsync(hospitalId);
             return Ok(departments);
+        }
+
+        [HttpGet("hospitals/{hospitalId}/doctors")]
+        public async Task<ActionResult<List<DoctorResponseDto>>> GetHospitalDoctors(Guid hospitalId)
+        {
+            try
+            {
+                var doctors = await _dbContext.Doctors
+                    .Include(d => d.Department)
+                    .Where(d => d.DepartmentId != null && d.Department != null && d.Department.HospitalId == hospitalId)
+                    .ToListAsync();
+
+                var result = doctors.Select(d => new DoctorResponseDto
+                {
+                    DoctorId = d.DoctorId,
+                    Name = d.Name,
+                    Email = d.Email,
+                    Phone = d.Phone,
+                    Qualification = d.Qualification,
+                    LicenseNumber = d.LicenseNumber,
+                    Status = d.Status,
+                    ProfileImage = d.ProfileImage,
+                    DepartmentId = d.DepartmentId,
+                    DepartmentName = d.Department != null ? d.Department.Name : null
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to retrieve hospital doctors", error = ex.Message });
+            }
         }
 
         [HttpPost("hospitals/{hospitalId}/departments")]
