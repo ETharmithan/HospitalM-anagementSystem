@@ -98,9 +98,11 @@
                   <span class="material-symbols-outlined">schedule</span>
                   <span>{{ formatTime(appointment.appointmentTime) }}</span>
                 </div>
+                @if (appointment.appointmentStatus.toLowerCase() !== 'cancellationrequested'){
                 <span class="px-3 py-1 rounded-full text-xs font-medium {{ getStatusColor(appointment.appointmentStatus) }}">
                   {{ appointment.appointmentStatus }}
                 </span>
+              }
               </div>
 
               <!-- Actions -->

@@ -9,6 +9,7 @@ import { AccountService } from '../../../core/services/account-service';
 import { Appointment, Doctor } from '../../../types/doctor';
 import { Nav } from '../../../layout/nav/nav';
 
+
 @Component({
   selector: 'app-my-appointments',
   imports: [CommonModule, RouterModule, Nav],
@@ -236,10 +237,35 @@ export class MyAppointments implements OnInit {
       },
     });
   }
+isUpcoming(appointmentDate: string, appointmentTime: string): boolean {
+    if (!appointmentDate || !appointmentTime) return false;
 
-  isUpcoming(appointmentDate: string, appointmentTime: string): boolean {
-    const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
-    return appointmentDateTime > new Date();
+    // Create a date object for the appointment
+    const aptDate = new Date(appointmentDate);
+    
+    // Parse time (assuming format is "HH:mm" or "HH.mm" from your formatTime logic)
+    let hours = 0;
+    let minutes = 0;
+
+    if (appointmentTime.includes(':')) {
+      const parts = appointmentTime.split(':');
+      hours = parseInt(parts[0]);
+      minutes = parseInt(parts[1]);
+    } else if (appointmentTime.includes('.')) {
+      const parts = appointmentTime.split('.');
+      hours = parseInt(parts[0]);
+      minutes = parseInt(parts[1]);
+    }
+
+    // Set the time on the date object
+    aptDate.setHours(hours, minutes, 0, 0);
+
+    // Compare with current time
+    return aptDate > new Date();
   }
+  // isUpcoming(appointmentDate: string, appointmentTime: string): boolean {
+  //   const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+  //   return appointmentDateTime > new Date();
+  // }
 }
 
