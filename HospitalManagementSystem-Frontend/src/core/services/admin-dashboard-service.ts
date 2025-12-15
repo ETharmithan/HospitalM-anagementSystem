@@ -26,4 +26,16 @@ export class AdminDashboardService {
   getHospitalInfo(): Observable<HospitalInfo> {
     return this.http.get<HospitalInfo>(`${this.baseUrl}/hospital-info`);
   }
+
+  getAppointments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/appointments`);
+  }
+
+  approveCancellation(appointmentId: string, note?: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/appointments/${appointmentId}/approve-cancellation`, { note });
+  }
+
+  rejectCancellation(appointmentId: string, reason?: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/appointments/${appointmentId}/reject-cancellation`, { reason });
+  }
 }

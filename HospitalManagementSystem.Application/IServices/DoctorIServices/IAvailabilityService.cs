@@ -6,9 +6,9 @@ namespace HospitalManagementSystem.Application.IServices.DoctorIServices
 {
     public interface IAvailabilityService
     {
-        Task<AvailabilityResponseDto> GetAvailabilityAsync(Guid doctorId, DateTime date);
-        Task<AvailableDatesResponseDto> GetAvailableDatesAsync(Guid doctorId, DateTime startDate, DateTime endDate);
-        Task<bool> IsSlotAvailableAsync(Guid doctorId, DateTime date, string time);
+        Task<AvailabilityResponseDto> GetAvailabilityAsync(Guid doctorId, DateTime date, Guid? hospitalId = null);
+        Task<AvailableDatesResponseDto> GetAvailableDatesAsync(Guid doctorId, DateTime startDate, DateTime endDate, Guid? hospitalId = null);
+        Task<bool> IsSlotAvailableAsync(Guid doctorId, DateTime date, string time, Guid? hospitalId = null);
     }
 }
 

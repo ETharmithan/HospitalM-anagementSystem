@@ -71,6 +71,32 @@
         <!-- Booking Form -->
         <div class="lg:col-span-2 space-y-6">
           <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+            @if (hospitalOptions().length > 1) {
+              <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-6">
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-200 mb-2">
+                  Select Hospital (optional)
+                </label>
+                <select
+                  class="w-full px-4 py-3 rounded-2xl bg-white/80 dark:bg-slate-950/40 border border-white/60 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-[#82EAEA]/25 focus:border-[#82EAEA]/60 transition"
+                  formControlName="hospitalId"
+                  (change)="onHospitalSelected($any($event.target).value)"
+                >
+                  <option value="">All hospitals</option>
+                  @for (h of hospitalOptions(); track h.hospitalId) {
+                    <option [value]="h.hospitalId">{{ h.name }}</option>
+                  }
+                </select>
+
+                @if (!selectedHospitalId()) {
+                  <p class="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-400">No hospital selected: time slots will be shown grouped by hospital.</p>
+                }
+              </div>
+            } @else if (selectedHospitalName) {
+              <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-4">
+                <div class="text-sm font-extrabold text-slate-900 dark:text-white">Hospital: {{ selectedHospitalName }}</div>
+              </div>
+            }
+
             <!-- Calendar Picker -->
             <app-calendar-picker
               [selectedDate]="selectedDate()"
@@ -93,12 +119,34 @@
                     </div>
                   </div>
                 } @else {
-                  <app-time-slot-picker
-                    [timeSlots]="availableTimeSlots()"
-                    [selectedTime]="appointmentTime?.value"
-                    [appointmentDuration]="30"
-                    (timeSelected)="onTimeSelected($event)">
-                  </app-time-slot-picker>
+                  @if (hospitalOptions().length > 1 && !selectedHospitalId()) {
+                    @if (getHospitalsWithAvailableSlots().length === 0) {
+                      <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-6 text-center">
+                        <p class="text-slate-600 dark:text-slate-400">No available time slots for this doctor on the selected date.</p>
+                      </div>
+                    } @else {
+                      <div class="space-y-6">
+                        @for (h of getHospitalsWithAvailableSlots(); track h.hospitalId) {
+                          <div class="rounded-3xl bg-white/70 dark:bg-white/5 border border-white/50 dark:border-white/10 shadow-lg p-6">
+                            <div class="text-sm font-extrabold text-slate-900 dark:text-white mb-4">{{ h.name }}</div>
+                            <app-time-slot-picker
+                              [timeSlots]="getTimeSlotsForHospital(h.hospitalId)"
+                              [selectedTime]="appointmentTime?.value"
+                              [appointmentDuration]="30"
+                              (timeSelected)="onTimeSelectedForHospital(h.hospitalId, $event)">
+                            </app-time-slot-picker>
+                          </div>
+                        }
+                      </div>
+                    }
+                  } @else {
+                    <app-time-slot-picker
+                      [timeSlots]="availableTimeSlots()"
+                      [selectedTime]="appointmentTime?.value"
+                      [appointmentDuration]="30"
+                      (timeSelected)="onTimeSelected($event)">
+                    </app-time-slot-picker>
+                  }
                 }
               </div>
             } @else {

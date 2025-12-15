@@ -27,11 +27,11 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
         /// Get available time slots for a doctor on a specific date
         /// </summary>
         [HttpGet("doctor/{doctorId}/date/{date}")]
-        public async Task<IActionResult> GetAvailability(Guid doctorId, DateTime date)
+        public async Task<IActionResult> GetAvailability(Guid doctorId, DateTime date, [FromQuery] Guid? hospitalId = null)
         {
             try
             {
-                var availability = await _availabilityService.GetAvailabilityAsync(doctorId, date);
+                var availability = await _availabilityService.GetAvailabilityAsync(doctorId, date, hospitalId);
                 return Ok(availability);
             }
             catch (Exception ex)
@@ -47,14 +47,15 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
         public async Task<IActionResult> GetAvailableDates(
             Guid doctorId,
             [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] Guid? hospitalId = null)
         {
             try
             {
                 var start = startDate ?? DateTime.Today;
                 var end = endDate ?? DateTime.Today.AddMonths(3);
                 
-                var availableDates = await _availabilityService.GetAvailableDatesAsync(doctorId, start, end);
+                var availableDates = await _availabilityService.GetAvailableDatesAsync(doctorId, start, end, hospitalId);
                 return Ok(availableDates);
             }
             catch (Exception ex)
@@ -76,7 +77,8 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
                 var isAvailable = await _availabilityService.IsSlotAvailableAsync(
                     doctorId, 
                     request.Date, 
-                    request.Time);
+                    request.Time,
+                    request.HospitalId);
                 
                 return Ok(new { available = isAvailable });
             }
@@ -271,6 +273,7 @@ namespace HospitalManagementSystem.Presentation.Controllers.DoctorControllers
     {
         public DateTime Date { get; set; }
         public string Time { get; set; } = null!;
+        public Guid? HospitalId { get; set; }
     }
 
     public class SetAvailabilityRequest

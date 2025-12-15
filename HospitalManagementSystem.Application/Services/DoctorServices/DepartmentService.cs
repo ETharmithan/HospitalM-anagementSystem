@@ -27,7 +27,12 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             return departments.Select(d => new DepartmentResponseDto
             {
                 DepartmentId = d.DepartmentId,
-                Name = d.Name
+                Name = d.Name,
+                Description = d.Description,
+                IsActive = d.IsActive,
+                CreatedAt = d.CreatedAt,
+                UpdatedAt = d.UpdatedAt,
+                HospitalId = d.HospitalId
             });
         }
 
@@ -39,15 +44,25 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             return new DepartmentResponseDto
             {
                 DepartmentId = department.DepartmentId,
-                Name = department.Name
+                Name = department.Name,
+                Description = department.Description,
+                IsActive = department.IsActive,
+                CreatedAt = department.CreatedAt,
+                UpdatedAt = department.UpdatedAt,
+                HospitalId = department.HospitalId
             };
         }
 
         public async Task<DepartmentResponseDto> CreateAsync(DepartmentRequestDto departmentRequestDto)
         {
+            if (!departmentRequestDto.HospitalId.HasValue)
+                throw new ArgumentException("HospitalId is required to create a department");
+
             var department = new Department
             {
-                Name = departmentRequestDto.Name
+                Name = departmentRequestDto.Name,
+                Description = departmentRequestDto.Description,
+                HospitalId = departmentRequestDto.HospitalId.Value
             };
 
             var Created = await _departmentRepository.CreateAsync(department);
@@ -55,7 +70,12 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             return new DepartmentResponseDto
             {
                 DepartmentId = Created.DepartmentId,
-                Name = Created.Name
+                Name = Created.Name,
+                Description = Created.Description,
+                IsActive = Created.IsActive,
+                CreatedAt = Created.CreatedAt,
+                UpdatedAt = Created.UpdatedAt,
+                HospitalId = Created.HospitalId
             };
         }
 
@@ -66,6 +86,8 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 return false;
 
             department.Name = departmentRequestDto.Name;
+            department.Description = departmentRequestDto.Description;
+            department.UpdatedAt = DateTime.UtcNow;
 
             await _departmentRepository.UpdateAsync(department);
             return true;

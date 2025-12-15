@@ -31,7 +31,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             _doctorAvailabilityRepository = doctorAvailabilityRepository;
         }
 
-        public async Task<AvailabilityResponseDto> GetAvailabilityAsync(Guid doctorId, DateTime date)
+        public async Task<AvailabilityResponseDto> GetAvailabilityAsync(Guid doctorId, DateTime date, Guid? hospitalId = null)
         {
             var doctor = await _doctorRepository.GetByIdAsync(doctorId);
             if (doctor == null)
@@ -57,7 +57,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             }
 
             // Check for date-specific availability override
-            var dateAvailability = await _doctorAvailabilityRepository.GetByDoctorIdAndDateAsync(doctorId, date);
+            var dateAvailability = await _doctorAvailabilityRepository.GetByDoctorAndDateAsync(doctorId, date, hospitalId);
             
             string? startTime = null;
             string? endTime = null;
@@ -80,6 +80,10 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 // Check DoctorSchedule: First try specific date, then weekly recurring
                 var dayOfWeek = date.DayOfWeek.ToString();
                 var schedules = await _doctorScheduleRepository.GetByDoctorIdAsync(doctorId);
+                if (hospitalId.HasValue)
+                {
+                    schedules = schedules.Where(s => s.HospitalId == hospitalId.Value).ToList();
+                }
                 
                 // Priority 1: Specific date schedule (ScheduleDate matches exactly)
                 var schedule = schedules.FirstOrDefault(s => 
@@ -115,7 +119,8 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             var dateAppointments = appointments
                 .Where(a => a.AppointmentDate.Date == targetDate && 
                            a.AppointmentStatus.ToLower() != "cancelled" &&
-                           a.AppointmentStatus.ToLower() != "cancellationrequested")
+                           a.AppointmentStatus.ToLower() != "cancellationrequested" &&
+                           (!hospitalId.HasValue || a.HospitalId == hospitalId.Value))
                 .ToList();
 
             // Mark booked slots as unavailable
@@ -169,7 +174,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             return response;
         }
 
-        public async Task<AvailableDatesResponseDto> GetAvailableDatesAsync(Guid doctorId, DateTime startDate, DateTime endDate)
+        public async Task<AvailableDatesResponseDto> GetAvailableDatesAsync(Guid doctorId, DateTime startDate, DateTime endDate, Guid? hospitalId = null)
         {
             var response = new AvailableDatesResponseDto
             {
@@ -196,10 +201,18 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
 
             // Get date-specific availabilities
             var dateAvailabilities = await _doctorAvailabilityRepository.GetByDoctorIdAndDateRangeAsync(doctorId, startDate, endDate);
+            if (hospitalId.HasValue)
+            {
+                dateAvailabilities = dateAvailabilities.Where(a => a.HospitalId == hospitalId.Value);
+            }
             var availabilityDict = dateAvailabilities.ToDictionary(a => a.Date.Date, a => a);
 
             // Get schedules (both specific dates and weekly recurring)
             var schedules = await _doctorScheduleRepository.GetByDoctorIdAsync(doctorId);
+            if (hospitalId.HasValue)
+            {
+                schedules = schedules.Where(s => s.HospitalId == hospitalId.Value).ToList();
+            }
             var specificDateSchedules = schedules
                 .Where(s => s.ScheduleDate.HasValue)
                 .GroupBy(s => s.ScheduleDate!.Value.Date)
@@ -211,6 +224,10 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
 
             // Get all appointments
             var appointments = await _doctorAppointmentRepository.GetByDoctorIdAsync(doctorId);
+            if (hospitalId.HasValue)
+            {
+                appointments = appointments.Where(a => a.HospitalId == hospitalId.Value).ToList();
+            }
             var appointmentsByDate = appointments
                 .Where(a => a.AppointmentDate.Date >= startDate && a.AppointmentDate.Date <= endDate &&
                            a.AppointmentStatus.ToLower() != "cancelled")
@@ -242,7 +259,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                     // Has date-specific schedule, check if fully booked
                     try
                     {
-                        var availability = await GetAvailabilityAsync(doctorId, date);
+                        var availability = await GetAvailabilityAsync(doctorId, date, hospitalId);
                         if (availability.IsFullyBooked)
                         {
                             response.FullyBookedDates.Add(date);
@@ -273,7 +290,7 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
                 // Check if fully booked
                 try
                 {
-                    var dayAvailability = await GetAvailabilityAsync(doctorId, date);
+                    var dayAvailability = await GetAvailabilityAsync(doctorId, date, hospitalId);
                     if (dayAvailability.IsFullyBooked)
                     {
                         response.FullyBookedDates.Add(date);
@@ -293,9 +310,9 @@ namespace HospitalManagementSystem.Application.Services.DoctorServices
             return response;
         }
 
-        public async Task<bool> IsSlotAvailableAsync(Guid doctorId, DateTime date, string time)
+        public async Task<bool> IsSlotAvailableAsync(Guid doctorId, DateTime date, string time, Guid? hospitalId = null)
         {
-            var availability = await GetAvailabilityAsync(doctorId, date);
+            var availability = await GetAvailabilityAsync(doctorId, date, hospitalId);
             if (!availability.HasSchedule || availability.IsOnLeave)
                 return false;
 

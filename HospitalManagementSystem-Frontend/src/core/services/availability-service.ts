@@ -38,14 +38,19 @@ export class AvailabilityService {
   private baseUrl = 'http://localhost:5245/api';
 
   // Get available time slots for a specific date
-  getAvailability(doctorId: string, date: Date): Observable<AvailabilityResponse> {
+  getAvailability(doctorId: string, date: Date, hospitalId?: string): Observable<AvailabilityResponse> {
     // Format date as YYYY-MM-DD in local timezone to avoid UTC issues
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const localDateString = `${year}-${month}-${day}`;
-    
-    return this.http.get<AvailabilityResponse>(`${this.baseUrl}/availability/doctor/${doctorId}/date/${localDateString}`).pipe(
+
+    let params = new HttpParams();
+    if (hospitalId) {
+      params = params.set('hospitalId', hospitalId);
+    }
+
+    return this.http.get<AvailabilityResponse>(`${this.baseUrl}/availability/doctor/${doctorId}/date/${localDateString}`, { params }).pipe(
       timeout(10000),
       catchError(error => {
         console.error('Error fetching availability:', error);
@@ -55,7 +60,7 @@ export class AvailabilityService {
   }
 
   // Get available dates for calendar (3 months range)
-  getAvailableDates(doctorId: string, startDate?: Date, endDate?: Date): Observable<AvailableDatesResponse> {
+  getAvailableDates(doctorId: string, startDate?: Date, endDate?: Date, hospitalId?: string): Observable<AvailableDatesResponse> {
     const start = startDate || new Date();
     const end = endDate || new Date();
     end.setMonth(end.getMonth() + 3); // 3 months ahead
@@ -68,9 +73,13 @@ export class AvailabilityService {
       return `${year}-${month}-${day}`;
     };
 
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('startDate', formatDateLocal(start))
       .set('endDate', formatDateLocal(end));
+
+    if (hospitalId) {
+      params = params.set('hospitalId', hospitalId);
+    }
 
     return this.http.get<AvailableDatesResponse>(`${this.baseUrl}/availability/doctor/${doctorId}/dates`, { params }).pipe(
       timeout(10000),
@@ -82,7 +91,7 @@ export class AvailabilityService {
   }
 
   // Check if a specific slot is available
-  checkSlotAvailability(doctorId: string, date: Date, time: string): Observable<{ available: boolean }> {
+  checkSlotAvailability(doctorId: string, date: Date, time: string, hospitalId?: string): Observable<{ available: boolean }> {
     // Format date as YYYY-MM-DD in local timezone to avoid UTC issues
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -91,7 +100,8 @@ export class AvailabilityService {
     
     return this.http.post<{ available: boolean }>(`${this.baseUrl}/availability/doctor/${doctorId}/check`, {
       date: localDateString,
-      time: time
+      time: time,
+      hospitalId: hospitalId || null
     }).pipe(
       timeout(10000),
       catchError(error => {

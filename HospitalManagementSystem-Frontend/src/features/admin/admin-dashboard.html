@@ -17,6 +17,10 @@
         <span class="nav-icon">👨‍⚕️</span>
         <span>Doctors</span>
       </button>
+      <button class="nav-item" [class.active]="activeTab() === 'schedules'" (click)="setActiveTab('schedules')">
+        <span class="nav-icon">🕒</span>
+        <span>Doctor Availability</span>
+      </button>
       <button class="nav-item" [class.active]="activeTab() === 'departments'" (click)="setActiveTab('departments')">
         <span class="nav-icon">🏢</span>
         <span>Departments</span>
@@ -56,6 +60,7 @@
           @switch (activeTab()) {
             @case ('overview') { Dashboard Overview }
             @case ('doctors') { Doctor Management }
+            @case ('schedules') { Availability Management }
             @case ('departments') { Department Management }
             @case ('appointments') { Appointments }
           }
@@ -215,6 +220,53 @@
         }
       }
 
+      <!-- Availability / Schedules Tab -->
+      @if (activeTab() === 'schedules') {
+        @if (isLoadingDoctors()) {
+          <div class="loading-spinner">Loading doctors...</div>
+        } @else if (doctors().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">🕒</span>
+            <h3>No Doctors Yet</h3>
+            <p>Add a doctor first to set their availability.</p>
+            <button class="btn btn-primary" (click)="setActiveTab('doctors'); openCreateDoctorModal()">Add Doctor</button>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Doctor</th>
+                  <th>Department</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (doctor of doctors(); track doctor.doctorId) {
+                  <tr>
+                    <td>
+                      <div class="doctor-info">
+                        <div class="doctor-avatar">{{ doctor.name?.charAt(0) || 'D' }}</div>
+                        <div>
+                          <div class="doctor-name">Dr. {{ doctor.name }}</div>
+                          <div class="doctor-qualification">{{ doctor.qualification || 'N/A' }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ doctor.departmentName || 'Unassigned' }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn btn-sm btn-primary" (click)="openScheduleModal(doctor)">Manage Availability</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+
       <!-- Departments Tab -->
       @if (activeTab() === 'departments') {
         @if (isLoadingDepartments()) {
@@ -249,11 +301,72 @@
 
       <!-- Appointments Tab -->
       @if (activeTab() === 'appointments') {
-        <div class="coming-soon">
-          <span class="coming-soon-icon">📅</span>
-          <h3>Appointments Management</h3>
-          <p>View and manage all hospital appointments here. This feature shows appointments for all doctors in your hospital.</p>
-        </div>
+        @if (isLoadingAppointments()) {
+          <div class="loading-spinner">Loading appointments...</div>
+        } @else if (appointments().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">📅</span>
+            <h3>No Appointments Found</h3>
+            <p>Appointments for your hospital will appear here.</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Doctor</th>
+                  <th>Patient</th>
+                  <th>Hospital</th>
+                  <th>Status</th>
+                  <th>Cancellation</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (apt of appointments(); track apt.appointmentId) {
+                  <tr>
+                    <td>{{ apt.appointmentDate | date:'mediumDate' }}</td>
+                    <td>{{ apt.appointmentTime }}</td>
+                    <td>{{ apt.doctorName || apt.doctorId }}</td>
+                    <td>{{ apt.patientName || apt.patientId }}</td>
+                    <td>{{ apt.hospitalName || apt.hospitalId || '—' }}</td>
+                    <td>
+                      <span class="status-badge" [class.active]="apt.appointmentStatus === 'Scheduled'">
+                        {{ apt.appointmentStatus }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (apt.cancellationRequested) {
+                        <div>
+                          <div class="text-sm font-semibold text-orange-600">Requested</div>
+                          @if (apt.cancellationReason) {
+                            <div class="text-xs text-gray-600 dark:text-gray-300 mt-1 p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                              <strong>Reason:</strong> {{ apt.cancellationReason }}
+                            </div>
+                          }
+                        </div>
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td>
+                      @if (apt.cancellationRequested && apt.appointmentStatus === 'CancellationRequested') {
+                        <div class="action-buttons">
+                          <button class="btn btn-sm btn-primary" (click)="approveCancellation(apt)">Approve</button>
+                          <button class="btn btn-sm btn-danger" (click)="rejectCancellation(apt)">Reject</button>
+                        </div>
+                      } @else {
+                        —
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       }
     </div>
   </main>

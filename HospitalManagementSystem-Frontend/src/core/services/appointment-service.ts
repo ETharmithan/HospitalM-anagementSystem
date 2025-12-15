@@ -139,7 +139,7 @@ export class AppointmentService {
 
   // Request cancellation (patient workflow)
   requestCancellation(appointmentId: string, reason: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/doctorappointment/request-cancellation/${appointmentId}`, { reason }).pipe(
+    return this.http.post<any>(`${this.baseUrl}/doctorappointment/request-cancellation/${appointmentId}`, { CancellationReason: reason }).pipe(
       timeout(10000),
       catchError(error => {
         console.error('Error requesting cancellation:', error);

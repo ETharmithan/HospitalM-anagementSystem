@@ -33,12 +33,14 @@ export class AdminDashboard implements OnInit {
   doctors = signal<Doctor[]>([]);
   departments = signal<Department[]>([]);
   schedules = signal<DoctorSchedule[]>([]);
+  appointments = signal<any[]>([]);
   
   // Loading states
   isLoading = signal(true);
   isLoadingDoctors = signal(false);
   isLoadingDepartments = signal(false);
   isLoadingSchedules = signal(false);
+  isLoadingAppointments = signal(false);
   isSubmitting = signal(false);
   
   // UI state
@@ -116,6 +118,56 @@ export class AdminDashboard implements OnInit {
     this.activeTab.set(tab);
     if (tab === 'doctors') this.loadDoctors();
     if (tab === 'departments') this.loadDepartments();
+    if (tab === 'schedules') this.loadDoctors();
+    if (tab === 'appointments') this.loadAppointments();
+  }
+
+  loadAppointments(): void {
+    this.isLoadingAppointments.set(true);
+    this.dashboardService.getAppointments().subscribe({
+      next: (data) => {
+        this.appointments.set(data ?? []);
+        this.isLoadingAppointments.set(false);
+      },
+      error: (err) => {
+        this.toastService.error(err?.message || 'Failed to load appointments');
+        this.isLoadingAppointments.set(false);
+      }
+    });
+  }
+
+  approveCancellation(appointment: any): void {
+    const appointmentId = appointment?.appointmentId;
+    if (!appointmentId) return;
+
+    const note = prompt('Optional approval note (leave empty to skip):') || undefined;
+    this.dashboardService.approveCancellation(appointmentId, note).subscribe({
+      next: () => {
+        this.toastService.success('Cancellation approved');
+        this.loadAppointments();
+        this.loadOverview();
+      },
+      error: (err) => {
+        this.toastService.error(err?.message || 'Failed to approve cancellation');
+      }
+    });
+  }
+
+  rejectCancellation(appointment: any): void {
+    const appointmentId = appointment?.appointmentId;
+    if (!appointmentId) return;
+
+    const reason = prompt('Rejection reason (optional):') || undefined;
+    this.dashboardService.rejectCancellation(appointmentId, reason).subscribe({
+      next: () => {
+        this.toastService.success('Cancellation rejected');
+        this.loadAppointments();
+        this.loadOverview();
+      },
+      error: (err) => {
+        this.toastService.error(err?.message || 'Failed to reject cancellation');
+      }
+    });
   }
 
   // Data Loading

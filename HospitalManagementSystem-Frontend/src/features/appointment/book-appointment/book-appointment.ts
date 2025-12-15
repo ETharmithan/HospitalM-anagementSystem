@@ -8,10 +8,12 @@ import { PatientService } from '../../../core/services/patient-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { AccountService } from '../../../core/services/account-service';
 import { AvailabilityService, TimeSlot } from '../../../core/services/availability-service';
+import { DoctorScheduleService } from '../../../core/services/doctor-schedule-service';
 import { Doctor } from '../../../types/doctor';
 import { CalendarPicker } from '../components/calendar-picker/calendar-picker';
 import { TimeSlotPicker } from '../components/time-slot-picker/time-slot-picker';
 import { Nav } from '../../../layout/nav/nav';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-book-appointment',
@@ -29,6 +31,7 @@ export class BookAppointment implements OnInit {
   private toastService = inject(ToastService);
   private accountService = inject(AccountService);
   private availabilityService = inject(AvailabilityService);
+  private doctorScheduleService = inject(DoctorScheduleService);
 
   doctor = signal<Doctor | null>(null);
   appointmentForm!: FormGroup;
@@ -36,6 +39,10 @@ export class BookAppointment implements OnInit {
   isSubmitting = signal<boolean>(false);
   isLoadingAvailability = signal<boolean>(false);
   patientId = signal<string | null>(null);
+
+  hospitalOptions = signal<Array<{ hospitalId: string; name: string }>>([]);
+  selectedHospitalId = signal<string | null>(null);
+  timeSlotsByHospital = signal<Record<string, TimeSlot[]>>({});
   
   // Calendar and availability
   selectedDate = signal<Date | null>(null);
@@ -57,6 +64,7 @@ export class BookAppointment implements OnInit {
 
     // Initialize form
     this.appointmentForm = this.fb.group({
+      hospitalId: [''],
       appointmentDate: ['', [Validators.required]],
       appointmentTime: ['', [Validators.required]],
       reason: ['', [Validators.required, Validators.minLength(10)]],
@@ -81,7 +89,7 @@ export class BookAppointment implements OnInit {
       next: (doctor) => {
         this.doctor.set(doctor);
         this.isLoading.set(false);
-        this.loadAvailableDates(doctorId);
+        this.loadHospitalsForDoctor(doctorId);
       },
       error: (error) => {
         this.toastService.error('Failed to load doctor details');
@@ -91,8 +99,111 @@ export class BookAppointment implements OnInit {
     });
   }
 
-  loadAvailableDates(doctorId: string) {
-    this.availabilityService.getAvailableDates(doctorId, this.minDate, this.maxDate).subscribe({
+  loadTimeSlotsForAllHospitals(doctorId: string, date: Date) {
+    const hospitals = this.hospitalOptions();
+    if (!hospitals || hospitals.length === 0) {
+      this.loadTimeSlots(doctorId, date);
+      return;
+    }
+
+    // If there is only one hospital, just behave like normal.
+    if (hospitals.length === 1) {
+      this.loadTimeSlots(doctorId, date, hospitals[0].hospitalId);
+      return;
+    }
+
+    this.isLoadingAvailability.set(true);
+    this.availableTimeSlots.set([]);
+
+    const calls = hospitals.map(h =>
+      this.availabilityService.getAvailability(doctorId, date, h.hospitalId)
+    );
+
+    forkJoin(calls).subscribe({
+      next: (results) => {
+        const map: Record<string, TimeSlot[]> = {};
+        hospitals.forEach((h, idx) => {
+          map[h.hospitalId] = results[idx]?.availableSlots ?? [];
+        });
+        this.timeSlotsByHospital.set(map);
+        this.isLoadingAvailability.set(false);
+      },
+      error: () => {
+        this.toastService.error('Failed to load available time slots');
+        this.timeSlotsByHospital.set({});
+        this.isLoadingAvailability.set(false);
+      }
+    });
+  }
+
+  loadHospitalsForDoctor(doctorId: string) {
+    this.doctorScheduleService.getSchedulesByDoctorId(doctorId).subscribe({
+      next: (schedules) => {
+        const map = new Map<string, string>();
+        (schedules ?? []).forEach((s: any) => {
+          const hid = s?.hospitalId;
+          if (!hid) return;
+          if (!map.has(hid)) {
+            map.set(hid, s?.hospitalName || 'Hospital');
+          }
+        });
+
+        const options = Array.from(map.entries()).map(([hospitalId, name]) => ({ hospitalId, name }));
+        this.hospitalOptions.set(options);
+
+        // If doctor has exactly one hospital, auto-select it.
+        if (options.length === 1) {
+          this.onHospitalSelected(options[0].hospitalId);
+          return;
+        }
+
+        // If multiple hospitals, allow patient to either pick a hospital OR view grouped slots.
+        if (options.length > 1) {
+          this.selectedHospitalId.set(null);
+          this.appointmentForm.patchValue({ hospitalId: '' });
+          this.loadAvailableDates(doctorId);
+          return;
+        }
+
+        // No hospital-specific schedules; fall back to non-hospital-specific availability.
+        this.loadAvailableDates(doctorId);
+      },
+      error: () => {
+        // Fall back to non-hospital-specific availability.
+        this.loadAvailableDates(doctorId);
+      }
+    });
+  }
+
+  onHospitalSelected(hospitalId: string) {
+    if (!hospitalId) {
+      this.selectedHospitalId.set(null);
+      this.timeSlotsByHospital.set({});
+      this.appointmentForm.patchValue({ hospitalId: '', appointmentDate: '', appointmentTime: '' });
+      this.selectedDate.set(null);
+      this.availableTimeSlots.set([]);
+
+      const doctorId = this.doctor()?.doctorId;
+      if (doctorId) {
+        this.loadAvailableDates(doctorId);
+      }
+      return;
+    }
+
+    this.selectedHospitalId.set(hospitalId);
+    this.timeSlotsByHospital.set({});
+    this.appointmentForm.patchValue({ hospitalId, appointmentDate: '', appointmentTime: '' });
+    this.selectedDate.set(null);
+    this.availableTimeSlots.set([]);
+
+    const doctorId = this.doctor()?.doctorId;
+    if (doctorId) {
+      this.loadAvailableDates(doctorId, hospitalId);
+    }
+  }
+
+  loadAvailableDates(doctorId: string, hospitalId?: string) {
+    this.availabilityService.getAvailableDates(doctorId, this.minDate, this.maxDate, hospitalId).subscribe({
       next: (response) => {
         // Convert date strings to Date objects
         this.availableDates = response.availableDates.map(d => new Date(d));
@@ -120,13 +231,18 @@ export class BookAppointment implements OnInit {
     
     // Load available time slots for selected date
     if (this.doctor()?.doctorId) {
-      this.loadTimeSlots(this.doctor()!.doctorId, date);
+      const selectedHospitalId = this.selectedHospitalId();
+      if (selectedHospitalId) {
+        this.loadTimeSlots(this.doctor()!.doctorId, date, selectedHospitalId);
+      } else {
+        this.loadTimeSlotsForAllHospitals(this.doctor()!.doctorId, date);
+      }
     }
   }
 
-  loadTimeSlots(doctorId: string, date: Date) {
+  loadTimeSlots(doctorId: string, date: Date, hospitalId?: string) {
     this.isLoadingAvailability.set(true);
-    this.availabilityService.getAvailability(doctorId, date).subscribe({
+    this.availabilityService.getAvailability(doctorId, date, hospitalId).subscribe({
       next: (availability) => {
         this.availableTimeSlots.set(availability.availableSlots);
         this.isLoadingAvailability.set(false);
@@ -149,6 +265,20 @@ export class BookAppointment implements OnInit {
 
   onTimeSelected(time: string) {
     this.appointmentForm.patchValue({ appointmentTime: time });
+  }
+
+  onTimeSelectedForHospital(hospitalId: string, time: string) {
+    this.selectedHospitalId.set(hospitalId);
+    this.appointmentForm.patchValue({ hospitalId, appointmentTime: time });
+  }
+
+  getTimeSlotsForHospital(hospitalId: string): TimeSlot[] {
+    return this.timeSlotsByHospital()?.[hospitalId] ?? [];
+  }
+
+  getHospitalsWithAvailableSlots(): Array<{ hospitalId: string; name: string }> {
+    const slotsMap = this.timeSlotsByHospital();
+    return this.hospitalOptions().filter(h => (slotsMap[h.hospitalId] ?? []).some(s => s.available));
   }
 
   loadPatientId() {
@@ -174,6 +304,13 @@ export class BookAppointment implements OnInit {
       return;
     }
 
+    // If doctor works in multiple hospitals and user didn't pick a hospital explicitly,
+    // they must still have chosen a time from one hospital group (which sets hospitalId).
+    if (this.hospitalOptions().length > 1 && !this.selectedHospitalId()) {
+      this.toastService.error('Please choose a time slot from a hospital');
+      return;
+    }
+
     if (!this.patientId()) {
       this.toastService.error('Patient information not found. Please complete your registration.');
       return;
@@ -190,12 +327,13 @@ export class BookAppointment implements OnInit {
       this.availabilityService.checkSlotAvailability(
         this.doctor()!.doctorId,
         this.selectedDate()!,
-        formValue.appointmentTime
+        formValue.appointmentTime,
+        this.selectedHospitalId() || undefined
       ).subscribe({
         next: (checkResult) => {
           if (!checkResult.available) {
             this.toastService.error('This time slot is no longer available. Please select another time.');
-            this.loadTimeSlots(this.doctor()!.doctorId, this.selectedDate()!);
+            this.loadTimeSlots(this.doctor()!.doctorId, this.selectedDate()!, this.selectedHospitalId() || undefined);
             return;
           }
           this.createAppointment(formValue);
@@ -209,6 +347,7 @@ export class BookAppointment implements OnInit {
 
   createAppointment(formValue: any) {
     const appointmentData = {
+      hospitalId: this.selectedHospitalId() || undefined,
       appointmentDate: formValue.appointmentDate,
       appointmentTime: formValue.appointmentTime,
       appointmentStatus: 'Scheduled',
@@ -236,6 +375,12 @@ export class BookAppointment implements OnInit {
 
   get appointmentTime() {
     return this.appointmentForm.get('appointmentTime');
+  }
+
+  get selectedHospitalName(): string {
+    const id = this.selectedHospitalId();
+    if (!id) return '';
+    return this.hospitalOptions().find(o => o.hospitalId === id)?.name || '';
   }
 
   get reason() {

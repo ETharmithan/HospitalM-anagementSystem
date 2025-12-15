@@ -8,6 +8,7 @@ using HospitalManagementSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace HospitalManagementSystem.Presentation.Controllers
 {
@@ -81,21 +82,8 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
-                var hospitalId = await GetAdminHospitalIdAsync();
-                if (!hospitalId.HasValue)
-                    return Unauthorized(new { message = "Admin not assigned to any hospital" });
-
-                // Get departments for this hospital
-                var hospitalDepartments = await _dbContext.Departments
-                    .Where(d => d.HospitalId == hospitalId.Value)
-                    .Select(d => d.DepartmentId)
-                    .ToListAsync();
-
                 // Get all doctors
                 var doctors = await _doctorService.GetAllAsync();
-                
-                // Filter by hospital's departments
-                doctors = doctors.Where(d => d.DepartmentId.HasValue && hospitalDepartments.Contains(d.DepartmentId.Value)).ToList();
                 
                 if (departmentId.HasValue)
                 {
@@ -163,23 +151,69 @@ namespace HospitalManagementSystem.Presentation.Controllers
         }
 
         // Doctor Schedule Management
+        public class HospitalAdminScheduleRequest
+        {
+            public int DayOfWeek { get; set; }
+            public string StartTime { get; set; } = string.Empty;
+            public string EndTime { get; set; } = string.Empty;
+            public int MaxPatients { get; set; } = 0;
+        }
+
         [HttpPost("doctors/{doctorId}/schedules")]
         public async Task<ActionResult<DoctorScheduleResponseDto>> CreateDoctorSchedule(
             Guid doctorId, 
-            [FromBody] DoctorScheduleRequestDto scheduleDto)
+            [FromBody] HospitalAdminScheduleRequest scheduleDto)
         {
             try
             {
+                var hospitalId = await GetAdminHospitalIdAsync();
+                if (!hospitalId.HasValue)
+                    return Unauthorized(new { message = "Admin not assigned to any hospital" });
+
                 // Verify doctor exists and admin has access
-                var doctor = await _doctorService.GetByIdAsync(doctorId);
+                var doctor = await _dbContext.Doctors
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(d => d.DoctorId == doctorId);
                 if (doctor == null)
                     return NotFound(new { message = "Doctor not found" });
 
-                // Set the doctor ID in the schedule DTO
-                scheduleDto.DoctorId = doctorId;
+                var isDoctorInAdminsHospital = await _dbContext.Departments
+                    .AnyAsync(dep => dep.DepartmentId == doctor.DepartmentId && dep.HospitalId == hospitalId.Value);
 
-                var result = await _doctorScheduleService.CreateAsync(scheduleDto);
-                return CreatedAtAction(nameof(GetDoctorSchedules), new { doctorId }, result);
+                if (!isDoctorInAdminsHospital)
+                    return Forbid();
+
+                if (scheduleDto.DayOfWeek < 0 || scheduleDto.DayOfWeek > 6)
+                    return BadRequest(new { message = "Invalid dayOfWeek. Must be 0-6." });
+
+                var dayName = Enum.GetName(typeof(DayOfWeek), scheduleDto.DayOfWeek);
+                if (string.IsNullOrEmpty(dayName))
+                    return BadRequest(new { message = "Invalid dayOfWeek." });
+
+                // Map frontend payload to application DTO (hospital is always admin's hospital)
+                var createDto = new DoctorScheduleRequestDto
+                {
+                    DoctorId = doctorId,
+                    HospitalId = hospitalId.Value,
+                    IsRecurring = true,
+                    DayOfWeek = dayName,
+                    ScheduleDate = null,
+                    StartTime = scheduleDto.StartTime,
+                    EndTime = scheduleDto.EndTime
+                };
+
+                var result = await _doctorScheduleService.CreateAsync(createDto);
+
+                return Ok(new
+                {
+                    scheduleId = result.ScheduleId,
+                    doctorId = result.DoctorId,
+                    dayOfWeek = scheduleDto.DayOfWeek,
+                    startTime = result.StartTime,
+                    endTime = result.EndTime,
+                    maxPatients = scheduleDto.MaxPatients,
+                    isActive = true
+                });
             }
             catch (Exception ex)
             {
@@ -192,8 +226,39 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
-                var schedules = await _doctorScheduleService.GetAllAsync();
-                return Ok(schedules);
+                var hospitalId = await GetAdminHospitalIdAsync();
+                if (!hospitalId.HasValue)
+                    return Unauthorized(new { message = "Admin not assigned to any hospital" });
+
+                var schedules = await _doctorScheduleService.GetByDoctorIdAsync(doctorId);
+                var filtered = schedules
+                    .Where(s => s.HospitalId.HasValue && s.HospitalId.Value == hospitalId.Value)
+                    .Select(s =>
+                    {
+                        int dayValue = 0;
+                        if (!string.IsNullOrEmpty(s.DayOfWeek) && Enum.TryParse<DayOfWeek>(s.DayOfWeek, true, out var parsed))
+                        {
+                            dayValue = (int)parsed;
+                        }
+                        else if (s.ScheduleDate.HasValue)
+                        {
+                            dayValue = (int)s.ScheduleDate.Value.DayOfWeek;
+                        }
+
+                        return new
+                        {
+                            scheduleId = s.ScheduleId,
+                            doctorId = s.DoctorId,
+                            dayOfWeek = dayValue,
+                            startTime = s.StartTime,
+                            endTime = s.EndTime,
+                            maxPatients = 0,
+                            isActive = true
+                        };
+                    })
+                    .ToList();
+
+                return Ok(filtered);
             }
             catch (Exception ex)
             {
@@ -228,6 +293,20 @@ namespace HospitalManagementSystem.Presentation.Controllers
         {
             try
             {
+                var hospitalId = await GetAdminHospitalIdAsync();
+                if (!hospitalId.HasValue)
+                    return Unauthorized(new { message = "Admin not assigned to any hospital" });
+
+                var schedule = await _doctorScheduleService.GetByIdAsync(scheduleId);
+                if (schedule == null)
+                    return NotFound(new { message = "Schedule not found" });
+
+                if (schedule.DoctorId != doctorId)
+                    return Forbid();
+
+                if (!schedule.HospitalId.HasValue || schedule.HospitalId.Value != hospitalId.Value)
+                    return Forbid();
+
                 var result = await _doctorScheduleService.DeleteAsync(scheduleId);
                 if (!result)
                     return NotFound(new { message = "Schedule not found" });
