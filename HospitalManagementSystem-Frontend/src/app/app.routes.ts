@@ -15,6 +15,12 @@ export const routes: Routes = [
     loadComponent: () => import('../features/superadmin/superadmin-dashboard').then(c => c.SuperAdminDashboard),
     canActivate: [superAdminGuard]
   },
+
+  {
+    path: 'superadmin/profile',
+    loadComponent: () => import('../features/superadmin/superadmin-profile/superadmin-profile').then(c => c.SuperAdminProfile),
+    canActivate: [superAdminGuard]
+  },
   { 
     path: 'superadmin/hospital-details/:id', 
     loadComponent: () => import('../features/superadmin/hospital-details/hospital-details').then(c => c.HospitalDetails),
@@ -25,6 +31,18 @@ export const routes: Routes = [
   { 
     path: 'admin/dashboard', 
     loadComponent: () => import('../features/admin/admin-dashboard').then(c => c.AdminDashboard),
+    canActivate: [adminGuard]
+  },
+
+  {
+    path: 'admin/location',
+    loadComponent: () => import('../features/admin/admin-location/admin-location').then(c => c.AdminLocation),
+    canActivate: [adminGuard]
+  },
+
+  {
+    path: 'admin/profile',
+    loadComponent: () => import('../features/admin/admin-profile/admin-profile').then(c => c.AdminProfile),
     canActivate: [adminGuard]
   },
   

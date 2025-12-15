@@ -10,11 +10,12 @@ import { UserManagementService, UserInfo, CreateUserRequest } from '../../core/s
 import { AccountService } from '../../core/services/account-service';
 import { ToastService } from '../../core/services/toast-service';
 import { AdminOverview } from '../../types/admin-overview';
+import { Nav } from '../../layout/nav/nav';
 
 @Component({
   selector: 'app-superadmin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, Nav],
   templateUrl: './superadmin-dashboard.html',
   styleUrl: './superadmin-dashboard.css',
 })
@@ -27,6 +28,32 @@ export class SuperAdminDashboard implements OnInit {
   private toastService = inject(ToastService);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
+
+  getHospitalMapsSearchUrlForHospital(hospital: any): string {
+    if (!hospital) return '';
+
+    const lat = hospital.latitude;
+    const lng = hospital.longitude;
+    if (lat != null && lng != null) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`;
+    }
+
+    const parts = [
+      hospital.name,
+      hospital.address,
+      hospital.city,
+      hospital.state,
+      hospital.country,
+      hospital.postalCode,
+    ]
+      .filter(Boolean)
+      .map((v: any) => String(v).trim())
+      .filter((v: string) => v.length > 0);
+
+    const query = parts.join(', ');
+    if (!query) return '';
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  }
 
   locationSearchQuery = signal<string>('');
   locationSearchResults = signal<LocationSearchResult[]>([]);
@@ -388,35 +415,48 @@ export class SuperAdminDashboard implements OnInit {
 
     this.isUsingCurrentLocation.set(true);
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        this.hospitalForm.latitude = lat;
-        this.hospitalForm.longitude = lng;
+    const onSuccess = (pos: GeolocationPosition) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      this.hospitalForm.latitude = lat;
+      this.hospitalForm.longitude = lng;
 
-        this.locationService.reverseGeocode(lat, lng).subscribe({
-          next: (result) => {
-            if (result) {
-              this.applyAddressFromLocationResult(result);
-              this.locationSearchQuery.set(result.displayName);
-            }
-            this.isUsingCurrentLocation.set(false);
-          },
-          error: () => {
-            this.isUsingCurrentLocation.set(false);
+      this.locationService.reverseGeocode(lat, lng).subscribe({
+        next: (result) => {
+          if (result) {
+            this.applyAddressFromLocationResult(result);
+            this.locationSearchQuery.set(result.displayName);
           }
-        });
-      },
+          this.isUsingCurrentLocation.set(false);
+        },
+        error: () => {
+          this.isUsingCurrentLocation.set(false);
+        }
+      });
+    };
+
+    const onError = (err: GeolocationPositionError) => {
+      let msg = 'Unable to get your current location';
+      if (err?.code === 1) msg = 'Location permission denied. Allow location access in browser settings.';
+      if (err?.code === 2) msg = 'Location unavailable. Turn on GPS / Location services.';
+      if (err?.code === 3) msg = 'Location request timed out. Try again.';
+      this.toastService.error(msg);
+      this.isUsingCurrentLocation.set(false);
+    };
+
+    const primaryOptions: PositionOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 };
+    const fallbackOptions: PositionOptions = { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 };
+
+    navigator.geolocation.getCurrentPosition(
+      onSuccess,
       (err) => {
-        let msg = 'Unable to get your current location';
-        if (err?.code === 1) msg = 'Location permission denied. Allow location access in browser settings.';
-        if (err?.code === 2) msg = 'Location unavailable. Turn on GPS / Location services.';
-        if (err?.code === 3) msg = 'Location request timed out. Try again.';
-        this.toastService.error(msg);
-        this.isUsingCurrentLocation.set(false);
+        if (err?.code === 2 || err?.code === 3) {
+          navigator.geolocation.getCurrentPosition(onSuccess, onError, fallbackOptions);
+          return;
+        }
+        onError(err);
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+      primaryOptions
     );
   }
 

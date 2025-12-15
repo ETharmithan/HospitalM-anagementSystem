@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
+import { Doctor } from '../../types/doctor';
 
 export interface Hospital {
   hospitalId: string;
@@ -230,7 +231,45 @@ export class HospitalService {
       timeout(10000),
       catchError(error => {
         console.error('Error fetching hospital details:', error);
-        return throwError(() => new Error('Failed to fetch hospital details.'));
+        const message =
+          error?.error?.message ||
+          error?.error?.title ||
+          error?.message ||
+          `Failed to fetch hospital details (HTTP ${error?.status || 'unknown'}).`;
+        return throwError(() => new Error(message));
+      })
+    );
+  }
+
+  getHospitalDoctors(hospitalId: string): Observable<Doctor[]> {
+    const primaryUrl = `${this.baseUrl}/superadmin/hospitals/${hospitalId}/doctors`;
+    const fallbackUrl = `${this.baseUrl}/SuperAdmin/hospitals/${hospitalId}/doctors`;
+
+    return this.http.get<Doctor[]>(primaryUrl).pipe(
+      timeout(10000),
+      catchError(error => {
+        if (error?.status === 404) {
+          return this.http.get<Doctor[]>(fallbackUrl).pipe(
+            timeout(10000),
+            catchError(fallbackError => {
+              console.error('Error fetching hospital doctors (fallback):', fallbackError);
+              const message =
+                fallbackError?.error?.message ||
+                fallbackError?.error?.title ||
+                fallbackError?.message ||
+                `Failed to fetch hospital doctors (HTTP ${fallbackError?.status || 'unknown'}).`;
+              return throwError(() => new Error(message));
+            })
+          );
+        }
+
+        console.error('Error fetching hospital doctors:', error);
+        const message =
+          error?.error?.message ||
+          error?.error?.title ||
+          error?.message ||
+          `Failed to fetch hospital doctors (HTTP ${error?.status || 'unknown'}).`;
+        return throwError(() => new Error(message));
       })
     );
   }

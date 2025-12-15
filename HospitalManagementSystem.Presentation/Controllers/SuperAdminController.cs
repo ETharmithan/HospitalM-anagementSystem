@@ -717,6 +717,8 @@ namespace HospitalManagementSystem.Presentation.Controllers
                     State = hospital.State,
                     Country = hospital.Country,
                     PostalCode = hospital.PostalCode,
+                    Latitude = hospital.Latitude,
+                    Longitude = hospital.Longitude,
                     PhoneNumber = hospital.PhoneNumber,
                     Email = hospital.Email,
                     Website = hospital.Website,

@@ -4,11 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DoctorScheduleService } from '../../../core/services/doctor-schedule-service';
 import { PrescriptionService } from '../../../core/services/prescription-service';
 import { ToastService } from '../../../core/services/toast-service';
+import { Nav } from '../../../layout/nav/nav';
 
 @Component({
   selector: 'app-create-e-prescription',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Nav],
   templateUrl: './create-e-prescription.html',
   styleUrl: './create-e-prescription.css',
 })

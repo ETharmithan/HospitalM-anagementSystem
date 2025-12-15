@@ -9,13 +9,13 @@
 }
 
 .login-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 80px);
   background:
     radial-gradient(900px 560px at 12% 18%, rgba(130, 234, 234, 0.28), transparent 60%),
     radial-gradient(900px 560px at 88% 22%, rgba(148, 27, 109, 0.22), transparent 60%),
     radial-gradient(900px 620px at 55% 92%, rgba(48, 9, 52, 0.22), transparent 62%),
     linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(248, 250, 252, 1) 100%);
-  padding: 110px 16px 40px 16px;
+  padding: 32px 16px 40px 16px;
   position: relative;
 }
 

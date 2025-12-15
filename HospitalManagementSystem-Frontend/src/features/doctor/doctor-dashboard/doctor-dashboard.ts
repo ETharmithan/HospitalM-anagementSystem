@@ -9,6 +9,7 @@ import { DoctorScheduleService, DoctorSchedule, HospitalOption, CreateScheduleRe
 import { PrescriptionService, PrescriptionRequest, PrescriptionResponse, PatientMedicalProfile } from '../../../core/services/prescription-service';
 import { Appointment } from '../../../types/doctor';
 import { ChatNotificationBellComponent } from '../../../shared/components/chat-notification-bell.component';
+import { Nav } from '../../../layout/nav/nav';
 
 interface PatientInfo {
   patientId: string;
@@ -40,7 +41,7 @@ interface ScheduleForm {
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DatePipe, ChatNotificationBellComponent],
+  imports: [CommonModule, RouterModule, FormsModule, DatePipe, ChatNotificationBellComponent, Nav],
   templateUrl: './doctor-dashboard.html',
   styleUrl: './doctor-dashboard.css',
 })
@@ -91,6 +92,15 @@ export class DoctorDashboard implements OnInit {
     endTime: '17:00',
     hospitalId: ''
   };
+
+  // Tab configuration for modern UI
+  tabs = [
+    { id: 'today', label: "Today's Appointments", icon: 'calendar_today' },
+    { id: 'upcoming', label: 'Upcoming', icon: 'event' },
+    { id: 'all', label: 'All Appointments', icon: 'list' },
+    { id: 'availability', label: 'My Availability', icon: 'schedule' },
+    { id: 'prescriptions', label: 'My Prescriptions', icon: 'medication' }
+  ];
 
   // Schedule filters
   scheduleViewMode = signal<'byHospital' | 'byDate' | 'byPeriod'>('byHospital');

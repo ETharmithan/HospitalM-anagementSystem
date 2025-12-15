@@ -1,72 +1,17 @@
+<app-nav></app-nav>
+
 <div class="admin-dashboard">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">
-        <span class="logo-icon">🏥</span>
-        <span class="logo-text">Hospital Admin</span>
-      </div>
-    </div>
-    
-    <nav class="sidebar-nav">
-      <button class="nav-item" [class.active]="activeTab() === 'overview'" (click)="setActiveTab('overview')">
-        <span class="nav-icon">📊</span>
-        <span>Overview</span>
-      </button>
-      <button class="nav-item" [class.active]="activeTab() === 'doctors'" (click)="setActiveTab('doctors')">
-        <span class="nav-icon">👨‍⚕️</span>
-        <span>Doctors</span>
-      </button>
-      <button class="nav-item" [class.active]="activeTab() === 'schedules'" (click)="setActiveTab('schedules')">
-        <span class="nav-icon">🕒</span>
-        <span>Doctor Availability</span>
-      </button>
-      <button class="nav-item" [class.active]="activeTab() === 'departments'" (click)="setActiveTab('departments')">
-        <span class="nav-icon">🏢</span>
-        <span>Departments</span>
-      </button>
-      <button class="nav-item" [class.active]="activeTab() === 'appointments'" (click)="setActiveTab('appointments')">
-        <span class="nav-icon">📅</span>
-        <span>Appointments</span>
-      </button>
-    </nav>
-    
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">{{ currentUser()?.displayName?.charAt(0) || 'A' }}</div>
-        <div class="user-details">
-          <span class="user-name">{{ currentUser()?.displayName || 'Admin' }}</span>
-          <span class="user-role">Hospital Admin</span>
-        </div>
-      </div>
-      <button class="logout-btn" (click)="logout()">
-        <span>🚪</span> Logout
-      </button>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- Header -->
-    <header class="content-header">
-      <div class="header-left">
-
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <h1 class="admin-title">Admin Dashboard</h1>
         @if (hospitalInfo()) {
-          <p class="page-subtitle">{{ hospitalInfo()!.hospitalName }} - {{ hospitalInfo()!.hospitalCity }}</p>
+          <p class="admin-subtitle">{{ hospitalInfo()!.hospitalName }} - {{ hospitalInfo()!.hospitalCity }}</p>
         } @else {
-          <p class="page-subtitle">Manage your hospital operations efficiently</p>
+          <p class="admin-subtitle">Manage your hospital operations efficiently</p>
         }
-                <h1 class="page-title">
-          @switch (activeTab()) {
-            @case ('overview') { Dashboard Overview }
-            @case ('doctors') { Doctor Management }
-            @case ('schedules') { Availability Management }
-            @case ('departments') { Department Management }
-            @case ('appointments') { Appointments }
-          }
-        </h1>
       </div>
-      <div class="header-right">
+      <div class="admin-header-right">
         @if (activeTab() === 'doctors') {
           <button class="btn btn-primary" (click)="openCreateDoctorModal()">
             <span>+</span> Add Doctor
@@ -80,7 +25,29 @@
       </div>
     </header>
 
-    <!-- Content Area -->
+    <div class="admin-tabs">
+      <button class="admin-tab" [class.active]="activeTab() === 'overview'" (click)="setActiveTab('overview')">
+        <span class="tab-icon">📊</span>
+        Overview
+      </button>
+      <button class="admin-tab" [class.active]="activeTab() === 'doctors'" (click)="setActiveTab('doctors')">
+        <span class="tab-icon">👨‍⚕️</span>
+        Doctors
+      </button>
+      <button class="admin-tab" [class.active]="activeTab() === 'schedules'" (click)="setActiveTab('schedules')">
+        <span class="tab-icon">🕒</span>
+        Availability
+      </button>
+      <button class="admin-tab" [class.active]="activeTab() === 'departments'" (click)="setActiveTab('departments')">
+        <span class="tab-icon">🏢</span>
+        Departments
+      </button>
+      <button class="admin-tab" [class.active]="activeTab() === 'appointments'" (click)="setActiveTab('appointments')">
+        <span class="tab-icon">📅</span>
+        Appointments
+      </button>
+    </div>
+
     <div class="content-area">
       <!-- Overview Tab -->
       @if (activeTab() === 'overview') {
@@ -369,7 +336,7 @@
         }
       }
     </div>
-  </main>
+  </div>
 </div>
 
 <!-- Doctor Modal -->

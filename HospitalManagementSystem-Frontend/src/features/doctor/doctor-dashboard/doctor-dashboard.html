@@ -1,18 +1,8 @@
-<div class="dashboard-container">
-  <!-- Header -->
-  <header class="dashboard-header">
-    <div class="header-content">
-      <h1>Doctor Dashboard</h1>
-      <div class="header-actions">
-        <app-chat-notification-bell></app-chat-notification-bell>
-        <span class="welcome-text">Welcome, Dr. {{ userName }}</span>
-        <button class="btn btn-primary" routerLink="/chat">💬 Messages</button>
-        <button class="btn btn-outline" (click)="onLogout()">Logout</button>
-      </div>
-    </div>
-  </header>
+<app-nav></app-nav>
 
-  <!-- Stats Cards -->
+
+<div class="dashboard-container">
+    <!-- Stats Cards -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon today">📅</div>
@@ -41,6 +31,54 @@
         <span class="stat-value">{{ totalAppointments() }}</span>
         <span class="stat-label">Total Appointments</span>
       </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-section">
+    <div class="quick-actions-header">
+      <h2>Quick Actions</h2>
+    </div>
+    <div class="quick-actions-grid">
+      <a routerLink="/chat" class="quick-action-card">
+        <div class="action-icon">
+          <span class="material-icons">chat</span>
+        </div>
+        <div class="action-content">
+          <h3>Messages</h3>
+          <p>Check patient messages</p>
+        </div>
+      </a>
+      
+      <a routerLink="/e-prescription/create" class="quick-action-card">
+        <div class="action-icon">
+          <span class="material-icons">medication</span>
+        </div>
+        <div class="action-content">
+          <h3>Create E-Prescription</h3>
+          <p>Write new prescription</p>
+        </div>
+      </a>
+      
+      <a routerLink="/e-prescription" class="quick-action-card">
+        <div class="action-icon">
+          <span class="material-icons">history</span>
+        </div>
+        <div class="action-content">
+          <h3>Prescription History</h3>
+          <p>View all prescriptions</p>
+        </div>
+      </a>
+      
+      <a routerLink="/hospitals" class="quick-action-card">
+        <div class="action-icon">
+          <span class="material-icons">local_hospital</span>
+        </div>
+        <div class="action-content">
+          <h3>Hospitals</h3>
+          <p>Browse hospitals</p>
+        </div>
+      </a>
     </div>
   </div>
 
@@ -106,6 +144,14 @@
                 <div class="patient-info">
                   <strong>Patient:</strong> {{ apt.patientName || apt.patientId }}
                 </div>
+                @if (apt.hospitalName) {
+                  <div class="hospital-info">
+                    <strong>Hospital:</strong> 
+                    <a routerLink="/hospital-detail/{{ apt.hospitalId }}" class="hospital-link">
+                      {{ apt.hospitalName }}
+                    </a>
+                  </div>
+                }
                 <div class="appointment-status">
                   <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
                     {{ apt.appointmentStatus }}
@@ -117,17 +163,17 @@
                   View Profile
                 </button>
                 @if (apt.appointmentStatus === 'Scheduled' || apt.appointmentStatus === 'Pending') {
-                  <button class="btn btn-primary btn-sm" (click)="openPrescriptionModal(apt)">
+                  <a routerLink="/e-prescription/create" class="btn btn-primary btn-sm">
                     Add Prescription
-                  </button>
+                  </a>
                   <button class="btn btn-danger btn-sm" (click)="cancelAppointment(apt)">
                     Cancel
                   </button>
                 }
                 @if (apt.appointmentStatus === 'Completed') {
-                  <button class="btn btn-secondary btn-sm" (click)="openPrescriptionModal(apt)">
+                  <a routerLink="/e-prescription" class="btn btn-secondary btn-sm">
                     View/Edit Prescription
-                  </button>
+                  </a>
                 }
               </div>
             </div>
@@ -158,6 +204,14 @@
                 <div class="patient-info">
                   <strong>Patient:</strong> {{ apt.patientName || apt.patientId }}
                 </div>
+                @if (apt.hospitalName) {
+                  <div class="hospital-info">
+                    <strong>Hospital:</strong> 
+                    <a routerLink="/hospital-detail/{{ apt.hospitalId }}" class="hospital-link">
+                      {{ apt.hospitalName }}
+                    </a>
+                  </div>
+                }
                 <div class="appointment-status">
                   <span class="status-badge" [ngClass]="getStatusClass(apt.appointmentStatus)">
                     {{ apt.appointmentStatus }}

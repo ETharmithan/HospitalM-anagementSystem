@@ -12,6 +12,51 @@ export interface HospitalInfo {
   hospitalPhone: string;
 }
 
+export interface AdminHospitalLocation {
+  hospitalId: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  phoneNumber: string;
+  email: string;
+  website?: string;
+  description?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface UpdateMyHospitalRequest {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  phoneNumber: string;
+  email: string;
+  website?: string;
+  description?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface UpdateMyProfileRequest {
+  username?: string;
+  email?: string;
+  password?: string;
+}
+
+export interface MyProfileResponse {
+  userId: string;
+  username: string;
+  email: string;
+  imageUrl?: string | null;
+  role: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -37,5 +82,21 @@ export class AdminDashboardService {
 
   rejectCancellation(appointmentId: string, reason?: string): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/appointments/${appointmentId}/reject-cancellation`, { reason });
+  }
+
+  getMyHospital(): Observable<AdminHospitalLocation> {
+    return this.http.get<AdminHospitalLocation>(`${this.baseUrl}/my-hospital`);
+  }
+
+  updateMyHospital(payload: UpdateMyHospitalRequest): Observable<AdminHospitalLocation> {
+    return this.http.put<AdminHospitalLocation>(`${this.baseUrl}/my-hospital`, payload);
+  }
+
+  getMyProfile(): Observable<MyProfileResponse> {
+    return this.http.get<MyProfileResponse>(`${this.baseUrl}/my-profile`);
+  }
+
+  updateMyProfile(payload: UpdateMyProfileRequest): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/my-profile`, payload);
   }
 }

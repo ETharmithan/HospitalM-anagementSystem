@@ -1,0 +1,136 @@
+<app-nav></app-nav>
+
+<div class="page">
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Location Management</h1>
+        <p>Update your hospital address and map coordinates.</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-outline" [href]="getMapsSearchUrl()" target="_blank" rel="noopener" [class.disabled]="!getMapsSearchUrl()">
+          Open in Maps
+        </a>
+        <button class="btn btn-primary" (click)="save()" [disabled]="isSaving() || isLoading()">
+          {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="card loading">
+        <div class="spinner"></div>
+        <div>Loading hospital location...</div>
+      </div>
+    } @else {
+      <div class="grid">
+        <div class="card">
+          <h2>Hospital Details</h2>
+
+          <div class="form">
+            <div class="row">
+              <div class="field">
+                <label>Hospital Name *</label>
+                <input type="text" [(ngModel)]="form.name" placeholder="Hospital name" />
+              </div>
+              <div class="field">
+                <label>Phone *</label>
+                <input type="text" [(ngModel)]="form.phoneNumber" placeholder="Phone" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label>Email *</label>
+                <input type="email" [(ngModel)]="form.email" placeholder="Email" />
+              </div>
+              <div class="field">
+                <label>Website</label>
+                <input type="text" [(ngModel)]="form.website" placeholder="Website" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Description</label>
+              <textarea rows="3" [(ngModel)]="form.description" placeholder="About your hospital"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Address & Coordinates</h2>
+
+          <div class="form">
+            <div class="field">
+              <label>Search Location</label>
+              <div class="search">
+                <input
+                  type="text"
+                  [value]="locationSearchQuery()"
+                  (input)="onLocationSearchInput($any($event.target).value)"
+                  placeholder="Search hospital / clinic location"
+                />
+                @if (isSearchingLocation()) {
+                  <div class="searching">Searching...</div>
+                }
+              </div>
+
+              @if (showLocationResults()) {
+                <div class="results">
+                  @if (locationSearchResults().length === 0) {
+                    <div class="no-results">No results found. Try a different keyword.</div>
+                  } @else {
+                    @for (r of locationSearchResults(); track r.displayName) {
+                      <button type="button" class="result" (click)="selectLocationResult(r)">
+                        <div class="result-title">{{ r.displayName }}</div>
+                        <div class="result-sub">{{ r.lat }}, {{ r.lng }}</div>
+                      </button>
+                    }
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="field">
+              <label>Address *</label>
+              <input type="text" [(ngModel)]="form.address" placeholder="Street address" />
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label>City *</label>
+                <input type="text" [(ngModel)]="form.city" placeholder="City" />
+              </div>
+              <div class="field">
+                <label>State *</label>
+                <input type="text" [(ngModel)]="form.state" placeholder="State" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label>Country *</label>
+                <input type="text" [(ngModel)]="form.country" placeholder="Country" />
+              </div>
+              <div class="field">
+                <label>Postal Code *</label>
+                <input type="text" [(ngModel)]="form.postalCode" placeholder="Postal code" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label>Latitude</label>
+                <input type="number" [(ngModel)]="form.latitude" placeholder="Latitude" />
+              </div>
+              <div class="field">
+                <label>Longitude</label>
+                <input type="number" [(ngModel)]="form.longitude" placeholder="Longitude" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -7,11 +7,12 @@ import { HospitalAdminService, Doctor, Department, DoctorSchedule, CreateDoctorR
 import { ToastService } from '../../core/services/toast-service';
 import { AccountService } from '../../core/services/account-service';
 import { AdminOverview } from '../../types/admin-overview';
+import { Nav } from '../../layout/nav/nav';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Nav],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })

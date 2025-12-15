@@ -79,19 +79,20 @@
 }
 
 .toggle-label input {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
 }
 
 .toggle-icon {
-  font-size: 1rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.9;
 }
 
-.toggle-text {
-  opacity: 0.95;
-  font-weight: 500;
-  white-space: nowrap;
+.toggle-label:not(.active) .toggle-icon {
+  opacity: 0.8;
 }
 
 .btn-icon {
@@ -373,6 +374,35 @@
 
 .availability-status {
   margin: 0.5rem 0;
+}
+
+.availability-icons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  .availability-icons {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.availability-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.availability-icon.enabled {
+  color: #16a34a;
+}
+
+.availability-icon.disabled {
+  color: #9ca3af;
 }
 
 .status-badge {

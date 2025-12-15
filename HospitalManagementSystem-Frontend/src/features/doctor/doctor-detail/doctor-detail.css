@@ -6,7 +6,7 @@
     radial-gradient(900px 560px at 88% 22%, rgba(148, 27, 109, 0.18), transparent 60%),
     radial-gradient(900px 620px at 55% 92%, rgba(48, 9, 52, 0.18), transparent 62%),
     linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 55%, rgba(248, 250, 252, 1) 100%);
-  padding: 110px 20px 40px 20px;
+  padding: 0;
   position: relative;
  }
 
@@ -21,7 +21,7 @@
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0;
+  padding: 2rem 20px 40px 20px;
   position: relative;
 }
 

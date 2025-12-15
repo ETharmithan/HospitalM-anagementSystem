@@ -40,6 +40,13 @@ export class App {
     // Check exact matches
     if (this.navRoutes.includes(path)) return true;
 
+    // Public detail routes that should keep the same global nav (avoid nav jump)
+    if (path.startsWith('/doctor-detail/')) return true;
+    if (path.startsWith('/hospital-detail/')) return true;
+    if (path.startsWith('/book-appointment/')) return true;
+    if (path === '/my-appointments') return true;
+    if (path === '/patient-profile') return true;
+
     // Check /doctor/:id (but not dashboard)
     if (path.startsWith('/doctor/') && !path.includes('dashboard')) {
       return true;

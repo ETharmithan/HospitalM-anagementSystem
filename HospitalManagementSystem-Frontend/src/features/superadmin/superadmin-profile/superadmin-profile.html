@@ -1,0 +1,76 @@
+<app-nav></app-nav>
+
+<div class="page">
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>My Profile</h1>
+        <p>Update your SuperAdmin account information.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" (click)="save()" [disabled]="isSaving() || isLoading()">
+          {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="card loading">
+        <div class="spinner"></div>
+        <div>Loading profile...</div>
+      </div>
+    } @else {
+      <div class="grid">
+        <div class="card">
+          <h2>Account</h2>
+
+          <div class="meta">
+            <div class="chip">
+              <span class="label">Role</span>
+              <span class="value">{{ profile()?.role }}</span>
+            </div>
+            <div class="chip">
+              <span class="label">User ID</span>
+              <span class="value mono">{{ profile()?.userId }}</span>
+            </div>
+          </div>
+
+          <div class="form">
+            <div class="field">
+              <label>Username *</label>
+              <input type="text" [(ngModel)]="form.username" placeholder="Username" />
+            </div>
+
+            <div class="field">
+              <label>Email *</label>
+              <input type="email" [(ngModel)]="form.email" placeholder="Email" />
+            </div>
+
+            <div class="field">
+              <label>New Password</label>
+              <input type="password" [(ngModel)]="form.password" placeholder="Leave empty to keep current password" />
+              <div class="hint">Minimum 8 characters (only if changing password)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Security</h2>
+          <div class="note">
+            <div class="note-title">Password change</div>
+            <div class="note-body">
+              If you change your password, you may need to log in again.
+            </div>
+          </div>
+
+          <div class="note">
+            <div class="note-title">Email change</div>
+            <div class="note-body">
+              Email must be unique. If the new email is already used, the update will fail.
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

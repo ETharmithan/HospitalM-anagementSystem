@@ -88,10 +88,25 @@ export class PatientDashboard implements OnInit {
       this.isLoadingPrescriptions.set(false);
       return;
     }
-    this.prescriptionService.getPrescriptionsByPatientId(user.id).subscribe({
-      next: (items) => {
-        this.prescriptions.set(items ?? []);
-        this.isLoadingPrescriptions.set(false);
+
+    // user.id is the UserId, not the PatientId. Resolve PatientId first.
+    this.patientService.getPatientByUserId(user.id).subscribe({
+      next: (patient) => {
+        if (!patient?.patientId) {
+          this.prescriptions.set([]);
+          this.isLoadingPrescriptions.set(false);
+          return;
+        }
+
+        this.prescriptionService.getPrescriptionsByPatientId(patient.patientId).subscribe({
+          next: (items) => {
+            this.prescriptions.set(items ?? []);
+            this.isLoadingPrescriptions.set(false);
+          },
+          error: () => {
+            this.isLoadingPrescriptions.set(false);
+          },
+        });
       },
       error: () => {
         this.isLoadingPrescriptions.set(false);

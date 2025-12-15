@@ -56,16 +56,18 @@
               type="checkbox" 
               [checked]="myChatAvailability().isAvailableForChat"
               (change)="toggleChatAvailability()">
-            <span class="toggle-icon">💬</span>
-            <span class="toggle-text">{{ myChatAvailability().isAvailableForChat ? 'Available for Chat' : 'Chat Unavailable' }}</span>
+            <span class="material-icons toggle-icon" [title]="myChatAvailability().isAvailableForChat ? 'Chat available' : 'Chat unavailable'">
+              {{ myChatAvailability().isAvailableForChat ? 'chat' : 'chat_off' }}
+            </span>
           </label>
           <label class="toggle-label" [class.active]="myChatAvailability().isAvailableForVideo">
             <input 
               type="checkbox" 
               [checked]="myChatAvailability().isAvailableForVideo"
               (change)="toggleVideoAvailability()">
-            <span class="toggle-icon">📹</span>
-            <span class="toggle-text">{{ myChatAvailability().isAvailableForVideo ? 'Available for Video' : 'Video Unavailable' }}</span>
+            <span class="material-icons toggle-icon" [title]="myChatAvailability().isAvailableForVideo ? 'Video available' : 'Video unavailable'">
+              {{ myChatAvailability().isAvailableForVideo ? 'videocam' : 'videocam_off' }}
+            </span>
           </label>
         </div>
       }
@@ -181,15 +183,22 @@
                 <div class="doctor-name">{{ doctor.doctorName }}</div>
                 <div class="doctor-specialty">{{ doctor.specialization || 'General' }}</div>
                 <div class="availability-status">
-                  @if (doctor.isAvailableForChat && doctor.isAvailableForVideo) {
-                    <span class="status-badge online">🟢 Available for Chat & Video</span>
-                  } @else if (doctor.isAvailableForChat) {
-                    <span class="status-badge online">🟢 Available for Chat</span>
-                  } @else if (doctor.isAvailableForVideo) {
-                    <span class="status-badge online">🟢 Available for Video</span>
-                  } @else {
-                    <span class="status-badge offline">⚫ Offline - Leave a message</span>
-                  }
+                  <div class="availability-icons">
+                    <span
+                      class="material-icons availability-icon"
+                      [class.enabled]="doctor.isAvailableForChat"
+                      [class.disabled]="!doctor.isAvailableForChat"
+                      [title]="doctor.isAvailableForChat ? 'Chat available' : 'Chat unavailable'">
+                      {{ doctor.isAvailableForChat ? 'chat' : 'chat_off' }}
+                    </span>
+                    <span
+                      class="material-icons availability-icon"
+                      [class.enabled]="doctor.isAvailableForVideo"
+                      [class.disabled]="!doctor.isAvailableForVideo"
+                      [title]="doctor.isAvailableForVideo ? 'Video available' : 'Video unavailable'">
+                      {{ doctor.isAvailableForVideo ? 'videocam' : 'videocam_off' }}
+                    </span>
+                  </div>
                 </div>
                 @if (doctor.statusMessage) {
                   <div class="doctor-status-msg">💬 {{ doctor.statusMessage }}</div>

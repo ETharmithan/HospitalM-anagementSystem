@@ -88,6 +88,16 @@
             <span class="relative z-10">Chat</span>
             <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </a>
+
+          <a 
+            *ngIf="currentUser?.role === 'Admin'"
+            routerLink="/admin/location"
+            routerLinkActive="bg-gradient-to-r from-[#941B6D]/30 to-[#82EAEA]/30 text-white font-semibold shadow-lg"
+            class="nav-link group relative px-5 py-2.5 font-medium text-white/85 hover:text-white transition-all duration-300 rounded-xl hover:bg-gradient-to-r hover:from-[#941B6D]/20 hover:to-[#82EAEA]/20 hover:shadow-lg hover:shadow-[#941B6D]/25 active:scale-[0.98] overflow-hidden"
+          >
+            <span class="relative z-10">Location</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#941B6D]/10 to-[#82EAEA]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </a>
           
           <a
             *ngIf="currentUser?.role === 'Patient'"
@@ -232,6 +242,30 @@
               class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
               👤 Profile
+            </a>
+            <a
+              *ngIf="currentUser?.role === 'Admin'"
+              routerLink="/admin/profile"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              👤 Profile
+            </a>
+            <a
+              *ngIf="currentUser?.role === 'SuperAdmin'"
+              routerLink="/superadmin/profile"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              👤 Profile
+            </a>
+            <a
+              *ngIf="currentUser?.role === 'Admin'"
+              routerLink="/admin/location"
+              (click)="showUserMenu = false"
+              class="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              📍 Location
             </a>
             <a
               [routerLink]="getHomeRoute()"
