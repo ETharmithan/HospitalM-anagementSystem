@@ -70,7 +70,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
         /// Get patient by user ID
         /// </summary>
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<Patient>> GetPatientByUserId(Guid userId)
+        public async Task<IActionResult> GetPatientByUserId(Guid userId)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace HospitalManagementSystem.Presentation.Controllers
                 if (patient == null)
                     return NotFound(new { message = "Patient not found for this user" });
 
-                return Ok(patient);
+                return Ok(BuildPatientProfileResponse(patient));
             }
             catch (Exception ex)
             {
@@ -484,99 +484,181 @@ namespace HospitalManagementSystem.Presentation.Controllers
         [HttpPut("{patientId}/profile")]
         public async Task<IActionResult> UpdatePatientProfile(Guid patientId, [FromBody] UpdatePatientProfileDto profileDto)
         {
-            try
+            using (var transaction = await dbContext.Database.BeginTransactionAsync())
             {
-                var patient = await patientRepository.GetPatientWithDetailsAsync(patientId);
-                if (patient == null)
-                    return NotFound(new { message = "Patient not found" });
-
-                // Update basic info (excluding name)
-                if (profileDto.DateOfBirth.HasValue)
-                    patient.DateOfBirth = profileDto.DateOfBirth.Value;
-                if (!string.IsNullOrWhiteSpace(profileDto.Gender))
-                    patient.Gender = profileDto.Gender;
-                if (!string.IsNullOrWhiteSpace(profileDto.ImageUrl))
-                    patient.ImageUrl = profileDto.ImageUrl;
-
-                // Update contact info
-                if (patient.ContactInfo != null)
+                try
                 {
-                    if (!string.IsNullOrWhiteSpace(profileDto.PhoneNumber))
-                        patient.ContactInfo.PhoneNumber = profileDto.PhoneNumber;
-                    if (!string.IsNullOrWhiteSpace(profileDto.AddressLine1))
-                        patient.ContactInfo.AddressLine1 = profileDto.AddressLine1;
-                    if (profileDto.AddressLine2 != null)
-                        patient.ContactInfo.AddressLine2 = profileDto.AddressLine2;
-                    if (!string.IsNullOrWhiteSpace(profileDto.City))
-                        patient.ContactInfo.City = profileDto.City;
-                    if (!string.IsNullOrWhiteSpace(profileDto.State))
-                        patient.ContactInfo.State = profileDto.State;
-                    if (!string.IsNullOrWhiteSpace(profileDto.PostalCode))
-                        patient.ContactInfo.PostalCode = profileDto.PostalCode;
-                    if (!string.IsNullOrWhiteSpace(profileDto.Country))
-                        patient.ContactInfo.Country = profileDto.Country;
-                    if (!string.IsNullOrWhiteSpace(profileDto.Nationality))
-                        patient.ContactInfo.Nationality = profileDto.Nationality;
-                }
+                    var patient = await dbContext.Patients
+                        .Include(p => p.ContactInfo)
+                        .Include(p => p.MedicalRelatedInfo)
+                        .Include(p => p.EmergencyContact)
+                        .FirstOrDefaultAsync(p => p.PatientId == patientId);
 
-                // Update or create medical info
-                if (patient.MedicalRelatedInfo == null)
-                {
-                    patient.MedicalRelatedInfo = new Patient_Medical_Related_Info
+                    if (patient == null)
+                        return NotFound(new { message = "Patient not found" });
+
+                    // Update basic info
+                    if (profileDto.DateOfBirth.HasValue)
+                        patient.DateOfBirth = profileDto.DateOfBirth.Value;
+                    if (!string.IsNullOrWhiteSpace(profileDto.Gender))
+                        patient.Gender = profileDto.Gender;
+                    if (!string.IsNullOrWhiteSpace(profileDto.ImageUrl))
+                        patient.ImageUrl = profileDto.ImageUrl;
+
+                    // Update or create contact info
+                    if (patient.ContactInfo == null)
                     {
-                        PatientId = patientId,
-                        BloodType = profileDto.BloodType ?? string.Empty,
-                        Allergies = profileDto.Allergies ?? string.Empty,
-                        ChronicConditions = profileDto.ChronicConditions ?? string.Empty
-                    };
-                    dbContext.Set<Patient_Medical_Related_Info>().Add(patient.MedicalRelatedInfo);
-                }
-                else
-                {
-                    if (!string.IsNullOrWhiteSpace(profileDto.BloodType))
-                        patient.MedicalRelatedInfo.BloodType = profileDto.BloodType;
-                    if (profileDto.Allergies != null)
-                        patient.MedicalRelatedInfo.Allergies = profileDto.Allergies;
-                    if (profileDto.ChronicConditions != null)
-                        patient.MedicalRelatedInfo.ChronicConditions = profileDto.ChronicConditions;
-                }
-
-                // Update or create emergency contact
-                if (patient.EmergencyContact == null && 
-                    (!string.IsNullOrWhiteSpace(profileDto.EmergencyContactName) || 
-                     !string.IsNullOrWhiteSpace(profileDto.EmergencyContactPhone)))
-                {
-                    patient.EmergencyContact = new Patient_Emergency_Contact
+                        patient.ContactInfo = new Patient_Contact_Information
+                        {
+                            PatientId = patientId,
+                            PhoneNumber = profileDto.PhoneNumber ?? string.Empty,
+                            AddressLine1 = profileDto.AddressLine1 ?? string.Empty,
+                            AddressLine2 = profileDto.AddressLine2 ?? string.Empty,
+                            City = profileDto.City ?? string.Empty,
+                            State = profileDto.State ?? string.Empty,
+                            PostalCode = profileDto.PostalCode ?? string.Empty,
+                            Country = profileDto.Country ?? string.Empty,
+                            Nationality = profileDto.Nationality ?? string.Empty
+                        };
+                        dbContext.Set<Patient_Contact_Information>().Add(patient.ContactInfo);
+                    }
+                    else
                     {
-                        Id = Guid.NewGuid(),
-                        PatientId = patientId,
-                        ContactName = profileDto.EmergencyContactName ?? string.Empty,
-                        ContactEmail = profileDto.EmergencyContactEmail ?? string.Empty,
-                        ContactPhone = profileDto.EmergencyContactPhone ?? string.Empty,
-                        RelationshipToPatient = profileDto.EmergencyContactRelationship ?? string.Empty
-                    };
-                    dbContext.Set<Patient_Emergency_Contact>().Add(patient.EmergencyContact);
+                        if (profileDto.PhoneNumber != null)
+                            patient.ContactInfo.PhoneNumber = profileDto.PhoneNumber;
+                        if (profileDto.AddressLine1 != null)
+                            patient.ContactInfo.AddressLine1 = profileDto.AddressLine1;
+                        if (profileDto.AddressLine2 != null)
+                            patient.ContactInfo.AddressLine2 = profileDto.AddressLine2;
+                        if (profileDto.City != null)
+                            patient.ContactInfo.City = profileDto.City;
+                        if (profileDto.State != null)
+                            patient.ContactInfo.State = profileDto.State;
+                        if (profileDto.PostalCode != null)
+                            patient.ContactInfo.PostalCode = profileDto.PostalCode;
+                        if (profileDto.Country != null)
+                            patient.ContactInfo.Country = profileDto.Country;
+                        if (profileDto.Nationality != null)
+                            patient.ContactInfo.Nationality = profileDto.Nationality;
+                    }
+
+                    // Update or create medical info
+                    if (patient.MedicalRelatedInfo == null)
+                    {
+                        patient.MedicalRelatedInfo = new Patient_Medical_Related_Info
+                        {
+                            PatientId = patientId,
+                            BloodType = profileDto.BloodType ?? string.Empty,
+                            Allergies = profileDto.Allergies ?? string.Empty,
+                            ChronicConditions = profileDto.ChronicConditions ?? string.Empty
+                        };
+                        dbContext.Set<Patient_Medical_Related_Info>().Add(patient.MedicalRelatedInfo);
+                    }
+                    else
+                    {
+                        if (profileDto.BloodType != null)
+                            patient.MedicalRelatedInfo.BloodType = profileDto.BloodType;
+                        if (profileDto.Allergies != null)
+                            patient.MedicalRelatedInfo.Allergies = profileDto.Allergies;
+                        if (profileDto.ChronicConditions != null)
+                            patient.MedicalRelatedInfo.ChronicConditions = profileDto.ChronicConditions;
+                    }
+
+                    // Update or create emergency contact
+                    if (patient.EmergencyContact == null && 
+                        (!string.IsNullOrEmpty(profileDto.EmergencyContactName) || 
+                         !string.IsNullOrEmpty(profileDto.EmergencyContactPhone)))
+                    {
+                        patient.EmergencyContact = new Patient_Emergency_Contact
+                        {
+                            Id = Guid.NewGuid(),
+                            PatientId = patientId,
+                            ContactName = profileDto.EmergencyContactName ?? string.Empty,
+                            ContactEmail = profileDto.EmergencyContactEmail ?? string.Empty,
+                            ContactPhone = profileDto.EmergencyContactPhone ?? string.Empty,
+                            RelationshipToPatient = profileDto.EmergencyContactRelationship ?? string.Empty
+                        };
+                        dbContext.Set<Patient_Emergency_Contact>().Add(patient.EmergencyContact);
+                    }
+                    else if (patient.EmergencyContact != null)
+                    {
+                        if (profileDto.EmergencyContactName != null)
+                            patient.EmergencyContact.ContactName = profileDto.EmergencyContactName;
+                        if (profileDto.EmergencyContactEmail != null)
+                            patient.EmergencyContact.ContactEmail = profileDto.EmergencyContactEmail;
+                        if (profileDto.EmergencyContactPhone != null)
+                            patient.EmergencyContact.ContactPhone = profileDto.EmergencyContactPhone;
+                        if (profileDto.EmergencyContactRelationship != null)
+                            patient.EmergencyContact.RelationshipToPatient = profileDto.EmergencyContactRelationship;
+                    }
+
+                    // Mark the patient as having completed additional info
+                    patient.HasCompletedAdditionalInfo = true;
+                    patient.AdditionalInfoCompletedAt = DateTime.UtcNow;
+
+                    await dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    // Fetch the updated patient with all related data
+                    var updatedPatient = await dbContext.Patients
+                        .Include(p => p.ContactInfo)
+                        .Include(p => p.MedicalRelatedInfo)
+                        .Include(p => p.EmergencyContact)
+                        .FirstOrDefaultAsync(p => p.PatientId == patientId);
+
+                    return Ok(new {
+                        message = "Profile updated successfully",
+                        patient = updatedPatient != null ? BuildPatientProfileResponse(updatedPatient) : BuildPatientProfileResponse(patient)
+                    });
                 }
-                else if (patient.EmergencyContact != null)
+                catch (Exception ex)
                 {
-                    if (!string.IsNullOrWhiteSpace(profileDto.EmergencyContactName))
-                        patient.EmergencyContact.ContactName = profileDto.EmergencyContactName;
-                    if (profileDto.EmergencyContactEmail != null)
-                        patient.EmergencyContact.ContactEmail = profileDto.EmergencyContactEmail;
-                    if (!string.IsNullOrWhiteSpace(profileDto.EmergencyContactPhone))
-                        patient.EmergencyContact.ContactPhone = profileDto.EmergencyContactPhone;
-                    if (profileDto.EmergencyContactRelationship != null)
-                        patient.EmergencyContact.RelationshipToPatient = profileDto.EmergencyContactRelationship;
+                    await transaction.RollbackAsync();
+                    return StatusCode(500, new { message = "An error occurred while updating profile", error = ex.Message });
                 }
-
-                await dbContext.SaveChangesAsync();
-
-                return Ok(new { message = "Profile updated successfully" });
             }
-            catch (Exception ex)
+        }
+
+        private static object BuildPatientProfileResponse(Patient patient)
+        {
+            return new
             {
-                return StatusCode(500, new { message = "An error occurred while updating profile", error = ex.Message });
-            }
+                patientId = patient.PatientId,
+                userId = patient.UserId,
+                firstName = patient.FirstName,
+                lastName = patient.LastName,
+                dateOfBirth = patient.DateOfBirth,
+                gender = patient.Gender,
+                imageUrl = patient.ImageUrl,
+
+                contactInfo = patient.ContactInfo == null ? null : new
+                {
+                    phoneNumber = patient.ContactInfo.PhoneNumber,
+                    emailAddress = patient.ContactInfo.EmailAddress,
+                    addressLine1 = patient.ContactInfo.AddressLine1,
+                    addressLine2 = patient.ContactInfo.AddressLine2,
+                    city = patient.ContactInfo.City,
+                    state = patient.ContactInfo.State,
+                    postalCode = patient.ContactInfo.PostalCode,
+                    country = patient.ContactInfo.Country,
+                    nationality = patient.ContactInfo.Nationality
+                },
+
+                medicalRelatedInfo = patient.MedicalRelatedInfo == null ? null : new
+                {
+                    bloodType = patient.MedicalRelatedInfo.BloodType,
+                    allergies = patient.MedicalRelatedInfo.Allergies,
+                    chronicConditions = patient.MedicalRelatedInfo.ChronicConditions
+                },
+
+                emergencyContact = patient.EmergencyContact == null ? null : new
+                {
+                    contactName = patient.EmergencyContact.ContactName,
+                    contactEmail = patient.EmergencyContact.ContactEmail,
+                    contactPhone = patient.EmergencyContact.ContactPhone,
+                    relationshipToPatient = patient.EmergencyContact.RelationshipToPatient
+                }
+            };
         }
 
         /// <summary>

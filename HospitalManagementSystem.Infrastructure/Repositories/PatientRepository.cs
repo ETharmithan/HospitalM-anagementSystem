@@ -17,12 +17,23 @@ namespace HospitalManagementSystem.Infrastructure.Repositories
             return await _dbSet
                 .Include(p => p.ContactInfo)
                 .Include(p => p.IdentificationDetails)
+                .Include(p => p.MedicalHistory)
+                .Include(p => p.MedicalRelatedInfo)
+                .Include(p => p.EmergencyContact)
+                .Include(p => p.LoginInfo)
                 .FirstOrDefaultAsync(p => p.PatientId == id);
         }
 
         public async Task<Patient> GetByUserIdAsync(Guid userId)
         {
-            return await _dbSet.FirstOrDefaultAsync(p => p.UserId == userId);
+            return await _dbSet
+                .Include(p => p.ContactInfo)
+                .Include(p => p.IdentificationDetails)
+                .Include(p => p.MedicalHistory)
+                .Include(p => p.MedicalRelatedInfo)
+                .Include(p => p.EmergencyContact)
+                .Include(p => p.LoginInfo)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
         }
 
         public async Task<Patient> GetPatientWithDetailsAsync(Guid patientId)

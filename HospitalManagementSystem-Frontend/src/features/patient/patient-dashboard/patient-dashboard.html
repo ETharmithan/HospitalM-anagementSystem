@@ -267,7 +267,7 @@
                 </div>
 
                 <div>
-                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">Doctor ID: {{ apt.doctorId }}</div>
+                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">Doctor: {{ getDoctorDisplayName(apt) }}</div>
                   <div class="mt-1">
                     <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatusClass(apt.appointmentStatus)">{{ apt.appointmentStatus }}</span>
                   </div>
@@ -310,7 +310,7 @@
                   <div class="text-xs text-slate-600 dark:text-slate-400">{{ apt.appointmentTime }}</div>
                 </div>
                 <div>
-                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">Doctor ID: {{ apt.doctorId }}</div>
+                  <div class="text-sm font-extrabold text-slate-900 dark:text-white">Doctor: {{ getDoctorDisplayName(apt) }}</div>
                   <div class="mt-1">
                     <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatusClass(apt.appointmentStatus)">{{ apt.appointmentStatus }}</span>
                   </div>

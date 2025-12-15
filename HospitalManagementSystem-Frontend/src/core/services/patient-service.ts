@@ -67,7 +67,14 @@ export class PatientService {
 
   // Get patient by user ID
   getPatientByUserId(userId: string): Observable<PatientData> {
-    return this.http.get<PatientData>(`${this.apiUrl}/user/${userId}`);
+    const headers = {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    };
+    // Add timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    return this.http.get<PatientData>(`${this.apiUrl}/user/${userId}?t=${timestamp}`, { headers });
   }
 
   // Get patients by gender
@@ -115,7 +122,12 @@ export class PatientService {
 
   // Update patient profile
   updatePatientProfile(patientId: string, profileData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${patientId}/profile`, profileData).pipe(
+    const headers = {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    };
+    return this.http.put(`${this.apiUrl}/${patientId}/profile`, profileData, { headers }).pipe(
       timeout(10000),
       catchError(error => {
         if (error.name === 'TimeoutError') {

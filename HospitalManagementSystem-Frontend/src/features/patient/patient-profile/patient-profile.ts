@@ -96,6 +96,10 @@ export class PatientProfile implements OnInit {
     if (user?.id) {
       this.patientService.getPatientByUserId(user.id).subscribe({
         next: (patient) => {
+          console.log('Patient data received:', patient);
+          console.log('ContactInfo:', patient.contactInfo);
+          console.log('Nationality:', patient.contactInfo?.nationality);
+          console.log('Phone Number:', patient.contactInfo?.phoneNumber);
           this.patientId.set(patient.patientId || null);
           this.populateForm(patient);
           this.isLoading.set(false);
@@ -159,13 +163,22 @@ export class PatientProfile implements OnInit {
     const formData = this.profileForm.value;
 
     this.patientService.updatePatientProfile(patientId, formData).subscribe({
-      next: () => {
-        this.toastService.success('Profile updated successfully');
+      next: (response) => {
+        this.toastService.success(response.message || 'Profile updated successfully');
         this.isSaving.set(false);
+        // Use the returned patient data to immediately update the form
+        if (response.patient) {
+          this.populateForm(response.patient);
+        } else {
+          // Fallback to reloading from server if patient data not returned
+          this.loadPatientProfile();
+        }
       },
-      error: () => {
-        this.toastService.error('Failed to update profile');
+      error: (error) => {
+        const errorMessage = error.error?.message || 'Failed to update profile';
+        this.toastService.error(errorMessage);
         this.isSaving.set(false);
+        console.error('Error updating profile:', error);
       }
     });
   }

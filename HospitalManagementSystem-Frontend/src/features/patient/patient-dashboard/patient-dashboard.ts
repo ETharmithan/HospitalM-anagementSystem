@@ -46,6 +46,7 @@ export class PatientDashboard implements OnInit {
   pastAppointments = signal<Appointment[]>([]);
   doctors = signal<Doctor[]>([]);
   hospitals = signal<Hospital[]>([]);
+  doctorNameMap = signal<Map<string, string>>(new Map());
   patientId = signal<string | null>(null);
   isLoading = signal(true);
   isLoadingDoctors = signal(false);
@@ -131,6 +132,7 @@ export class PatientDashboard implements OnInit {
     this.appointmentService.getAppointmentsByPatientId(patientId).subscribe({
       next: (appointments) => {
         this.appointments.set(appointments);
+        this.loadDoctorNamesForAppointments(appointments);
         this.filterAppointments(appointments);
         this.calculateStats(appointments);
         this.isLoading.set(false);
@@ -282,6 +284,32 @@ export class PatientDashboard implements OnInit {
 
   bookAppointment(doctorId: string): void {
     this.router.navigate(['/book-appointment', doctorId]);
+  }
+
+  loadDoctorNamesForAppointments(appointments: Appointment[]): void {
+    const ids = [...new Set((appointments ?? []).map(a => a.doctorId).filter(Boolean))];
+    ids.forEach((doctorId) => {
+      if (this.doctorNameMap().has(doctorId)) return;
+
+      this.doctorService.getDoctorById(doctorId).subscribe({
+        next: (doctor) => {
+          const nextMap = new Map(this.doctorNameMap());
+          nextMap.set(doctorId, doctor?.name ?? doctorId);
+          this.doctorNameMap.set(nextMap);
+        },
+        error: () => {
+          const nextMap = new Map(this.doctorNameMap());
+          nextMap.set(doctorId, doctorId);
+          this.doctorNameMap.set(nextMap);
+        }
+      });
+    });
+  }
+
+  getDoctorDisplayName(apt: Appointment): string {
+    const id = apt?.doctorId;
+    if (!id) return '';
+    return this.doctorNameMap().get(id) || apt.doctorName || apt.doctor?.name || id;
   }
 
   formatDate(dateString: string): string {
