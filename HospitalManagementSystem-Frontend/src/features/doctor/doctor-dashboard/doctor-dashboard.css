@@ -128,8 +128,8 @@
 .quick-action-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
+  gap: 16px;
+  padding: 20px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 16px;
@@ -138,6 +138,8 @@
   text-decoration: none;
   color: inherit;
   transition: all 0.3s ease;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .quick-action-card:hover {
@@ -157,6 +159,7 @@
   justify-content: center;
   background: linear-gradient(135deg, #dbeafe, #bfdbfe);
   color: #2563eb;
+  border-radius: 12px;
   flex-shrink: 0;
 }
 
@@ -177,19 +180,29 @@
 
 .action-icon .material-icons {
   font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.action-content {
+  flex: 1;          /* Take up all available space */
+  min-width: 0;     /* CRITICAL: Allows this container to shrink smaller than the text inside */
 }
 
 .action-content h3 {
+  margin: 0;
+  white-space: normal;
   font-size: 1.125rem;
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 0.25rem 0;
+  overflow-wrap: break-word;
+  overflow: hidden;         /* Hides anything that still manages to poke out */
+  text-overflow: ellipsis;  /* Adds '...' if it gets cut off (optional) */
 }
 
 .action-content p {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #64748b;
 }
 
 /* Tabs - Modern Design */
