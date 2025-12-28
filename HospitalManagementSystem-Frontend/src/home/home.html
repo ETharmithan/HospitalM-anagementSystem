@@ -154,115 +154,122 @@
 
 <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 font-sans selection:bg-violet-500 selection:text-white">
 
-  <section class="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-[#621708] via-[#FFB9EF] to-[#EDCFBC]">
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-gradient-to-r from-[#FFB9EF]/60 to-[#EDCFBC]/40 rounded-full blur-[120px] animate-blob"></div>
-      <div class="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-gradient-to-r from-[#EDCFBC]/50 to-[#621708]/30 rounded-full blur-[120px] animate-blob" style="animation-delay: 2s"></div>
-      <div class="absolute bottom-[-10%] left-[30%] w-[600px] h-[600px] bg-gradient-to-r from-[#621708]/40 to-[#FFB9EF]/30 rounded-full blur-[120px] animate-blob" style="animation-delay: 4s"></div>
-      <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30 brightness-100 contrast-150"></div>
-      <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-    </div>
+  <section class="relative min-h-[90vh] flex items-center overflow-hidden 
+bg-gradient-to-br from-[#EFF6FF] via-[#ECFEFF] to-[#F0FDF4]">
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-24 sm:py-32 z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        
-        <div class="text-center lg:text-left space-y-8">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-accent-soft text-sm font-medium mb-6 shimmer">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            Healthcare Reimagined
-          </div>
+  <!-- Background Blobs -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-24 -left-24 w-[500px] h-[500px] 
+      bg-[#2563EB]/20 rounded-full blur-[120px]"></div>
 
-          <h1 class="text-5xl sm:text-6xl lg:text-8xl font-bold tracking-tight text-text-main leading-[1.0]">
-            Your Health, <br>
-            <span class="gradient-text">Our Priority</span>
-          </h1>
-          
-          <p class="text-xl text-text-muted leading-relaxed max-w-2xl mx-auto lg:mx-0">
-            Experience world-class healthcare with our expert medical professionals. Book appointments, manage your health records, and get the care you deserve.
-          </p>
-          
-          @if (!isLoggedIn()) {
-            <div class="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start pt-4">
-              <button
-                (click)="onBookAppointment()"
-                class="btn-primary">
-                Book Appointment
-              </button>
-              <button
-                (click)="onLogin()"
-                class="px-8 py-4 glass-panel rounded-2xl font-bold text-lg text-text-muted hover:bg-white/10 transition-all duration-300 border border-primary-soft/30 hover:border-primary-soft/50">
-                Sign In
-              </button>
-            </div>
-          } @else {
-            <div class="space-y-6">
-              <div class="glass-panel rounded-2xl p-6 border-l-4 border-primary">
-                <h3 class="text-2xl font-bold text-text-main mb-1">Welcome back, {{ currentUser()?.displayName || 'User' }}!</h3>
-                <p class="text-text-muted flex items-center gap-2">
-                  <span class="material-symbols-outlined text-sm">verified</span>
-                  You are logged in as {{ currentUser()?.role || 'User' }}
-                </p>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <button
-                  (click)="onBookAppointment()"
-                  class="btn-primary">
-                  Book Appointment
-                </button>
-                <button
-                  (click)="onDashboard()"
-                  class="px-8 py-4 glass-panel border-primary-soft/30 text-text-muted rounded-2xl font-bold text-lg hover:bg-white/10 transition-all duration-300">
-                  Go to Dashboard
-                </button>
-              </div>
-            </div>
-          }
+    <div class="absolute top-1/3 -right-32 w-[450px] h-[450px] 
+      bg-[#06B6D4]/20 rounded-full blur-[120px]"></div>
+
+    <div class="absolute bottom-[-20%] left-1/3 w-[500px] h-[500px] 
+      bg-[#22C55E]/20 rounded-full blur-[120px]"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-6 py-28 z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+      <!-- LEFT CONTENT -->
+      <div class="space-y-8 text-center lg:text-left">
+
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full 
+          bg-white/70 backdrop-blur-md border border-white/40 text-sm font-semibold text-[#2563EB]">
+          <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+          Healthcare Reimagined
         </div>
 
-        <div class="hidden lg:block relative h-[600px]">
-          <div class="absolute inset-0 flex items-center justify-center">
-            <div class="glass-panel p-8 rounded-[2rem] max-w-sm w-full animate-float z-20 shadow-2xl bg-gradient-to-br from-slate-900/60 to-slate-800/40">
-              <div class="flex justify-between items-start mb-8">
-                <span class="material-symbols-outlined text-5xl text-violet-400 bg-violet-500/10 p-3 rounded-2xl">local_hospital</span>
-                <div class="text-right">
-                  <div class="text-3xl font-bold text-white">{{ isLoading() ? '...' : doctorCount() }}+</div>
-                  <div class="text-sm text-violet-300">Doctors</div>
-                </div>
-              </div>
-              
-              <div class="space-y-4">
-                <div class="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                   <span class="material-symbols-outlined text-purple-400">support_agent</span>
-                   <div>
-                     <div class="font-bold text-white">24/7</div>
-                     <div class="text-xs text-slate-400">Support</div>
-                   </div>
-                </div>
-                <div class="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                   <span class="material-symbols-outlined text-blue-400">medical_services</span>
-                   <div>
-                     <div class="font-bold text-white">100%</div>
-                     <div class="text-xs text-slate-400">Care</div>
-                   </div>
-                </div>
-              </div>
-            </div>
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-[#0F172A] leading-tight">
+          Your Health, <br>
+          <span class="bg-gradient-to-r from-[#2563EB] to-[#06B6D4] bg-clip-text text-transparent">
+            Our Priority
+          </span>
+        </h1>
 
-            <div class="absolute top-10 right-10 w-64 h-64 bg-gradient-to-br from-violet-600 to-purple-600 rounded-[2rem] -z-10 opacity-60 blur-md transform rotate-6 animate-float" style="animation-delay: 1s;"></div>
-            <div class="absolute bottom-10 left-10 w-48 h-48 bg-gradient-to-br from-fuchsia-500 to-pink-500 rounded-full -z-10 opacity-40 blur-xl animate-pulse"></div>
-            
-            <!-- Medical Background Image -->
-            <div class="absolute inset-0 opacity-20">
-              <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80" alt="Modern Medical Facility" class="w-full h-full object-cover rounded-[2rem]">
-            </div>
-          </div>
+        <p class="text-lg text-[#64748B] max-w-xl mx-auto lg:mx-0 leading-relaxed">
+          Book appointments, consult trusted doctors, manage medical records, 
+          and access e-prescriptions anytime, anywhere.
+        </p>
+
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+          <button
+            (click)="onBookAppointment()"
+            class="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#06B6D4]
+            text-white font-bold text-lg shadow-lg hover:scale-105 transition">
+            Book Appointment
+          </button>
+
+          <button
+            (click)="onLogin()"
+            class="px-8 py-4 rounded-2xl bg-white/70 backdrop-blur-md
+            border border-white/40 text-[#0F172A] font-bold text-lg
+            hover:bg-white transition">
+            Sign In
+          </button>
         </div>
       </div>
+
+      <!-- RIGHT CARD -->
+      <div class="hidden lg:flex justify-center relative perspective-[1200px]">
+
+  <div class="relative w-[440px] h-[560px] rounded-[2.8rem] overflow-hidden 
+              shadow-[0_40px_80px_rgba(0,0,0,0.25)]
+              tilt-3d float-3d">
+
+    <!-- Image -->
+    <img
+      src="https://images.pexels.com/photos/8460094/pexels-photo-8460094.jpeg"
+      alt="Modern Healthcare"
+      class="w-full h-full object-cover"/>
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+
+    <!-- Floating Glass Card -->
+    <div class="absolute bottom-6 left-6 right-6 glass-panel rounded-2xl p-6 space-y-5">
+
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[#22C55E] bg-white/30 p-3 rounded-xl">
+            medical_services
+          </span>
+          <span class="text-white font-semibold">Trusted Doctors</span>
+        </div>
+        <span class="text-white text-2xl font-bold">5+</span>
+      </div>
+
+      <div class="flex justify-between text-sm text-white/90">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#06B6D4] text-base">
+            support_agent
+          </span>
+          24/7 Support
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#22C55E] text-base">
+            verified
+          </span>
+          Secure Care
+        </div>
+      </div>
+
     </div>
-  </section>
+  </div>
+
+  <!-- Glow Effects -->
+  <div class="absolute -z-10 top-16 -right-16 w-72 h-72 bg-[#2563EB]/30 blur-[120px] rounded-full"></div>
+  <div class="absolute -z-10 bottom-16 -left-16 w-72 h-72 bg-[#22C55E]/30 blur-[120px] rounded-full"></div>
+</div>
+
+
+    </div>
+  </div>
+</section>
+
 
   <section class="relative z-20 -mt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-20">
     <div class="text-center mb-8 lg:hidden">

@@ -151,3 +151,35 @@ html {
   transform: scale(1.08) rotate(3deg);
 }
 
+
+
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.float-3d {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.tilt-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.tilt-3d:hover {
+  transform: rotateY(-6deg) rotateX(6deg) scale(1.03);
+}
